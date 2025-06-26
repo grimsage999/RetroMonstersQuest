@@ -80,12 +80,12 @@ export function Interface() {
       <div className="fixed bottom-4 left-4 z-10">
         <Card className="w-auto max-w-xs bg-background/80 backdrop-blur-sm">
           <CardContent className="p-4">
-            <h3 className="font-medium mb-2">Controls:</h3>
+            <h3 className="font-medium mb-2 text-green-400">COSMIC PLAYGROUND</h3>
             <ul className="text-sm space-y-1 text-muted-foreground">
-              <li>WASD or Arrow Keys: Move the ball</li>
-              <li>Space: Jump</li>
-              <li>R: Restart game</li>
-              <li>M: Toggle sound</li>
+              <li>Arrow Keys: Move Cosmo the Alien</li>
+              <li>Collect all cookies</li>
+              <li>Avoid CIA agents and more!</li>
+              <li>Reach the finish line!</li>
             </ul>
           </CardContent>
         </Card>

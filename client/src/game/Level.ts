@@ -628,6 +628,10 @@ export class Level {
     return this.cookies.length;
   }
 
+  public getEnemies(): Enemy[] {
+    return this.enemies;
+  }
+
   public getFinishLine() {
     return this.finishLine;
   }
