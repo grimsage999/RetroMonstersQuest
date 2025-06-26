@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cosmic Playground - Alien Cookie Quest</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>🛸 COSMIC PLAYGROUND 🛸</h1>
+    <p class="instructions">Use arrow keys to pilot your UFO • Collect all cookies • Avoid CIA agents • Reach the finish line!</p>
+    
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    
+    <!-- Mobile controls -->
+    <div class="mobile-controls">
+        <div class="control-pad">
+            <button class="control-btn up" data-key="ArrowUp">↑</button>
+            <button class="control-btn left" data-key="ArrowLeft">←</button>
+            <button class="control-btn right" data-key="ArrowRight">→</button>
+            <button class="control-btn down" data-key="ArrowDown">↓</button>
+        </div>
+    </div>
+    
+    <script src="game.js"></script>
+</body>
+</html>

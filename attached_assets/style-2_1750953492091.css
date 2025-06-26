@@ -1,0 +1,30 @@
+
+body {
+    margin: 0;
+    padding: 20px;
+    background: linear-gradient(45deg, #1a1a2e, #16213e);
+    font-family: 'Courier New', monospace;
+    color: #00ff00;
+    text-align: center;
+}
+
+canvas {
+    display: block;
+    background: radial-gradient(circle, #000011, #000000);
+    margin: 20px auto;
+    border: 3px solid #00ff00;
+    box-shadow: 0 0 20px #00ff00;
+}
+
+h1 {
+    color: #00ff00;
+    text-shadow: 0 0 10px #00ff00;
+    margin-bottom: 10px;
+}
+
+.instructions {
+    color: #ffffff;
+    margin-bottom: 20px;
+    font-size: 14px;
+}
+
