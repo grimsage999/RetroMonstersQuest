@@ -3,8 +3,8 @@ import { InputManager } from './InputManager';
 export class Player {
   private x: number;
   private y: number;
-  private width: number = 16;
-  private height: number = 16;
+  private width: number = 48; // 16 * 3 scale
+  private height: number = 48; // 16 * 3 scale
   private speed: number = 5;
   private isMoving: boolean = false;
   private direction: string = 'right';
@@ -43,11 +43,11 @@ export class Player {
     this.x = Math.max(0, Math.min(canvasWidth - this.width, this.x));
     this.y = Math.max(0, Math.min(canvasHeight - this.height, this.y));
     
-    // Update animation
+    // Update animation - smoother timing
     if (this.isMoving) {
       this.animationTimer += deltaTime;
-      if (this.animationTimer > 100) {
-        this.animationFrame = (this.animationFrame + 1) % 4;
+      if (this.animationTimer > 300) { // Slower, cleaner animation
+        this.animationFrame = (this.animationFrame + 1) % 2; // Simple 2-frame walk cycle
         this.animationTimer = 0;
       }
     } else {
@@ -66,7 +66,7 @@ export class Player {
     let spritePixels;
     if (this.isMoving) {
       // Walk cycle animation (2 frames)
-      spritePixels = this.animationFrame < 15 ? this.getWalkFrame1() : this.getWalkFrame2();
+      spritePixels = this.animationFrame === 0 ? this.getWalkFrame1() : this.getWalkFrame2();
     } else {
       // Idle animation
       spritePixels = this.getIdleFrame();
@@ -84,7 +84,7 @@ export class Player {
       '#FFD700',      // 7 - golden details
     ];
     
-    const scale = 1;
+    const scale = 3; // Much larger scale for better visibility
     for (let row = 0; row < spritePixels.length; row++) {
       for (let col = 0; col < spritePixels[row].length; col++) {
         const colorIndex = spritePixels[row][col];

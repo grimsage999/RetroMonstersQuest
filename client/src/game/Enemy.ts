@@ -19,20 +19,20 @@ export class Enemy {
     
     switch (type) {
       case 'cia':
-        this.width = 25;
-        this.height = 25;
+        this.width = 48; // 16 * 3 scale for visibility
+        this.height = 48;
         this.speedX = (Math.random() - 0.5) * 2;
         this.speedY = (Math.random() - 0.5) * 2;
         break;
       case 'army':
-        this.width = 25;
-        this.height = 25;
+        this.width = 48; // 16 * 3 scale for visibility
+        this.height = 48;
         this.speedX = (Math.random() - 0.5) * 1.5;
         this.speedY = (Math.random() - 0.5) * 1.5;
         break;
       case 'rat':
-        this.width = 20;
-        this.height = 20;
+        this.width = 36; // 12 * 3 scale for visibility
+        this.height = 36;
         this.speedX = (Math.random() - 0.5) * 3;
         this.speedY = (Math.random() - 0.5) * 3;
         break;
@@ -58,10 +58,10 @@ export class Enemy {
     this.x = Math.max(0, Math.min(canvasWidth - this.width, this.x));
     this.y = Math.max(0, Math.min(canvasHeight - this.height, this.y));
     
-    // Update animation
+    // Update animation - smoother timing to match player
     this.animationTimer += deltaTime;
-    if (this.animationTimer > 200) {
-      this.animationFrame = (this.animationFrame + 1) % 4;
+    if (this.animationTimer > 400) { // Slower, cleaner animation
+      this.animationFrame = (this.animationFrame + 1) % 2; // Simple 2-frame walk cycle
       this.animationTimer = 0;
     }
   }
@@ -90,7 +90,7 @@ export class Enemy {
   private renderCIAAgent(ctx: CanvasRenderingContext2D) {
     // CIA Agent with walk cycle animation
     let agentPixels;
-    if (this.animationFrame < 15) {
+    if (this.animationFrame === 0) {
       agentPixels = this.getCIAWalkFrame1();
     } else {
       agentPixels = this.getCIAWalkFrame2();
@@ -106,12 +106,13 @@ export class Enemy {
       '#ff0000',     // 6 - red tie
     ];
 
+    const scale = 3; // 3x scale for better visibility
     for (let row = 0; row < agentPixels.length; row++) {
       for (let col = 0; col < agentPixels[row].length; col++) {
         const colorIndex = agentPixels[row][col];
         if (colorIndex > 0) {
           ctx.fillStyle = colors[colorIndex];
-          ctx.fillRect(this.x + col, this.y + row, 1, 1);
+          ctx.fillRect(this.x + col * scale, this.y + row * scale, scale, scale);
         }
       }
     }
@@ -164,7 +165,7 @@ export class Enemy {
   private renderArmyMan(ctx: CanvasRenderingContext2D) {
     // Army Man with walk cycle animation
     let armyPixels;
-    if (this.animationFrame < 15) {
+    if (this.animationFrame === 0) {
       armyPixels = this.getArmyWalkFrame1();
     } else {
       armyPixels = this.getArmyWalkFrame2();
@@ -178,12 +179,13 @@ export class Enemy {
       '#1f5f1f',     // 4 - dark green camo
     ];
 
+    const scale = 3; // 3x scale for better visibility
     for (let row = 0; row < armyPixels.length; row++) {
       for (let col = 0; col < armyPixels[row].length; col++) {
         const colorIndex = armyPixels[row][col];
         if (colorIndex > 0) {
           ctx.fillStyle = colors[colorIndex];
-          ctx.fillRect(this.x + col, this.y + row, 1, 1);
+          ctx.fillRect(this.x + col * scale, this.y + row * scale, scale, scale);
         }
       }
     }
@@ -234,14 +236,12 @@ export class Enemy {
   }
 
   private renderRadioactiveRat(ctx: CanvasRenderingContext2D) {
-    // Radioactive Rat with twitchy walk cycle animation
+    // Radioactive Rat with simple walk cycle animation
     let ratPixels;
-    if (this.animationFrame < 10) {
+    if (this.animationFrame === 0) {
       ratPixels = this.getRatWalkFrame1();
-    } else if (this.animationFrame < 20) {
-      ratPixels = this.getRatWalkFrame2();
     } else {
-      ratPixels = this.getRatWalkFrame3(); // Extra twitchy frame
+      ratPixels = this.getRatWalkFrame2();
     }
 
     const colors = [
@@ -259,12 +259,13 @@ export class Enemy {
     ctx.shadowColor = '#39ff14';
     ctx.shadowBlur = glowIntensity;
 
+    const scale = 3; // 3x scale for better visibility
     for (let row = 0; row < ratPixels.length; row++) {
       for (let col = 0; col < ratPixels[row].length; col++) {
         const colorIndex = ratPixels[row][col];
         if (colorIndex > 0) {
           ctx.fillStyle = colors[colorIndex];
-          ctx.fillRect(this.x + col, this.y + row, 1, 1);
+          ctx.fillRect(this.x + col * scale, this.y + row * scale, scale, scale);
         }
       }
     }

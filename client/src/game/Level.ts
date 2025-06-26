@@ -533,7 +533,7 @@ export class Level {
       '#8B4513',     // 3 - chocolate chips (SaddleBrown)
     ];
     
-    const scale = 2; // Make cookies bigger
+    const scale = 4; // Much bigger cookies to match character scale
     for (let row = 0; row < cookiePixels.length; row++) {
       for (let col = 0; col < cookiePixels[row].length; col++) {
         const colorIndex = cookiePixels[row][col];
@@ -564,7 +564,7 @@ export class Level {
     ctx.imageSmoothingEnabled = false;
     
     // Checkered finish line pattern (based on reference image)
-    const tileSize = 8;
+    const tileSize = 16; // Larger tiles to match character scale
     const pattern = [
       [1,0,1,0,1,0,1,0,1,0,1,0,1], // Black and white checkered
       [0,1,0,1,0,1,0,1,0,1,0,1,0],
