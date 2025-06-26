@@ -3,6 +3,7 @@ import { Enemy } from './Enemy';
 import { Level } from './Level';
 import { AudioManager } from './AudioManager';
 import { InputManager } from './InputManager';
+import { Cutscene, CutsceneData } from './Cutscene';
 
 export interface GameState {
   score: number;
@@ -28,6 +29,7 @@ export class GameEngine {
   
   private bullets: Array<{x: number, y: number, vx: number, vy: number, hits: number}> = [];
   private adjudicatorCooldown: number = 0;
+  private currentCutscene: Cutscene | null = null;
   
   private animationId: number = 0;
   private lastTime: number = 0;
@@ -130,9 +132,58 @@ export class GameEngine {
   public nextLevel() {
     this.gameState.level++;
     this.gameState.cookiesCollected = 0;
-    this.gameState.phase = 'playing';
+    this.bullets = [];
     
-    // Unlock Ray Gun in Level 3 and above
+    // Show cutscene for new level
+    this.showLevelCutscene();
+  }
+  
+  private showLevelCutscene() {
+    const cutsceneData: CutsceneData = this.getCutsceneData(this.gameState.level);
+    
+    this.currentCutscene = new Cutscene(this.canvas, cutsceneData, () => {
+      this.currentCutscene = null;
+      this.initializeLevel();
+    });
+    
+    this.currentCutscene.start();
+  }
+  
+  private getCutsceneData(level: number): CutsceneData {
+    const cutscenes: { [key: number]: CutsceneData } = {
+      2: {
+        levelNumber: 2,
+        title: "Level 2: Dystopian City",
+        description: "Navigate crumbling skyscrapers and neon-lit streets"
+      },
+      3: {
+        levelNumber: 3,
+        title: "Level 3: Abandoned Subway",
+        description: "Underground tunnels filled with radioactive threats",
+        weaponUnlocked: "Ray Gun - Press SPACE to fire"
+      },
+      4: {
+        levelNumber: 4,
+        title: "Level 4: Graveyard",
+        description: "Zombies roam among crooked tombstones"
+      },
+      5: {
+        levelNumber: 5,
+        title: "Level 5: Government Lab",
+        description: "Final level - Find The Adjudicator",
+        weaponUnlocked: "Adjudicator - Press X for ultimate power"
+      }
+    };
+    
+    return cutscenes[level] || {
+      levelNumber: level,
+      title: `Level ${level}`,
+      description: "Continue your cosmic adventure"
+    };
+  }
+  
+  private initializeLevel() {
+    // Unlock Ray Gun starting from Level 3
     if (this.gameState.level >= 3) {
       this.gameState.hasRayGun = true;
     }
@@ -145,6 +196,7 @@ export class GameEngine {
     this.player.reset(this.canvas.width / 2, this.canvas.height - 50);
     this.currentLevel = new Level(this.gameState.level, this.canvas.width, this.canvas.height);
     this.gameState.totalCookies = this.currentLevel.getTotalCookies();
+    this.gameState.phase = 'playing';
     this.updateState();
   }
 
@@ -280,7 +332,7 @@ export class GameEngine {
     if (this.gameState.cookiesCollected >= this.gameState.totalCookies) {
       const finishLine = this.currentLevel.getFinishLine();
       if (this.checkCollision(this.player.getBounds(), finishLine)) {
-        if (this.gameState.level >= 3) {
+        if (this.gameState.level >= 5) {
           this.gameState.phase = 'victory';
           this.audioManager.playSuccess();
         } else {
@@ -300,7 +352,16 @@ export class GameEngine {
     if (collectedCookies > 0) {
       this.gameState.cookiesCollected += collectedCookies;
       this.gameState.score += collectedCookies * 10;
-      this.audioManager.playHit(); // Use hit sound for cookie collection
+      this.audioManager.playCrunch(); // Play satisfying crunch sound for cookie collection
+      
+      // Unlock weapons based on level progression
+      if (this.gameState.level >= 3 && this.gameState.cookiesCollected >= this.gameState.totalCookies) {
+        this.gameState.hasRayGun = true;
+      }
+      if (this.gameState.level >= 5 && this.gameState.cookiesCollected >= this.gameState.totalCookies) {
+        this.gameState.hasAdjudicator = true;
+      }
+      
       this.updateState();
     }
     

@@ -29,6 +29,8 @@ export class AudioManager {
     }
   }
 
+
+
   public playBackgroundMusic() {
     if (this.backgroundMusic && !this.isMuted) {
       this.backgroundMusic.play().catch(error => {
@@ -60,6 +62,18 @@ export class AudioManager {
       this.successSound.currentTime = 0;
       this.successSound.play().catch(error => {
         console.log('Success sound play prevented:', error);
+      });
+    }
+  }
+
+  public playCrunch() {
+    if (this.hitSound && !this.isMuted) {
+      // Use hit sound with higher pitch for crunch effect
+      const soundClone = this.hitSound.cloneNode() as HTMLAudioElement;
+      soundClone.volume = 0.4;
+      soundClone.playbackRate = 1.5; // Higher pitch for crunch
+      soundClone.play().catch(error => {
+        console.log('Crunch sound play prevented:', error);
       });
     }
   }

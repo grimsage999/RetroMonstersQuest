@@ -1,4 +1,4 @@
-export type EnemyType = 'cia' | 'army' | 'rat';
+export type EnemyType = 'cia' | 'army' | 'rat' | 'zombie';
 
 export class Enemy {
   private x: number;
@@ -35,6 +35,12 @@ export class Enemy {
         this.height = 36;
         this.speedX = (Math.random() - 0.5) * 3;
         this.speedY = (Math.random() - 0.5) * 3;
+        break;
+      case 'zombie':
+        this.width = 48; // 16 * 3 scale for visibility
+        this.height = 48;
+        this.speedX = (Math.random() - 0.5) * 1;
+        this.speedY = (Math.random() - 0.5) * 1;
         break;
     }
   }
@@ -81,6 +87,9 @@ export class Enemy {
         break;
       case 'rat':
         this.renderRadioactiveRat(ctx);
+        break;
+      case 'zombie':
+        this.renderZombie(ctx);
         break;
     }
     
@@ -336,6 +345,80 @@ export class Enemy {
 
   public isActive(): boolean {
     return this.active;
+  }
+
+  private renderZombie(ctx: CanvasRenderingContext2D) {
+    // Zombie with walk cycle animation
+    let zombiePixels;
+    if (this.animationFrame === 0) {
+      zombiePixels = this.getZombieWalkFrame1();
+    } else {
+      zombiePixels = this.getZombieWalkFrame2();
+    }
+
+    const colors = [
+      'transparent', // 0
+      '#2F4F2F',     // 1 - dark green skin
+      '#228B22',     // 2 - lighter green
+      '#8B0000',     // 3 - dark red blood
+      '#FF0000',     // 4 - bright red
+      '#654321',     // 5 - brown clothes
+      '#1C1C1C',     // 6 - black shadows
+      '#FFFFFF'      // 7 - white teeth/eyes
+    ];
+
+    // Render 16x16 sprite scaled 3x
+    for (let row = 0; row < zombiePixels.length; row++) {
+      for (let col = 0; col < zombiePixels[row].length; col++) {
+        const colorIndex = zombiePixels[row][col];
+        if (colorIndex !== 0) {
+          ctx.fillStyle = colors[colorIndex];
+          ctx.fillRect(this.x + col * 3, this.y + row * 3, 3, 3);
+        }
+      }
+    }
+  }
+
+  private getZombieWalkFrame1() {
+    return [
+      [0,0,0,2,2,2,2,0,0,2,2,2,2,0,0,0], // Row 0 - head outline
+      [0,0,2,1,1,1,1,2,2,1,1,1,1,2,0,0], // Row 1
+      [0,2,1,7,1,1,1,1,1,1,1,7,1,1,2,0], // Row 2 - eyes
+      [0,2,1,1,1,3,1,1,1,1,3,1,1,1,2,0], // Row 3 - wounds
+      [0,2,1,1,7,7,7,1,1,7,7,7,1,1,2,0], // Row 4 - teeth
+      [0,2,1,1,1,1,1,1,1,1,1,1,1,1,2,0], // Row 5
+      [0,0,2,2,2,2,2,2,2,2,2,2,2,2,0,0], // Row 6 - neck
+      [0,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0], // Row 7 - shirt
+      [0,0,5,1,5,5,5,5,5,5,5,1,5,5,0,0], // Row 8 - torn shirt
+      [0,0,5,5,1,1,1,1,1,1,1,1,5,5,0,0], // Row 9 - body
+      [0,0,5,5,1,1,1,1,1,1,1,1,5,5,0,0], // Row 10
+      [0,0,1,1,1,1,1,0,0,1,1,1,1,1,0,0], // Row 11 - arms
+      [0,0,1,1,1,1,0,0,0,0,1,1,1,1,0,0], // Row 12
+      [0,0,0,1,1,1,0,0,0,0,1,1,1,0,0,0], // Row 13 - legs
+      [0,0,0,6,6,6,0,0,0,0,6,6,6,0,0,0], // Row 14 - feet
+      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]  // Row 15
+    ];
+  }
+
+  private getZombieWalkFrame2() {
+    return [
+      [0,0,0,2,2,2,2,0,0,2,2,2,2,0,0,0], // Row 0 - head outline
+      [0,0,2,1,1,1,1,2,2,1,1,1,1,2,0,0], // Row 1
+      [0,2,1,7,1,1,1,1,1,1,1,7,1,1,2,0], // Row 2 - eyes
+      [0,2,1,1,1,3,1,1,1,1,3,1,1,1,2,0], // Row 3 - wounds
+      [0,2,1,1,7,7,7,1,1,7,7,7,1,1,2,0], // Row 4 - teeth
+      [0,2,1,1,1,1,1,1,1,1,1,1,1,1,2,0], // Row 5
+      [0,0,2,2,2,2,2,2,2,2,2,2,2,2,0,0], // Row 6 - neck
+      [0,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0], // Row 7 - shirt
+      [0,0,5,1,5,5,5,5,5,5,5,1,5,5,0,0], // Row 8 - torn shirt
+      [0,0,5,5,1,1,1,1,1,1,1,1,5,5,0,0], // Row 9 - body
+      [0,0,5,5,1,1,1,1,1,1,1,1,5,5,0,0], // Row 10
+      [0,0,0,1,1,1,1,0,0,1,1,1,1,0,0,0], // Row 11 - arms (different position)
+      [0,0,1,1,1,1,1,0,0,1,1,1,1,1,0,0], // Row 12
+      [0,0,1,1,1,0,0,0,0,0,1,1,1,1,0,0], // Row 13 - legs (walking)
+      [0,0,6,6,6,0,0,0,0,0,6,6,6,0,0,0], // Row 14 - feet
+      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]  // Row 15
+    ];
   }
 
   public destroy() {

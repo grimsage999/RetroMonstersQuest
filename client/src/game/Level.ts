@@ -13,6 +13,7 @@ interface LevelConfig {
   fbiAgents: number;
   armyMen: number;
   radioactiveRats: number;
+  zombies: number;
   cookies: number;
   title: string;
   description: string;
@@ -33,6 +34,7 @@ export class Level {
       fbiAgents: 8,
       armyMen: 0,
       radioactiveRats: 0,
+      zombies: 0,
       cookies: 8,
       title: 'Level 1: Roswell/Area 51 Desert',
       description: 'Sandy terrain, UFO wreckage, desert shrubs, and hangars'
@@ -42,6 +44,7 @@ export class Level {
       fbiAgents: 12,
       armyMen: 6,
       radioactiveRats: 0,
+      zombies: 0,
       cookies: 10,
       title: 'Level 2: Crumbling Dystopian City',
       description: 'Cracked pavement, crumbling skyscrapers, neon signs'
@@ -51,9 +54,30 @@ export class Level {
       fbiAgents: 8,
       armyMen: 4,
       radioactiveRats: 6,
+      zombies: 0,
       cookies: 12,
       title: 'Level 3: Abandoned Subway',
       description: 'Underground tunnels, graffiti, flickering lights'
+    },
+    4: {
+      background: '#2F2F2F',
+      fbiAgents: 6,
+      armyMen: 0,
+      radioactiveRats: 8,
+      zombies: 4,
+      cookies: 14,
+      title: 'Level 4: Graveyard',
+      description: 'Crooked tombstones, mist, dead trees'
+    },
+    5: {
+      background: '#4A4A4A',
+      fbiAgents: 4,
+      armyMen: 2,
+      radioactiveRats: 4,
+      zombies: 2,
+      cookies: 16,
+      title: 'Level 5: Government Lab',
+      description: 'Sterile lab, blinking lights, beakers, desks'
     }
   };
 
@@ -116,6 +140,15 @@ export class Level {
         'rat'
       ));
     }
+    
+    // Zombies
+    for (let i = 0; i < this.config.zombies; i++) {
+      this.enemies.push(new Enemy(
+        Math.random() * (this.canvasWidth - 25),
+        Math.random() * (this.canvasHeight - 200) + 100,
+        'zombie'
+      ));
+    }
   }
 
   public update(deltaTime: number) {
@@ -158,6 +191,12 @@ export class Level {
         break;
       case 3: // Subway
         this.renderSubwayBackground(ctx);
+        break;
+      case 4: // Graveyard
+        this.renderGraveyardBackground(ctx);
+        break;
+      case 5: // Government Lab
+        this.renderLabBackground(ctx);
         break;
       default:
         this.renderSpaceBackground(ctx);
@@ -305,6 +344,72 @@ export class Level {
     });
   }
 
+  private renderGraveyardBackground(ctx: CanvasRenderingContext2D) {
+    // Spooky graveyard atmosphere with mist
+    const skyGradient = ctx.createLinearGradient(0, 0, 0, this.canvasHeight);
+    skyGradient.addColorStop(0, '#2F2F2F'); // Dark gray
+    skyGradient.addColorStop(0.4, '#404040'); // Medium gray
+    skyGradient.addColorStop(1, '#1C1C1C'); // Very dark ground
+    ctx.fillStyle = skyGradient;
+    ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
+    
+    // Add eerie moon
+    ctx.fillStyle = '#F5F5DC';
+    ctx.shadowColor = '#F5F5DC';
+    ctx.shadowBlur = 15;
+    ctx.beginPath();
+    ctx.arc(this.canvasWidth * 0.8, this.canvasHeight * 0.2, 28, 0, 2 * Math.PI);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+    
+    // Add mist effect
+    ctx.globalAlpha = 0.3;
+    ctx.fillStyle = '#DCDCDC';
+    for (let x = 0; x < this.canvasWidth; x += 16) {
+      const mistHeight = Math.sin(x * 0.02 + Date.now() * 0.001) * 8 + 12;
+      ctx.fillRect(x, this.canvasHeight - mistHeight, 16, mistHeight);
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  private renderLabBackground(ctx: CanvasRenderingContext2D) {
+    // Sterile government lab environment
+    const bgGradient = ctx.createLinearGradient(0, 0, 0, this.canvasHeight);
+    bgGradient.addColorStop(0, '#E0E0E0'); // Light gray ceiling
+    bgGradient.addColorStop(0.3, '#F5F5F5'); // White walls
+    bgGradient.addColorStop(0.7, '#DCDCDC'); // Gray floor transition
+    bgGradient.addColorStop(1, '#C0C0C0'); // Darker floor
+    ctx.fillStyle = bgGradient;
+    ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
+    
+    // Add fluorescent lighting strips
+    ctx.fillStyle = '#FFFFFF';
+    for (let x = 100; x < this.canvasWidth; x += 200) {
+      ctx.fillRect(x, 20, 80, 8);
+      // Add glow effect
+      ctx.shadowColor = '#FFFFFF';
+      ctx.shadowBlur = 10;
+      ctx.fillRect(x, 20, 80, 8);
+      ctx.shadowBlur = 0;
+    }
+    
+    // Add grid floor pattern
+    ctx.strokeStyle = '#B0B0B0';
+    ctx.lineWidth = 1;
+    for (let x = 0; x < this.canvasWidth; x += 32) {
+      ctx.beginPath();
+      ctx.moveTo(x, this.canvasHeight * 0.7);
+      ctx.lineTo(x, this.canvasHeight);
+      ctx.stroke();
+    }
+    for (let y = this.canvasHeight * 0.7; y < this.canvasHeight; y += 32) {
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(this.canvasWidth, y);
+      ctx.stroke();
+    }
+  }
+
   private renderSpaceBackground(ctx: CanvasRenderingContext2D) {
     // Deep space
     ctx.fillStyle = '#000011';
@@ -335,6 +440,14 @@ export class Level {
         
       case 3: // Subway - Underground infrastructure
         this.renderSubwayEnvironment(ctx);
+        break;
+        
+      case 4: // Graveyard - Tombstones and dead trees
+        this.renderGraveyardEnvironment(ctx);
+        break;
+        
+      case 5: // Government Lab - Lab equipment and desks
+        this.renderLabEnvironment(ctx);
         break;
     }
     
@@ -508,6 +621,109 @@ export class Level {
         ctx.fillRect(x, y, 2, 20);
       }
     });
+  }
+
+  private renderGraveyardEnvironment(ctx: CanvasRenderingContext2D) {
+    // Crooked tombstones
+    const tombstonePositions = [
+      { x: 80, y: this.canvasHeight - 120, tilt: -5 },
+      { x: 200, y: this.canvasHeight - 110, tilt: 3 },
+      { x: 350, y: this.canvasHeight - 125, tilt: -2 },
+      { x: 500, y: this.canvasHeight - 115, tilt: 4 },
+      { x: 650, y: this.canvasHeight - 130, tilt: -3 }
+    ];
+
+    tombstonePositions.forEach(tomb => {
+      ctx.save();
+      ctx.translate(tomb.x + 12, tomb.y + 30);
+      ctx.rotate(tomb.tilt * Math.PI / 180);
+      
+      // Tombstone base
+      ctx.fillStyle = '#696969'; // Dim gray
+      ctx.fillRect(-12, -30, 24, 40);
+      
+      // Tombstone top (rounded)
+      ctx.fillRect(-8, -35, 16, 10);
+      
+      // Moss/weathering
+      ctx.fillStyle = '#228B22';
+      ctx.fillRect(-10, -20, 4, 6);
+      ctx.fillRect(6, -25, 3, 8);
+      
+      ctx.restore();
+    });
+
+    // Dead trees
+    const treePositions = [150, 400, 600];
+    treePositions.forEach(x => {
+      // Tree trunk
+      ctx.fillStyle = '#2F2F2F';
+      ctx.fillRect(x, this.canvasHeight - 180, 8, 60);
+      
+      // Bare branches
+      ctx.strokeStyle = '#2F2F2F';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(x + 4, this.canvasHeight - 160);
+      ctx.lineTo(x - 10, this.canvasHeight - 170);
+      ctx.moveTo(x + 4, this.canvasHeight - 150);
+      ctx.lineTo(x + 18, this.canvasHeight - 165);
+      ctx.stroke();
+    });
+  }
+
+  private renderLabEnvironment(ctx: CanvasRenderingContext2D) {
+    // Lab tables/desks
+    const tablePositions = [
+      { x: 100, y: this.canvasHeight - 80 },
+      { x: 300, y: this.canvasHeight - 80 },
+      { x: 500, y: this.canvasHeight - 80 }
+    ];
+
+    tablePositions.forEach(table => {
+      // Table surface
+      ctx.fillStyle = '#D3D3D3'; // Light gray
+      ctx.fillRect(table.x, table.y, 80, 16);
+      
+      // Table legs
+      ctx.fillStyle = '#A9A9A9';
+      ctx.fillRect(table.x + 4, table.y + 16, 4, 20);
+      ctx.fillRect(table.x + 72, table.y + 16, 4, 20);
+      
+      // Lab equipment on tables
+      ctx.fillStyle = '#4169E1'; // Royal blue (beakers)
+      ctx.fillRect(table.x + 20, table.y - 8, 6, 8);
+      ctx.fillStyle = '#32CD32'; // Lime green (liquid)
+      ctx.fillRect(table.x + 21, table.y - 6, 4, 4);
+      
+      // Computer/monitor
+      ctx.fillStyle = '#2F2F2F';
+      ctx.fillRect(table.x + 40, table.y - 12, 20, 12);
+      ctx.fillStyle = '#00FF00';
+      ctx.fillRect(table.x + 42, table.y - 10, 16, 8);
+    });
+
+    // Wall cabinets
+    ctx.fillStyle = '#F5F5F5';
+    for (let x = 50; x < this.canvasWidth - 50; x += 120) {
+      ctx.fillRect(x, 100, 60, 40);
+      // Cabinet doors
+      ctx.strokeStyle = '#C0C0C0';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(x, 100, 60, 40);
+      ctx.strokeRect(x + 30, 100, 30, 40);
+    }
+
+    // Special bag on desk (The Adjudicator)
+    if (this.levelNumber === 5) {
+      ctx.fillStyle = '#FFD700'; // Gold
+      ctx.fillRect(320, this.canvasHeight - 88, 12, 8);
+      // Glow effect
+      ctx.shadowColor = '#FFD700';
+      ctx.shadowBlur = 8;
+      ctx.fillRect(320, this.canvasHeight - 88, 12, 8);
+      ctx.shadowBlur = 0;
+    }
   }
 
   private renderCookie(ctx: CanvasRenderingContext2D, cookie: Cookie) {
