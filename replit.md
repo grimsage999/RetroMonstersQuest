@@ -104,7 +104,12 @@ The application is configured for Replit deployment with the following setup:
 
 ```
 Changelog:
-- June 26, 2025. Initial setup
+- June 26, 2025. Initial setup with basic 2D canvas game
+- June 26, 2025. Implemented authentic pixel art style characters (3x scale)
+- June 26, 2025. Added weapon systems: Ray Gun (Level 3+) and Adjudicator (Level 5)
+- June 26, 2025. Created inviting backgrounds: sunset desert, cyberpunk city, colorful subway
+- June 26, 2025. Added smooth walk cycle animations for all characters
+- June 26, 2025. Removed visual effects for clean pixel art aesthetic
 ```
 
 ## User Preferences

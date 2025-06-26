@@ -100,14 +100,7 @@ export class Player {
       }
     }
     
-    // Add subtle glow effect when moving
-    if (this.isMoving) {
-      ctx.shadowColor = '#39FF14';
-      ctx.shadowBlur = 3;
-      ctx.strokeStyle = '#39FF14';
-      ctx.lineWidth = 1;
-      ctx.strokeRect(this.x - 1, this.y - 1, this.width + 2, this.height + 2);
-    }
+    // No visual effects when moving - clean pixel art look
     
     ctx.restore();
   }
