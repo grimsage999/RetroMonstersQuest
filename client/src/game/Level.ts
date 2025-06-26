@@ -146,119 +146,454 @@ export class Level {
   }
 
   private renderBackground(ctx: CanvasRenderingContext2D) {
-    // Simple gradient background based on level
-    const gradient = ctx.createLinearGradient(0, 0, 0, this.canvasHeight);
+    ctx.save();
+    ctx.imageSmoothingEnabled = false;
     
     switch (this.levelNumber) {
-      case 1: // Desert
-        gradient.addColorStop(0, '#FFD700');
-        gradient.addColorStop(1, '#8B4513');
+      case 1: // Desert - Area 51
+        this.renderDesertBackground(ctx);
         break;
-      case 2: // City
-        gradient.addColorStop(0, '#2F4F4F');
-        gradient.addColorStop(1, '#000000');
+      case 2: // Dystopian City
+        this.renderCityBackground(ctx);
         break;
       case 3: // Subway
-        gradient.addColorStop(0, '#1C1C1C');
-        gradient.addColorStop(1, '#000000');
+        this.renderSubwayBackground(ctx);
         break;
       default:
-        gradient.addColorStop(0, '#000033');
-        gradient.addColorStop(1, '#000000');
+        this.renderSpaceBackground(ctx);
     }
     
-    ctx.fillStyle = gradient;
+    ctx.restore();
+    
+    // Add environmental details
+    this.renderEnvironment(ctx);
+  }
+
+  private renderDesertBackground(ctx: CanvasRenderingContext2D) {
+    // Beautiful desert sunset sky
+    const skyGradient = ctx.createLinearGradient(0, 0, 0, this.canvasHeight * 0.7);
+    skyGradient.addColorStop(0, '#FF6B35'); // Orange sunset
+    skyGradient.addColorStop(0.3, '#FF8C42'); // Warm orange
+    skyGradient.addColorStop(0.6, '#FFAA44'); // Golden
+    skyGradient.addColorStop(1, '#F4A460'); // Sandy transition
+    ctx.fillStyle = skyGradient;
+    ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight * 0.7);
+    
+    // Add stylized sun
+    ctx.fillStyle = '#FFD700';
+    ctx.shadowColor = '#FFD700';
+    ctx.shadowBlur = 20;
+    ctx.beginPath();
+    ctx.arc(this.canvasWidth * 0.8, this.canvasHeight * 0.2, 32, 0, 2 * Math.PI);
+    ctx.fill();
+    
+    // Desert sand with warm tones
+    const sandGradient = ctx.createLinearGradient(0, this.canvasHeight * 0.7, 0, this.canvasHeight);
+    sandGradient.addColorStop(0, '#DEB887'); // Burlywood
+    sandGradient.addColorStop(1, '#CD853F'); // Peru
+    ctx.fillStyle = sandGradient;
+    ctx.fillRect(0, this.canvasHeight * 0.7, this.canvasWidth, this.canvasHeight * 0.3);
+    
+    // Add flowing sand dunes
+    for (let x = 0; x < this.canvasWidth; x += 8) {
+      const waveHeight = Math.sin(x * 0.015) * 12 + Math.sin(x * 0.03) * 6;
+      ctx.fillStyle = '#F4A460';
+      ctx.fillRect(x, this.canvasHeight * 0.7 + waveHeight, 8, this.canvasHeight * 0.3 - waveHeight);
+    }
+    
+    // Add twinkling stars in the upper sky
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = '#FFFF99';
+    for (let i = 0; i < 20; i++) {
+      const x = Math.random() * this.canvasWidth;
+      const y = Math.random() * this.canvasHeight * 0.3;
+      const twinkle = Math.sin(Date.now() * 0.01 + i) * 0.5 + 0.5;
+      ctx.globalAlpha = twinkle;
+      ctx.fillRect(x, y, 2, 2);
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  private renderCityBackground(ctx: CanvasRenderingContext2D) {
+    // Vibrant cyberpunk sky with aurora-like colors
+    const skyGradient = ctx.createLinearGradient(0, 0, 0, this.canvasHeight * 0.7);
+    skyGradient.addColorStop(0, '#4B0082'); // Indigo
+    skyGradient.addColorStop(0.3, '#8A2BE2'); // Blue violet
+    skyGradient.addColorStop(0.6, '#DA70D6'); // Orchid
+    skyGradient.addColorStop(1, '#2F4F4F'); // Dark slate gray
+    ctx.fillStyle = skyGradient;
+    ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight * 0.7);
+    
+    // Add floating geometric shapes (cyberpunk aesthetic)
+    ctx.fillStyle = '#00FFFF';
+    ctx.globalAlpha = 0.3;
+    for (let i = 0; i < 8; i++) {
+      const x = (i * 100) + Math.sin(Date.now() * 0.001 + i) * 20;
+      const y = 50 + Math.cos(Date.now() * 0.002 + i) * 30;
+      ctx.fillRect(x, y, 8, 8);
+    }
+    ctx.globalAlpha = 1;
+    
+    // Sleek pavement with grid pattern
+    ctx.fillStyle = '#483D8B'; // Dark slate blue
+    ctx.fillRect(0, this.canvasHeight * 0.7, this.canvasWidth, this.canvasHeight * 0.3);
+    
+    // Add grid lines for futuristic feel
+    ctx.strokeStyle = '#00CED1'; // Dark turquoise
+    ctx.lineWidth = 1;
+    ctx.globalAlpha = 0.4;
+    // Vertical lines
+    for (let x = 0; x < this.canvasWidth; x += 32) {
+      ctx.beginPath();
+      ctx.moveTo(x, this.canvasHeight * 0.7);
+      ctx.lineTo(x, this.canvasHeight);
+      ctx.stroke();
+    }
+    // Horizontal lines
+    for (let y = this.canvasHeight * 0.7; y < this.canvasHeight; y += 16) {
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(this.canvasWidth, y);
+      ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  private renderSubwayBackground(ctx: CanvasRenderingContext2D) {
+    // Atmospheric underground with warm lighting
+    const wallGradient = ctx.createLinearGradient(0, 0, 0, this.canvasHeight * 0.8);
+    wallGradient.addColorStop(0, '#4A4A4A'); // Medium gray
+    wallGradient.addColorStop(0.5, '#6A5ACD'); // Slate blue
+    wallGradient.addColorStop(1, '#2F2F2F'); // Dark gray
+    ctx.fillStyle = wallGradient;
+    ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight * 0.8);
+    
+    // Colorful mosaic floor tiles
+    const tileSize = 16;
+    const tileColors = ['#4169E1', '#1E90FF', '#00CED1', '#20B2AA', '#4682B4'];
+    for (let x = 0; x < this.canvasWidth; x += tileSize) {
+      for (let y = this.canvasHeight * 0.8; y < this.canvasHeight; y += tileSize) {
+        const colorIndex = ((x + y) / tileSize) % tileColors.length;
+        ctx.fillStyle = tileColors[colorIndex];
+        ctx.globalAlpha = 0.8;
+        ctx.fillRect(x, y, tileSize, tileSize);
+        
+        // Add tile borders
+        ctx.globalAlpha = 1;
+        ctx.strokeStyle = '#1C1C1C';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(x, y, tileSize, tileSize);
+      }
+    }
+    
+    // Add warm ambient lighting effects
+    const ambientLights = [
+      { x: this.canvasWidth * 0.2, color: '#FFD700' },
+      { x: this.canvasWidth * 0.5, color: '#FF6347' },
+      { x: this.canvasWidth * 0.8, color: '#32CD32' }
+    ];
+    
+    ambientLights.forEach(light => {
+      const lightGradient = ctx.createRadialGradient(
+        light.x, this.canvasHeight * 0.1, 0,
+        light.x, this.canvasHeight * 0.1, 120
+      );
+      lightGradient.addColorStop(0, `${light.color}40`); // 25% opacity
+      lightGradient.addColorStop(1, 'transparent');
+      ctx.fillStyle = lightGradient;
+      ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
+    });
+  }
+
+  private renderSpaceBackground(ctx: CanvasRenderingContext2D) {
+    // Deep space
+    ctx.fillStyle = '#000011';
     ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
     
-    // Add some environmental details
-    this.renderEnvironment(ctx);
+    // Add stars
+    ctx.fillStyle = '#FFFFFF';
+    for (let i = 0; i < 100; i++) {
+      const x = Math.random() * this.canvasWidth;
+      const y = Math.random() * this.canvasHeight;
+      const size = Math.random() * 2;
+      ctx.fillRect(x, y, size, size);
+    }
   }
 
   private renderEnvironment(ctx: CanvasRenderingContext2D) {
     ctx.save();
+    ctx.imageSmoothingEnabled = false;
     
     switch (this.levelNumber) {
-      case 1: // Desert - add some rocks and cacti
-        ctx.fillStyle = '#8B4513';
-        for (let i = 0; i < 5; i++) {
-          const x = (i * 150) + 50;
-          const y = this.canvasHeight - 80;
-          ctx.fillRect(x, y, 20, 20); // Rock
-        }
+      case 1: // Desert - Area 51 with UFO wreckage and structures
+        this.renderDesertEnvironment(ctx);
         break;
         
-      case 2: // City - add some building silhouettes
-        ctx.fillStyle = '#333333';
-        for (let i = 0; i < 8; i++) {
-          const x = i * 100;
-          const height = 50 + Math.random() * 100;
-          ctx.fillRect(x, this.canvasHeight - height, 80, height);
-        }
+      case 2: // City - Dystopian buildings and debris
+        this.renderCityEnvironment(ctx);
         break;
         
-      case 3: // Subway - add some pillars and tracks
-        ctx.fillStyle = '#666666';
-        for (let i = 0; i < 4; i++) {
-          const x = (i * 200) + 100;
-          ctx.fillRect(x, 0, 20, this.canvasHeight); // Pillars
-        }
-        // Subway tracks
-        ctx.strokeStyle = '#999999';
-        ctx.lineWidth = 4;
-        ctx.beginPath();
-        ctx.moveTo(0, this.canvasHeight - 30);
-        ctx.lineTo(this.canvasWidth, this.canvasHeight - 30);
-        ctx.stroke();
+      case 3: // Subway - Underground infrastructure
+        this.renderSubwayEnvironment(ctx);
         break;
     }
     
     ctx.restore();
   }
 
+  private renderDesertEnvironment(ctx: CanvasRenderingContext2D) {
+    // UFO wreckage scattered around
+    const wreckagePositions = [
+      { x: 100, y: this.canvasHeight - 120 },
+      { x: 300, y: this.canvasHeight - 100 },
+      { x: 600, y: this.canvasHeight - 110 }
+    ];
+
+    wreckagePositions.forEach(pos => {
+      // Crashed UFO parts (pixel art style)
+      ctx.fillStyle = '#4682B4'; // Steel blue
+      ctx.fillRect(pos.x, pos.y, 24, 8);
+      ctx.fillStyle = '#2F4F4F'; // Dark slate gray
+      ctx.fillRect(pos.x + 4, pos.y - 4, 16, 4);
+      
+      // Burn marks
+      ctx.fillStyle = '#1C1C1C';
+      ctx.fillRect(pos.x - 8, pos.y + 8, 40, 4);
+    });
+
+    // Desert cacti (8-bit style)
+    const cactiPositions = [150, 450, 700];
+    cactiPositions.forEach(x => {
+      const y = this.canvasHeight - 80;
+      // Main stem
+      ctx.fillStyle = '#228B22';
+      ctx.fillRect(x, y, 8, 32);
+      // Arms
+      ctx.fillRect(x - 8, y + 8, 8, 8);
+      ctx.fillRect(x + 8, y + 12, 8, 8);
+      // Spines
+      ctx.fillStyle = '#FFFF00';
+      for (let i = 0; i < 4; i++) {
+        ctx.fillRect(x + i * 2, y + i * 8, 1, 2);
+      }
+    });
+
+    // Area 51 hangar in background
+    ctx.fillStyle = '#2F2F2F';
+    ctx.fillRect(50, this.canvasHeight * 0.4, 120, 80);
+    ctx.fillStyle = '#1C1C1C';
+    ctx.fillRect(60, this.canvasHeight * 0.4 + 10, 100, 60);
+    
+    // Warning signs
+    ctx.fillStyle = '#FFD700';
+    ctx.fillRect(250, this.canvasHeight - 60, 16, 16);
+    ctx.fillStyle = '#FF0000';
+    ctx.font = 'bold 8px monospace';
+    ctx.fillText('!', 256, this.canvasHeight - 50);
+  }
+
+  private renderCityEnvironment(ctx: CanvasRenderingContext2D) {
+    // Dystopian building silhouettes with pixel art detail
+    const buildings = [
+      { x: 0, height: 120, width: 80 },
+      { x: 80, height: 160, width: 90 },
+      { x: 170, height: 100, width: 70 },
+      { x: 240, height: 180, width: 85 },
+      { x: 325, height: 140, width: 75 },
+      { x: 400, height: 110, width: 80 },
+      { x: 480, height: 200, width: 95 },
+      { x: 575, height: 130, width: 70 },
+      { x: 645, height: 90, width: 65 },
+      { x: 710, height: 150, width: 90 }
+    ];
+
+    buildings.forEach(building => {
+      const y = this.canvasHeight - building.height;
+      
+      // Main building structure
+      ctx.fillStyle = '#2F2F2F';
+      ctx.fillRect(building.x, y, building.width, building.height);
+      
+      // Windows (some lit, some dark)
+      const windowSize = 6;
+      const windowSpacing = 12;
+      for (let wx = building.x + 8; wx < building.x + building.width - 8; wx += windowSpacing) {
+        for (let wy = y + 16; wy < y + building.height - 16; wy += windowSpacing) {
+          const isLit = Math.random() > 0.7;
+          ctx.fillStyle = isLit ? '#FFFF99' : '#1C1C1C';
+          ctx.fillRect(wx, wy, windowSize, windowSize);
+        }
+      }
+      
+      // Antenna or details on top
+      if (Math.random() > 0.5) {
+        ctx.fillStyle = '#FF0000';
+        ctx.fillRect(building.x + building.width/2, y - 8, 2, 8);
+      }
+    });
+
+    // Neon signs
+    ctx.fillStyle = '#FF1493'; // Deep pink neon
+    ctx.shadowColor = '#FF1493';
+    ctx.shadowBlur = 4;
+    ctx.fillRect(150, this.canvasHeight - 180, 32, 8);
+    ctx.fillStyle = '#00FFFF'; // Cyan neon
+    ctx.shadowColor = '#00FFFF';
+    ctx.fillRect(350, this.canvasHeight - 160, 24, 6);
+
+    // Debris on street
+    ctx.fillStyle = '#1C1C1C';
+    const debrisPositions = [120, 280, 420, 580];
+    debrisPositions.forEach(x => {
+      ctx.fillRect(x, this.canvasHeight - 40, 8, 4);
+      ctx.fillRect(x + 12, this.canvasHeight - 35, 6, 3);
+    });
+  }
+
+  private renderSubwayEnvironment(ctx: CanvasRenderingContext2D) {
+    // Support pillars
+    const pillarPositions = [150, 350, 550];
+    pillarPositions.forEach(x => {
+      ctx.fillStyle = '#4A4A4A';
+      ctx.fillRect(x, 0, 16, this.canvasHeight);
+      
+      // Pillar details
+      ctx.fillStyle = '#6A6A6A';
+      ctx.fillRect(x + 2, 0, 12, this.canvasHeight);
+      
+      // Rust/wear marks
+      ctx.fillStyle = '#8B4513';
+      for (let y = 50; y < this.canvasHeight; y += 100) {
+        ctx.fillRect(x, y, 16, 8);
+      }
+    });
+
+    // Subway tracks
+    ctx.fillStyle = '#708090'; // Slate gray
+    ctx.fillRect(0, this.canvasHeight - 24, this.canvasWidth, 8);
+    ctx.fillRect(0, this.canvasHeight - 12, this.canvasWidth, 8);
+    
+    // Track ties
+    ctx.fillStyle = '#654321'; // Dark brown
+    for (let x = 0; x < this.canvasWidth; x += 24) {
+      ctx.fillRect(x, this.canvasHeight - 28, 16, 20);
+    }
+
+    // Flickering lights (simulated with random brightness)
+    const lightPositions = [100, 300, 500, 700];
+    lightPositions.forEach(x => {
+      const brightness = Math.random() > 0.8 ? 0.5 : 0.2;
+      const lightGradient = ctx.createRadialGradient(x, 30, 0, x, 30, 60);
+      lightGradient.addColorStop(0, `rgba(255, 255, 255, ${brightness})`);
+      lightGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+      ctx.fillStyle = lightGradient;
+      ctx.fillRect(x - 60, 0, 120, 120);
+      
+      // Light fixture
+      ctx.fillStyle = '#2F2F2F';
+      ctx.fillRect(x - 8, 20, 16, 8);
+    });
+
+    // Graffiti tags (simple pixel art)
+    ctx.fillStyle = '#FF69B4'; // Hot pink
+    ctx.fillRect(200, this.canvasHeight - 200, 24, 16);
+    ctx.fillStyle = '#00FF00'; // Lime green
+    ctx.fillRect(400, this.canvasHeight - 180, 32, 12);
+    
+    // Water drips/stains
+    ctx.fillStyle = '#1C1C1C';
+    const stainPositions = [75, 225, 425, 625];
+    stainPositions.forEach(x => {
+      for (let y = 100; y < this.canvasHeight - 100; y += 50) {
+        ctx.fillRect(x, y, 2, 20);
+      }
+    });
+  }
+
   private renderCookie(ctx: CanvasRenderingContext2D, cookie: Cookie) {
     ctx.save();
+    ctx.imageSmoothingEnabled = false;
     
-    // Draw cookie as a golden circle with chocolate chips
-    ctx.fillStyle = '#DAA520';
-    ctx.beginPath();
-    ctx.arc(cookie.x + cookie.width/2, cookie.y + cookie.height/2, cookie.width/2, 0, 2 * Math.PI);
-    ctx.fill();
+    // Cookie pixel art (8x8) - based on reference image
+    const cookiePixels = [
+      [0,0,1,1,1,1,0,0], // Row 0
+      [0,1,2,2,2,2,1,0], // Row 1
+      [1,2,3,2,2,3,2,1], // Row 2 - chocolate chips
+      [1,2,2,2,2,2,2,1], // Row 3
+      [1,2,2,3,3,2,2,1], // Row 4 - chocolate chips
+      [1,2,2,2,2,2,2,1], // Row 5
+      [0,1,2,2,2,2,1,0], // Row 6
+      [0,0,1,1,1,1,0,0], // Row 7
+    ];
     
-    // Chocolate chips
-    ctx.fillStyle = '#8B4513';
-    const chipSize = 2;
-    for (let i = 0; i < 3; i++) {
-      const chipX = cookie.x + 4 + (i * 4);
-      const chipY = cookie.y + 4 + (i % 2) * 4;
-      ctx.fillRect(chipX, chipY, chipSize, chipSize);
+    const colors = [
+      'transparent', // 0
+      '#CD853F',     // 1 - cookie outline (Peru)
+      '#DEB887',     // 2 - cookie base (BurlyWood)
+      '#8B4513',     // 3 - chocolate chips (SaddleBrown)
+    ];
+    
+    const scale = 2; // Make cookies bigger
+    for (let row = 0; row < cookiePixels.length; row++) {
+      for (let col = 0; col < cookiePixels[row].length; col++) {
+        const colorIndex = cookiePixels[row][col];
+        if (colorIndex > 0) {
+          ctx.fillStyle = colors[colorIndex];
+          ctx.fillRect(
+            cookie.x + col * scale, 
+            cookie.y + row * scale, 
+            scale, 
+            scale
+          );
+        }
+      }
     }
     
-    // Glowing effect
+    // Add subtle glow
     ctx.shadowColor = '#DAA520';
-    ctx.shadowBlur = 5;
+    ctx.shadowBlur = 3;
     ctx.strokeStyle = '#DAA520';
     ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.arc(cookie.x + cookie.width/2, cookie.y + cookie.height/2, cookie.width/2 + 2, 0, 2 * Math.PI);
-    ctx.stroke();
+    ctx.strokeRect(cookie.x - 1, cookie.y - 1, cookie.width + 2, cookie.height + 2);
     
     ctx.restore();
   }
 
   private renderFinishLine(ctx: CanvasRenderingContext2D) {
     ctx.save();
+    ctx.imageSmoothingEnabled = false;
     
-    // Animated finish line
-    ctx.fillStyle = '#00ff00';
-    ctx.shadowColor = '#00ff00';
-    ctx.shadowBlur = 10;
-    ctx.fillRect(this.finishLine.x, this.finishLine.y, this.finishLine.width, this.finishLine.height);
+    // Checkered finish line pattern (based on reference image)
+    const tileSize = 8;
+    const pattern = [
+      [1,0,1,0,1,0,1,0,1,0,1,0,1], // Black and white checkered
+      [0,1,0,1,0,1,0,1,0,1,0,1,0],
+      [1,0,1,0,1,0,1,0,1,0,1,0,1],
+    ];
     
-    // Add "FINISH" text
-    ctx.fillStyle = '#ffffff';
-    ctx.font = '12px Courier New';
+    const colors = ['#000000', '#ffffff']; // Black and white
+    
+    // Draw checkered pattern
+    for (let row = 0; row < pattern.length; row++) {
+      for (let col = 0; col < pattern[row].length; col++) {
+        const colorIndex = pattern[row][col];
+        ctx.fillStyle = colors[colorIndex];
+        ctx.fillRect(
+          this.finishLine.x + col * tileSize,
+          this.finishLine.y + row * (this.finishLine.height / 3),
+          tileSize,
+          this.finishLine.height / 3
+        );
+      }
+    }
+    
+    // Add "FINISH" text in pixel font style
+    ctx.fillStyle = '#ffff00';
+    ctx.shadowColor = '#ffff00';
+    ctx.shadowBlur = 2;
+    ctx.font = 'bold 8px monospace';
     ctx.textAlign = 'center';
-    ctx.fillText('FINISH', this.finishLine.x + this.finishLine.width/2, this.finishLine.y + 15);
+    ctx.fillText('FINISH', this.finishLine.x + this.finishLine.width/2, this.finishLine.y + 12);
     
     ctx.restore();
   }
