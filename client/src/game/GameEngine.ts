@@ -153,37 +153,37 @@ export class GameEngine {
     const cutscenes: { [key: number]: CutsceneData } = {
       1: {
         levelNumber: 1,
-        title: "COSMIC PLAYGROUND",
-        description: "Cosmo the Alien crash-landed on Earth!\nCollect cookies to fuel your escape while avoiding government agents.\nUse arrow keys to move. Good luck!"
+        title: "👽 COSMIC PLAYGROUND 🛸",
+        description: "Cosmo crash-landed in Roswell!\nThe CIA hoards cookies - encoded joy itself.\nReclaim happiness through cosmic resistance!\n\nUse arrow keys to move • Collect all cookies • Avoid agents • Reach the finish!"
       },
       2: {
         levelNumber: 2,
         title: "Level 2: Dystopian City",
-        description: "Government forces close in! Navigate crumbling skyscrapers\nand neon-lit streets to reach the subway entrance."
+        description: "Government forces mobilize across crumbling streets.\nCracked pavement, neon signs, and surveillance everywhere.\nAmbient citizens watch from windows as you flee."
       },
       3: {
         levelNumber: 3,
         title: "Level 3: Abandoned Subway",
-        description: "Underground tunnels filled with radioactive threats.\nYou've found an alien Ray Gun in the debris!",
-        weaponUnlocked: "Ray Gun Acquired - Press SPACE to fire energy bolts"
+        description: "Underground tunnels echo with danger.\nRadioactive rats emerge from dark corners.\nIn the debris, you discover alien technology...",
+        weaponUnlocked: "⚡ RAY GUN ACQUIRED ⚡\nPress SPACE to fire lightning bolts!\n(3 hits to defeat enemies)"
       },
       4: {
         levelNumber: 4,
-        title: "Level 4: Graveyard of the Fallen",
-        description: "The government's experiments have gone wrong.\nZombies roam among crooked tombstones. Stay alert!"
+        title: "Level 4: Graveyard of the Fallen", 
+        description: "Government experiments created unholy abominations.\nZombies shamble between crooked tombstones.\nMist swirls as the undead hunt for fresh victims."
       },
       5: {
         levelNumber: 5,
         title: "Level 5: Government Lab",
-        description: "Final level - Infiltrate the secret facility.\nFind The Adjudicator, the ultimate alien weapon!",
-        weaponUnlocked: "The Adjudicator Found - Press X for devastating power"
+        description: "The sterile facility hides dark secrets.\nInteract with lab equipment to uncover fragments.\nSomewhere here lies The Adjudicator...",
+        weaponUnlocked: "🔮 THE ADJUDICATOR 🔮\nPress X for instant death rays!\nGlowing orb grants ultimate power!"
       }
     };
     
     return cutscenes[level] || {
       levelNumber: level,
       title: `Level ${level}`,
-      description: "Continue your cosmic adventure to escape Earth..."
+      description: "The cosmic adventure continues...\nWill Cosmo escape Earth's grasp?"
     };
   }
   
@@ -333,14 +333,17 @@ export class GameEngine {
     // Check collisions
     this.checkCollisions();
     
-    // Check win condition
+    // Check win condition - Act progression: Escape → Discovery → Boss → Catharsis → Mystery
     if (this.gameState.cookiesCollected >= this.gameState.totalCookies) {
       const finishLine = this.currentLevel.getFinishLine();
       if (this.checkCollision(this.player.getBounds(), finishLine)) {
         if (this.gameState.level >= 5) {
+          // Final victory: Cosmic resistance successful, joy reclaimed
           this.gameState.phase = 'victory';
-          this.audioManager.playSuccess();
+          this.audioManager.playVictoryFanfare();
+          this.showVictorySequence();
         } else {
+          // Level complete: Progress in Cosmo's escape journey
           this.gameState.phase = 'levelComplete';
           this.audioManager.playSuccess();
         }
@@ -352,21 +355,22 @@ export class GameEngine {
   private checkCollisions() {
     const playerBounds = this.player.getBounds();
     
-    // Check cookie collisions
+    // Check cookie collisions - Core feedback loop: Visual pop + audio crunch + brief screen flash
     const collectedCookies = this.currentLevel.checkCookieCollisions(playerBounds);
     if (collectedCookies > 0) {
       this.gameState.cookiesCollected += collectedCookies;
       this.gameState.score += collectedCookies * 10;
-      this.audioManager.playCrunch(); // Play satisfying crunch sound for cookie collection
       
-      // Unlock weapons based on level progression
-      if (this.gameState.level >= 3 && this.gameState.cookiesCollected >= this.gameState.totalCookies) {
-        this.gameState.hasRayGun = true;
-      }
-      if (this.gameState.level >= 5 && this.gameState.cookiesCollected >= this.gameState.totalCookies) {
-        this.gameState.hasAdjudicator = true;
-      }
+      // Satisfying feedback: Cookie collection chime (crunchy/pop from design doc)
+      this.audioManager.playCrunch();
       
+      // Screen flash effect for visual feedback
+      this.ctx.save();
+      this.ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+      this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+      this.ctx.restore();
+      
+      // Joy reclamation narrative: Each cookie = encoded happiness freed from CIA control
       this.updateState();
     }
     
@@ -471,6 +475,23 @@ export class GameEngine {
     }
     
     this.ctx.restore();
+  }
+
+  private showVictorySequence() {
+    // Epilogue: Mystery + sequel tease as specified in design doc
+    const epilogueData: CutsceneData = {
+      levelNumber: 6,
+      title: "🎃 COSMIC PLAYGROUND EPILOGUE 🎃",
+      description: "Cosmo escapes through the facility doors...\nAmbience drops to empty hallway echoes.\nA white room appears...\n\n\"what?\"\n\nCosmic Playground will be back on Halloween!"
+    };
+    
+    this.currentCutscene = new Cutscene(this.canvas, epilogueData, () => {
+      this.currentCutscene = null;
+      this.gameState.phase = 'victory';
+      this.updateState();
+    });
+    
+    this.currentCutscene.start();
   }
 
   private updateState() {

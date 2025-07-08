@@ -37,17 +37,17 @@ export class Level {
       zombies: 0,
       cookies: 8,
       title: 'Level 1: Roswell/Area 51 Desert',
-      description: 'Sandy terrain, UFO wreckage, desert shrubs, and hangars'
+      description: 'Sandy terrain, UFO wreckage, desert shrubs, military hangars, and alien crash sites'
     },
     2: {
       background: '#2F4F4F',
-      fbiAgents: 12,
-      armyMen: 6,
+      fbiAgents: 10,
+      armyMen: 8,
       radioactiveRats: 0,
       zombies: 0,
-      cookies: 10,
-      title: 'Level 2: Crumbling Dystopian City',
-      description: 'Cracked pavement, crumbling skyscrapers, neon signs'
+      cookies: 12,
+      title: 'Level 2: Dystopian City',
+      description: 'Cracked pavement, crumbling skyscrapers, flickering neon signs, surveillance cameras'
     },
     3: {
       background: '#1C1C1C',

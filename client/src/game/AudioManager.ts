@@ -102,6 +102,30 @@ export class AudioManager {
     }
   }
 
+  public playVictoryFanfare() {
+    if (this.successSound && !this.isMuted) {
+      // Epic victory sequence
+      const soundClone = this.successSound.cloneNode() as HTMLAudioElement;
+      soundClone.volume = 0.8;
+      soundClone.playbackRate = 1.2; // Triumphant tone
+      soundClone.play().catch(error => {
+        console.log('Victory fanfare play prevented:', error);
+      });
+    }
+  }
+
+  public playGameStart() {
+    if (this.successSound && !this.isMuted) {
+      // Game start jingle
+      const soundClone = this.successSound.cloneNode() as HTMLAudioElement;
+      soundClone.volume = 0.5;
+      soundClone.playbackRate = 1.5; // Cheerful startup
+      soundClone.play().catch(error => {
+        console.log('Game start sound play prevented:', error);
+      });
+    }
+  }
+
   public toggleMute() {
     this.isMuted = !this.isMuted;
     
