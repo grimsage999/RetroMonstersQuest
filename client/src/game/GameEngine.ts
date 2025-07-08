@@ -412,8 +412,9 @@ export class GameEngine {
     this.ctx.fillStyle = '#000011';
     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
     
-    // If cutscene is active, let it handle rendering
+    // If cutscene is active, render it and return
     if (this.currentCutscene) {
+      this.currentCutscene.render();
       return;
     }
     

@@ -70,14 +70,14 @@ export class Level {
       description: 'Crooked tombstones, mist, dead trees'
     },
     5: {
-      background: '#4A4A4A',
-      fbiAgents: 4,
-      armyMen: 2,
-      radioactiveRats: 4,
-      zombies: 2,
-      cookies: 16,
-      title: 'Level 5: Government Lab',
-      description: 'Sterile lab, blinking lights, beakers, desks'
+      background: '#1C1C1C',
+      fbiAgents: 6,
+      armyMen: 4,
+      radioactiveRats: 8,
+      zombies: 6,
+      cookies: 18,
+      title: 'Level 5: Government Lab + Boss Cathedral',
+      description: 'Sterile laboratory with dark secrets, then gothic cathedral boss arena'
     }
   };
 

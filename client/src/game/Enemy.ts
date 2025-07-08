@@ -1,4 +1,4 @@
-export type EnemyType = 'cia' | 'army' | 'rat' | 'zombie';
+export type EnemyType = 'cia' | 'army' | 'rat' | 'zombie' | 'boss';
 
 export class Enemy {
   private x: number;
