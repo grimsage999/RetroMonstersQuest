@@ -78,6 +78,30 @@ export class AudioManager {
     }
   }
 
+  public playRayGun() {
+    if (this.hitSound && !this.isMuted) {
+      // Use hit sound with lower pitch for ray gun
+      const soundClone = this.hitSound.cloneNode() as HTMLAudioElement;
+      soundClone.volume = 0.3;
+      soundClone.playbackRate = 0.8; // Lower pitch for energy weapon
+      soundClone.play().catch(error => {
+        console.log('Ray gun sound play prevented:', error);
+      });
+    }
+  }
+
+  public playAdjudicator() {
+    if (this.successSound && !this.isMuted) {
+      // Use success sound with dramatic effect for adjudicator
+      const soundClone = this.successSound.cloneNode() as HTMLAudioElement;
+      soundClone.volume = 0.6;
+      soundClone.playbackRate = 0.7; // Deep, powerful sound
+      soundClone.play().catch(error => {
+        console.log('Adjudicator sound play prevented:', error);
+      });
+    }
+  }
+
   public toggleMute() {
     this.isMuted = !this.isMuted;
     

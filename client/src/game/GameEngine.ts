@@ -151,34 +151,39 @@ export class GameEngine {
   
   private getCutsceneData(level: number): CutsceneData {
     const cutscenes: { [key: number]: CutsceneData } = {
+      1: {
+        levelNumber: 1,
+        title: "COSMIC PLAYGROUND",
+        description: "Cosmo the Alien crash-landed on Earth!\nCollect cookies to fuel your escape while avoiding government agents.\nUse arrow keys to move. Good luck!"
+      },
       2: {
         levelNumber: 2,
         title: "Level 2: Dystopian City",
-        description: "Navigate crumbling skyscrapers and neon-lit streets"
+        description: "Government forces close in! Navigate crumbling skyscrapers\nand neon-lit streets to reach the subway entrance."
       },
       3: {
         levelNumber: 3,
         title: "Level 3: Abandoned Subway",
-        description: "Underground tunnels filled with radioactive threats",
-        weaponUnlocked: "Ray Gun - Press SPACE to fire"
+        description: "Underground tunnels filled with radioactive threats.\nYou've found an alien Ray Gun in the debris!",
+        weaponUnlocked: "Ray Gun Acquired - Press SPACE to fire energy bolts"
       },
       4: {
         levelNumber: 4,
-        title: "Level 4: Graveyard",
-        description: "Zombies roam among crooked tombstones"
+        title: "Level 4: Graveyard of the Fallen",
+        description: "The government's experiments have gone wrong.\nZombies roam among crooked tombstones. Stay alert!"
       },
       5: {
         levelNumber: 5,
         title: "Level 5: Government Lab",
-        description: "Final level - Find The Adjudicator",
-        weaponUnlocked: "Adjudicator - Press X for ultimate power"
+        description: "Final level - Infiltrate the secret facility.\nFind The Adjudicator, the ultimate alien weapon!",
+        weaponUnlocked: "The Adjudicator Found - Press X for devastating power"
       }
     };
     
     return cutscenes[level] || {
       levelNumber: level,
       title: `Level ${level}`,
-      description: "Continue your cosmic adventure"
+      description: "Continue your cosmic adventure to escape Earth..."
     };
   }
   
@@ -242,7 +247,7 @@ export class GameEngine {
     if (nearestEnemy) {
       // Instant kill nearest enemy
       nearestEnemy.destroy();
-      this.audioManager.playSuccess(); // Adjudicator kill sound
+      this.audioManager.playAdjudicator(); // Adjudicator kill sound
     }
     
     this.adjudicatorCooldown = 5000; // 5 second cooldown
