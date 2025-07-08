@@ -5,7 +5,7 @@ export class Player {
   private y: number;
   private width: number = 48; // 16 * 3 scale
   private height: number = 48; // 16 * 3 scale
-  private speed: number = 5; // Consistent speed across all levels - matches Level 2 speed
+  private speed: number = 8; // Increased speed for better gameplay
   private isMoving: boolean = false;
   private direction: string = 'right';
   private animationFrame: number = 0;

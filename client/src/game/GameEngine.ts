@@ -264,10 +264,10 @@ export class GameEngine {
   }
 
   private updateBullets(deltaTime: number) {
-    // Update bullet positions
+    // Update bullet positions - faster bullets
     this.bullets.forEach(bullet => {
-      bullet.x += bullet.vx * deltaTime * 0.1;
-      bullet.y += bullet.vy * deltaTime * 0.1;
+      bullet.x += bullet.vx * deltaTime * 0.3;
+      bullet.y += bullet.vy * deltaTime * 0.3;
     });
 
     // Check bullet collisions with enemies
@@ -281,28 +281,30 @@ export class GameEngine {
         if (enemy.isActive()) {
           const enemyBounds = enemy.getBounds();
           const bulletBounds = {
-            x: bullet.x - 2,
-            y: bullet.y - 2,
-            width: 4,
-            height: 4
+            x: bullet.x - 6,
+            y: bullet.y - 6,
+            width: 12,
+            height: 12
           };
 
           if (this.checkCollision(bulletBounds, enemyBounds)) {
+            // Instant kill with weapons
+            enemy.destroy();
+            this.audioManager.playHit();
+            this.gameState.score += 50;
             bullet.hits++;
             
-            // Ray Gun requires 3 hits to kill
-            if (bullet.hits >= 3) {
-              enemy.destroy();
-              this.audioManager.playHit();
+            // Ray Gun bullets disappear after hitting enemy
+            // Adjudicator bullets pierce through (up to 3 enemies)
+            if (!this.gameState.hasAdjudicator || bullet.hits >= 3) {
+              bulletHit = true;
             }
-            
-            bulletHit = true;
             break;
           }
         }
       }
 
-      // Remove bullets that hit enemies or went off screen
+      // Remove bullets that should be removed or went off screen
       if (bulletHit || bullet.y < 0 || bullet.y > this.canvas.height ||
           bullet.x < 0 || bullet.x > this.canvas.width) {
         this.bullets.splice(i, 1);
@@ -434,15 +436,27 @@ export class GameEngine {
   private renderBullets() {
     this.ctx.save();
     this.bullets.forEach(bullet => {
-      // Ray Gun lightning bolt style
-      this.ctx.fillStyle = '#00FFFF';
-      this.ctx.shadowColor = '#00FFFF';
-      this.ctx.shadowBlur = 5;
-      this.ctx.fillRect(bullet.x - 2, bullet.y - 8, 4, 16);
-      
-      // Add electric effect
-      this.ctx.fillStyle = '#FFFFFF';
-      this.ctx.fillRect(bullet.x - 1, bullet.y - 6, 2, 12);
+      if (this.gameState.hasAdjudicator) {
+        // Adjudicator: Golden energy blasts
+        this.ctx.fillStyle = '#FFFF00';
+        this.ctx.shadowColor = '#FFFF00';
+        this.ctx.shadowBlur = 10;
+        this.ctx.fillRect(bullet.x - 6, bullet.y - 6, 12, 12);
+        
+        // Core effect
+        this.ctx.fillStyle = '#FFFFFF';
+        this.ctx.fillRect(bullet.x - 3, bullet.y - 3, 6, 6);
+      } else {
+        // Ray Gun: Cyan lightning bolts
+        this.ctx.fillStyle = '#00FFFF';
+        this.ctx.shadowColor = '#00FFFF';
+        this.ctx.shadowBlur = 8;
+        this.ctx.fillRect(bullet.x - 4, bullet.y - 8, 8, 16);
+        
+        // Lightning core
+        this.ctx.fillStyle = '#FFFFFF';
+        this.ctx.fillRect(bullet.x - 2, bullet.y - 6, 4, 12);
+      }
     });
     this.ctx.restore();
   }
