@@ -99,8 +99,14 @@ export class GameEngine {
 
   public start() {
     if (!this.isRunning) {
+      this.audioManager.playGameStart();
+      this.audioManager.playBackgroundMusic();
       this.isRunning = true;
-      this.gameLoop(0);
+      this.lastTime = performance.now();
+      this.gameLoop(this.lastTime);
+      
+      // Show opening cutscene
+      this.showLevelCutscene();
     }
   }
 
@@ -123,10 +129,13 @@ export class GameEngine {
       hasAdjudicator: false
     };
     
+    // Initialize level 1 first, then show cutscene
     this.player.reset(this.canvas.width / 2, this.canvas.height - 50);
     this.currentLevel = new Level(1, this.canvas.width, this.canvas.height);
     this.gameState.totalCookies = this.currentLevel.getTotalCookies();
-    this.updateState();
+    
+    // Show opening cutscene
+    this.showLevelCutscene();
   }
 
   public nextLevel() {
@@ -202,6 +211,7 @@ export class GameEngine {
     this.currentLevel = new Level(this.gameState.level, this.canvas.width, this.canvas.height);
     this.gameState.totalCookies = this.currentLevel.getTotalCookies();
     this.gameState.phase = 'playing';
+    this.bullets = []; // Clear bullets when starting new level
     this.updateState();
   }
 
@@ -306,7 +316,8 @@ export class GameEngine {
     const deltaTime = currentTime - this.lastTime;
     this.lastTime = currentTime;
 
-    if (this.gameState.phase === 'playing') {
+    // Only update game logic if not in cutscene and playing
+    if (this.gameState.phase === 'playing' && !this.currentCutscene) {
       this.update(deltaTime);
     }
     
