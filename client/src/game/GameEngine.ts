@@ -97,8 +97,11 @@ export class GameEngine {
     }
   }
 
-  public start() {
+  public async start() {
     if (!this.isRunning) {
+      // Initialize audio on user interaction (game start)
+      await this.audioManager.initialize();
+      
       this.audioManager.playGameStart();
       this.audioManager.playBackgroundMusic();
       this.isRunning = true;
@@ -117,7 +120,10 @@ export class GameEngine {
     }
   }
 
-  public restart() {
+  public async restart() {
+    // Initialize audio if not already done
+    await this.audioManager.initialize();
+    
     this.gameState = {
       score: 0,
       lives: 3,
@@ -133,6 +139,10 @@ export class GameEngine {
     this.player.reset(this.canvas.width / 2, this.canvas.height - 50);
     this.currentLevel = new Level(1, this.canvas.width, this.canvas.height);
     this.gameState.totalCookies = this.currentLevel.getTotalCookies();
+    
+    // Play audio
+    this.audioManager.playGameStart();
+    this.audioManager.playBackgroundMusic();
     
     // Show opening cutscene
     this.showLevelCutscene();

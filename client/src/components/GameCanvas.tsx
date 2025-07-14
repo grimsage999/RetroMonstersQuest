@@ -5,6 +5,7 @@ import GameUI from './GameUI';
 const GameCanvas: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const gameEngineRef = useRef<GameEngine | null>(null);
+  const [isStarted, setIsStarted] = useState(false);
   const [gameState, setGameState] = useState({
     score: 0,
     lives: 3,
@@ -24,16 +25,26 @@ const GameCanvas: React.FC = () => {
     });
     
     gameEngineRef.current = gameEngine;
-    gameEngine.start();
+    
+    // Don't auto-start, wait for user interaction
+    // gameEngine.start();
 
     return () => {
       gameEngine.stop();
     };
   }, []);
 
-  const handleRestart = () => {
+  const handleStart = async () => {
+    if (gameEngineRef.current && !isStarted) {
+      await gameEngineRef.current.start();
+      setIsStarted(true);
+    }
+  };
+
+  const handleRestart = async () => {
     if (gameEngineRef.current) {
-      gameEngineRef.current.restart();
+      await gameEngineRef.current.restart();
+      setIsStarted(true);
     }
   };
 
@@ -57,6 +68,52 @@ const GameCanvas: React.FC = () => {
         height={600}
         className="game-canvas"
       />
+      
+      {/* Start button overlay */}
+      {!isStarted && (
+        <div style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: 800,
+          height: 600,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: 'rgba(0, 0, 0, 0.8)',
+          color: 'white',
+          fontFamily: 'monospace'
+        }}>
+          <h1 style={{ fontSize: '48px', marginBottom: '20px', textShadow: '0 0 10px #00ffff' }}>
+            Cosmic Playground
+          </h1>
+          <p style={{ fontSize: '18px', marginBottom: '30px' }}>
+            Alien Cookie Quest
+          </p>
+          <button
+            onClick={handleStart}
+            style={{
+              padding: '15px 40px',
+              fontSize: '24px',
+              fontFamily: 'monospace',
+              backgroundColor: '#00ffff',
+              border: 'none',
+              borderRadius: '5px',
+              cursor: 'pointer',
+              boxShadow: '0 0 20px #00ffff',
+              transition: 'all 0.3s'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+            onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+          >
+            START GAME
+          </button>
+          <p style={{ fontSize: '14px', marginTop: '20px', color: '#888' }}>
+            Use arrow keys to move • Collect all cookies • Reach the finish line
+          </p>
+        </div>
+      )}
       
       <GameUI gameState={gameState} />
       

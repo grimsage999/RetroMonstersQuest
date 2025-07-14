@@ -3,14 +3,31 @@ export class AudioManager {
   private hitSound: HTMLAudioElement | null = null;
   private successSound: HTMLAudioElement | null = null;
   private isMuted: boolean = false;
+  private audioContext: AudioContext | null = null;
+  private isInitialized: boolean = false;
 
   constructor() {
-    this.loadSounds();
+    // Don't load sounds until user interaction
+  }
+
+  public async initialize() {
+    if (this.isInitialized) return;
+    
+    try {
+      // Create audio context on user interaction
+      this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      
+      // Load sounds after context is created
+      await this.loadSounds();
+      this.isInitialized = true;
+    } catch (error) {
+      console.log('Audio initialization failed:', error);
+    }
   }
 
   private async loadSounds() {
     try {
-      // Load background music
+      // Use existing sound files
       this.backgroundMusic = new Audio('/sounds/background.mp3');
       this.backgroundMusic.loop = true;
       this.backgroundMusic.volume = 0.3;
@@ -22,7 +39,14 @@ export class AudioManager {
       this.successSound = new Audio('/sounds/success.mp3');
       this.successSound.volume = 0.7;
       
-      // Start background music
+      // Preload all sounds
+      await Promise.all([
+        this.backgroundMusic.load(),
+        this.hitSound.load(),
+        this.successSound.load()
+      ]);
+      
+      // Start background music after initialization
       this.playBackgroundMusic();
     } catch (error) {
       console.log('Audio loading failed:', error);
@@ -32,7 +56,7 @@ export class AudioManager {
 
 
   public playBackgroundMusic() {
-    if (this.backgroundMusic && !this.isMuted) {
+    if (this.backgroundMusic && !this.isMuted && this.isInitialized) {
       this.backgroundMusic.play().catch(error => {
         console.log('Background music play prevented:', error);
       });
@@ -47,7 +71,7 @@ export class AudioManager {
   }
 
   public playHit() {
-    if (this.hitSound && !this.isMuted) {
+    if (this.hitSound && !this.isMuted && this.isInitialized) {
       // Clone the sound to allow overlapping playback
       const soundClone = this.hitSound.cloneNode() as HTMLAudioElement;
       soundClone.volume = 0.3;
@@ -58,7 +82,7 @@ export class AudioManager {
   }
 
   public playSuccess() {
-    if (this.successSound && !this.isMuted) {
+    if (this.successSound && !this.isMuted && this.isInitialized) {
       this.successSound.currentTime = 0;
       this.successSound.play().catch(error => {
         console.log('Success sound play prevented:', error);
@@ -67,7 +91,7 @@ export class AudioManager {
   }
 
   public playCrunch() {
-    if (this.hitSound && !this.isMuted) {
+    if (this.hitSound && !this.isMuted && this.isInitialized) {
       // Use hit sound with higher pitch for crunch effect
       const soundClone = this.hitSound.cloneNode() as HTMLAudioElement;
       soundClone.volume = 0.4;
@@ -79,7 +103,7 @@ export class AudioManager {
   }
 
   public playRayGun() {
-    if (this.hitSound && !this.isMuted) {
+    if (this.hitSound && !this.isMuted && this.isInitialized) {
       // Use hit sound with lower pitch for ray gun
       const soundClone = this.hitSound.cloneNode() as HTMLAudioElement;
       soundClone.volume = 0.3;
@@ -91,7 +115,7 @@ export class AudioManager {
   }
 
   public playAdjudicator() {
-    if (this.successSound && !this.isMuted) {
+    if (this.successSound && !this.isMuted && this.isInitialized) {
       // Use success sound with dramatic effect for adjudicator
       const soundClone = this.successSound.cloneNode() as HTMLAudioElement;
       soundClone.volume = 0.6;
@@ -103,7 +127,7 @@ export class AudioManager {
   }
 
   public playVictoryFanfare() {
-    if (this.successSound && !this.isMuted) {
+    if (this.successSound && !this.isMuted && this.isInitialized) {
       // Epic victory sequence
       const soundClone = this.successSound.cloneNode() as HTMLAudioElement;
       soundClone.volume = 0.8;
@@ -115,7 +139,7 @@ export class AudioManager {
   }
 
   public playGameStart() {
-    if (this.successSound && !this.isMuted) {
+    if (this.successSound && !this.isMuted && this.isInitialized) {
       // Game start jingle
       const soundClone = this.successSound.cloneNode() as HTMLAudioElement;
       soundClone.volume = 0.5;
