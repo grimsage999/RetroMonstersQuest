@@ -4,6 +4,9 @@ import { Level } from './Level';
 import { AudioManager } from './AudioManager';
 import { InputManager } from './InputManager';
 import { Cutscene, CutsceneData } from './Cutscene';
+import { SpatialGrid } from './SpatialGrid';
+import { SpriteBatcher } from './SpriteBatcher';
+import { AudioPool } from './AudioPool';
 
 export interface GameState {
   score: number;
@@ -41,6 +44,11 @@ export class GameEngine {
   private frameCount: number = 0;
   private fpsTimer: number = 0;
   private currentFPS: number = 0;
+  
+  // Optimization systems
+  private spatialGrid: SpatialGrid;
+  private spriteBatcher: SpriteBatcher;
+  private audioPool: AudioPool;
 
   constructor(canvas: HTMLCanvasElement, onStateChange: (state: GameState) => void) {
     this.canvas = canvas;
@@ -64,10 +72,30 @@ export class GameEngine {
     this.audioManager = new AudioManager();
     this.inputManager = new InputManager();
     
+    // Initialize optimization systems
+    this.spatialGrid = new SpatialGrid(canvas.width, canvas.height, 100);
+    this.spriteBatcher = new SpriteBatcher(this.ctx);
+    this.audioPool = new AudioPool(5);
+    this.initializeAudioPool();
+    
     this.gameState.totalCookies = this.currentLevel.getTotalCookies();
     this.updateState();
     
     this.setupEventListeners();
+  }
+  
+  private initializeAudioPool(): void {
+    // Initialize audio pools for different sound effects
+    this.audioPool.initializeSound('shoot', '/sounds/shoot.mp3', 8);
+    this.audioPool.initializeSound('hit', '/sounds/hit.mp3', 6);
+    this.audioPool.initializeSound('pickup', '/sounds/pickup.mp3', 4);
+    this.audioPool.initializeSound('crunch', '/sounds/crunch.mp3', 5);
+    this.audioPool.initializeSound('adjudicator', '/sounds/adjudicator.mp3', 3);
+    
+    // Preload all sounds
+    this.audioPool.preloadAll().catch(err => {
+      console.warn('Failed to preload some audio:', err);
+    });
   }
 
   private setupEventListeners() {
@@ -287,27 +315,46 @@ export class GameEngine {
       bullet.y += bullet.vy * deltaTime * 0.3;
     });
 
-    // Check bullet collisions with enemies
+    // Rebuild spatial grid with current enemy positions
     const enemies = this.currentLevel.getEnemies();
+    this.spatialGrid.clear();
+    for (const enemy of enemies) {
+      if (enemy.isActive()) {
+        const bounds = enemy.getBounds();
+        this.spatialGrid.insert(enemy, bounds.x, bounds.y, bounds.width, bounds.height);
+      }
+    }
+
+    // Check bullet collisions using spatial grid
     for (let i = this.bullets.length - 1; i >= 0; i--) {
       const bullet = this.bullets[i];
       let bulletHit = false;
 
-      // Check collision with enemies
-      for (const enemy of enemies) {
-        if (enemy.isActive()) {
-          const enemyBounds = enemy.getBounds();
-          const bulletBounds = {
-            x: bullet.x - 6,
-            y: bullet.y - 6,
-            width: 12,
-            height: 12
-          };
+      const bulletBounds = {
+        x: bullet.x - 6,
+        y: bullet.y - 6,
+        width: 12,
+        height: 12
+      };
+      
+      // Get only nearby enemies from spatial grid
+      const potentialEnemies = this.spatialGrid.getPotentialCollisions(
+        bulletBounds.x, 
+        bulletBounds.y, 
+        bulletBounds.width, 
+        bulletBounds.height
+      );
+
+      // Check collision only with nearby enemies
+      for (const enemy of potentialEnemies) {
+        const typedEnemy = enemy as Enemy;
+        if (typedEnemy.isActive()) {
+          const enemyBounds = typedEnemy.getBounds();
 
           if (this.checkCollision(bulletBounds, enemyBounds)) {
             // Instant kill with weapons
-            enemy.destroy();
-            this.audioManager.playHit();
+            typedEnemy.destroy();
+            this.audioPool.play('hit'); // Use audio pool
             this.gameState.score += 50;
             bullet.hits++;
             

@@ -1,4 +1,5 @@
 import { InputManager } from './InputManager';
+import { MovementSystem } from './MovementSystem';
 
 export class Player {
   private x: number;
@@ -10,43 +11,64 @@ export class Player {
   private direction: string = 'right';
   private animationFrame: number = 0;
   private animationTimer: number = 0;
+  private movementSystem: MovementSystem;
 
   constructor(x: number, y: number) {
     this.x = x;
     this.y = y;
+    this.movementSystem = new MovementSystem();
+    // Configure for smoother gameplay
+    this.movementSystem.configure({
+      baseSpeed: 4,
+      maxSpeed: 6,
+      acceleration: 0.25,
+      deceleration: 0.15,
+      dashSpeed: 10,
+      dashDuration: 200,
+      dashCooldown: 800
+    });
   }
 
   public update(inputManager: InputManager, deltaTime: number, canvasWidth: number, canvasHeight: number) {
-    this.isMoving = false;
+    // Get input direction
+    let inputX = 0;
+    let inputY = 0;
     
-    // Handle movement input
-    if (inputManager.isKeyPressed('ArrowUp')) {
-      this.y -= this.speed;
-      this.isMoving = true;
-    }
-    if (inputManager.isKeyPressed('ArrowDown')) {
-      this.y += this.speed;
-      this.isMoving = true;
-    }
+    if (inputManager.isKeyPressed('ArrowUp')) inputY = -1;
+    if (inputManager.isKeyPressed('ArrowDown')) inputY = 1;
     if (inputManager.isKeyPressed('ArrowLeft')) {
-      this.x -= this.speed;
-      this.isMoving = true;
+      inputX = -1;
       this.direction = 'left';
     }
     if (inputManager.isKeyPressed('ArrowRight')) {
-      this.x += this.speed;
-      this.isMoving = true;
+      inputX = 1;
       this.direction = 'right';
     }
+    
+    // Check for dash input (Shift key)
+    const isDashPressed = inputManager.isKeyPressed('Shift');
+    
+    // Get movement from movement system
+    const movement = this.movementSystem.update(inputX, inputY, isDashPressed, deltaTime);
+    
+    // Apply movement
+    this.x += movement.dx;
+    this.y += movement.dy;
     
     // Keep player within bounds
     this.x = Math.max(0, Math.min(canvasWidth - this.width, this.x));
     this.y = Math.max(0, Math.min(canvasHeight - this.height, this.y));
     
+    // Update movement state for animation
+    const state = this.movementSystem.getState();
+    this.isMoving = state.speed > 0.5;
+    
     // Update animation - smoother timing
     if (this.isMoving) {
+      // Speed up animation when dashing
+      const animSpeed = state.isDashing ? 150 : 300;
       this.animationTimer += deltaTime;
-      if (this.animationTimer > 300) { // Slower, cleaner animation
+      if (this.animationTimer > animSpeed) {
         this.animationFrame = (this.animationFrame + 1) % 2; // Simple 2-frame walk cycle
         this.animationTimer = 0;
       }
@@ -186,5 +208,6 @@ export class Player {
     this.isMoving = false;
     this.animationFrame = 0;
     this.animationTimer = 0;
+    this.movementSystem.reset();
   }
 }
