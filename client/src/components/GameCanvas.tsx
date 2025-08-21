@@ -36,8 +36,14 @@ const GameCanvas: React.FC = () => {
 
   const handleStart = async () => {
     if (gameEngineRef.current && !isStarted) {
-      await gameEngineRef.current.start();
-      setIsStarted(true);
+      console.log('GameCanvas: Starting game...');
+      try {
+        await gameEngineRef.current.start();
+        setIsStarted(true);
+        console.log('GameCanvas: Game started successfully');
+      } catch (error) {
+        console.error('GameCanvas: Error starting game:', error);
+      }
     }
   };
 

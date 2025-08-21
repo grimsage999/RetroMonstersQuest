@@ -159,17 +159,26 @@ export class GameEngine {
 
   public async start() {
     if (!this.isRunning) {
+      console.log('GameEngine: Starting game...');
+      
       // Initialize audio on user interaction (game start)
       await this.audioManager.initialize();
+      
+      // Transition to playing state
+      this.stateManager.transitionTo(GamePhase.CUTSCENE);
       
       this.audioManager.playGameStart();
       this.audioManager.playBackgroundMusic();
       this.isRunning = true;
       this.lastTime = performance.now();
-      this.gameLoop(this.lastTime);
       
       // Show opening cutscene
       this.showLevelCutscene();
+      
+      // Start game loop
+      this.gameLoop(this.lastTime);
+      
+      console.log('GameEngine: Game started successfully');
     }
   }
 
@@ -235,10 +244,13 @@ export class GameEngine {
   }
   
   private showLevelCutscene() {
+    console.log(`GameEngine: Showing cutscene for level ${this.gameState.level}`);
     const cutsceneData: CutsceneData = this.getCutsceneData(this.gameState.level);
     
     this.currentCutscene = new Cutscene(this.canvas, cutsceneData, () => {
+      console.log('GameEngine: Cutscene complete, initializing level');
       this.currentCutscene = null;
+      this.stateManager.transitionTo(GamePhase.PLAYING);
       this.initializeLevel();
     });
     
@@ -284,6 +296,8 @@ export class GameEngine {
   }
   
   private initializeLevel() {
+    console.log(`GameEngine: Initializing level ${this.gameState.level}`);
+    
     // Unlock Ray Gun starting from Level 3
     if (this.gameState.level >= 3) {
       this.gameState.hasRayGun = true;
@@ -300,6 +314,8 @@ export class GameEngine {
     this.gameState.phase = 'playing';
     this.bullets = []; // Clear bullets when starting new level
     this.updateState();
+    
+    console.log(`GameEngine: Level ${this.gameState.level} initialized with ${this.gameState.totalCookies} cookies`);
   }
 
   private fireRayGun() {
@@ -544,9 +560,8 @@ export class GameEngine {
     this.ctx.fillStyle = '#000011';
     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
     
-    // Check state manager to prevent UI layering issues
-    if (this.stateManager.isInPhase(GamePhase.TITLE)) {
-      // Title screen is handled by React component
+    // Don't render if game hasn't started yet (title screen is React component)
+    if (!this.isRunning) {
       return;
     }
     

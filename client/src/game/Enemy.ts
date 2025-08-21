@@ -3,10 +3,10 @@ export type EnemyType = 'cia' | 'army' | 'rat' | 'zombie' | 'boss';
 export class Enemy {
   private x: number;
   private y: number;
-  private width: number;
-  private height: number;
-  private speedX: number;
-  private speedY: number;
+  private width: number = 48;
+  private height: number = 48;
+  private speedX: number = 0;
+  private speedY: number = 0;
   private type: EnemyType;
   private animationFrame: number = 0;
   private animationTimer: number = 0;
@@ -41,6 +41,18 @@ export class Enemy {
         this.height = 48;
         this.speedX = (Math.random() - 0.5) * 2.5;
         this.speedY = (Math.random() - 0.5) * 2.5;
+        break;
+      case 'boss':
+        this.width = 72; // 24 * 3 scale for boss
+        this.height = 72;
+        this.speedX = (Math.random() - 0.5) * 2;
+        this.speedY = (Math.random() - 0.5) * 2;
+        break;
+      default:
+        this.width = 48;
+        this.height = 48;
+        this.speedX = (Math.random() - 0.5) * 3;
+        this.speedY = (Math.random() - 0.5) * 3;
         break;
     }
   }
