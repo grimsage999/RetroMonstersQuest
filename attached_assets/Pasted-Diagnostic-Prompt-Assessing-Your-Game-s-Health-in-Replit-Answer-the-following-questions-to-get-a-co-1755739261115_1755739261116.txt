@@ -1,0 +1,57 @@
+Diagnostic Prompt: Assessing Your Game's Health in Replit
+Answer the following questions to get a comprehensive overview of your game's current welfare.
+
+1. Resource Utilization (Inside Replit)
+First, let's check the direct feedback from the Replit environment. While your game is running, observe the resource panel in your Replit workspace.[1]
+
+CPU Usage: What is the typical and peak CPU percentage? Is it consistently high (e.g., above 80-90%)? High CPU usage can lead to stuttering and slowdowns.[2]
+Memory (RAM) Usage: How much memory is your application using? Does this amount grow steadily over time without decreasing (a potential sign of a memory leak)?[2][3]
+Storage: Are you reading or writing large amounts of data to storage frequently? Check your storage usage to ensure you are not hitting any limits.[1]
+2. Performance Metrics & Profiling
+Now, let's look at the performance from the game's perspective. You may need to implement some on-screen display for these metrics for easier diagnosis.
+
+Frames Per Second (FPS): What is the average FPS? Are there significant drops in FPS, and if so, what is happening in the game when they occur? Game performance problems often manifest as slow or occasional frame rates.[2]
+Frame Time: What is the time it takes to render a single frame (in milliseconds)? Consistent and low frame times are desirable. Spikes in frame time will be perceived as stutters.
+Update/Draw Calls: How many draw calls are being made per frame? High numbers of draw calls can sometimes be a performance bottleneck.
+Physics Calculations: Are there complex physics simulations running? How much time is being spent on physics updates per frame?[4]
+CPU vs. GPU Bound: If you lower the game's resolution and the frame rate doesn't improve, your game is likely CPU-bound.[2][4] If the frame rate improves significantly, it may be GPU-bound. Knowing this helps you focus your optimization efforts.
+3. Error and Log Analysis
+Errors and logs provide direct insight into problems your application is facing.
+
+Console Output: Are there any error messages or warnings being printed to the Replit console while the game is running?[3]
+Deployment Logs: If you have deployed your application, check the deployment logs in Replit for any runtime errors.[5]
+Error Rate: Are there specific actions in the game that consistently produce errors? This is a critical application performance metric.[6][7]
+Network Requests: If your game involves networking, are there any failing HTTP requests? Check the status codes of your network requests.[8]
+4. In-Game Subjective Evaluation
+Play your game and pay close attention to the user experience.
+
+Responsiveness: Do the controls feel responsive and immediate? Input lag can be a sign of performance issues.
+Loading Times: How long does it take for your game and its levels to load? Long loading times can be caused by inefficient asset loading.[2]
+Visual Glitches: Are there any visual artifacts, flickering, or other graphical anomalies? These can sometimes indicate rendering issues.[9]
+Audio Issues: Is the audio playing correctly? Stuttering or delayed audio can be linked to performance problems.[10]
+5. Code and Asset Review
+Take a look at your project's code and assets.
+
+Code Complexity: Are there any overly complex algorithms or loops that could be optimized?
+Asset Sizes: Are your textures, models, and audio files appropriately sized and compressed? Large assets can increase memory usage and loading times.
+Dependencies: Are you using any external libraries? Could any of these be causing performance issues?
+6. Replit Environment and Configuration
+Finally, consider the Replit-specific aspects.
+
+Runtime Environment: Are you using the appropriate runtime environment for your game?
+External Tools: Are you using any external monitoring tools or services? Some tools can provide more in-depth analytics.[11][12]
+Background Processes: Are there any other processes or services running in your Replit environment that could be consuming resources?
+Sources
+help
+replit.com
+steampowered.com
+rapidevelopers.com
+unity.com
+replit.com
+microtica.com
+stackify.com
+logit.io
+moderngamer.com
+youtube.com
+airbrake.io
+promptdc.com

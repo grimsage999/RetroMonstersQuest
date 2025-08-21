@@ -34,6 +34,13 @@ export class GameEngine {
   private animationId: number = 0;
   private lastTime: number = 0;
   private isRunning: boolean = false;
+  
+  // Performance metrics
+  private drawCallCount: number = 0;
+  private entityCount: number = 0;
+  private frameCount: number = 0;
+  private fpsTimer: number = 0;
+  private currentFPS: number = 0;
 
   constructor(canvas: HTMLCanvasElement, onStateChange: (state: GameState) => void) {
     this.canvas = canvas;
@@ -327,6 +334,20 @@ export class GameEngine {
 
     const deltaTime = currentTime - this.lastTime;
     this.lastTime = currentTime;
+    
+    // Performance monitoring
+    this.frameCount++;
+    this.fpsTimer += deltaTime;
+    if (this.fpsTimer >= 1000) {
+      this.currentFPS = this.frameCount;
+      this.frameCount = 0;
+      this.fpsTimer = 0;
+      
+      // Log performance metrics
+      if (this.currentFPS < 30) {
+        console.warn(`Low FPS detected: ${this.currentFPS}`);
+      }
+    }
 
     // Only update game logic if not in cutscene and playing
     if (this.gameState.phase === 'playing' && !this.currentCutscene) {
@@ -445,22 +466,22 @@ export class GameEngine {
 
   private renderBullets() {
     this.ctx.save();
+    
+    // Disable shadows for better performance
+    this.ctx.shadowBlur = 0;
+    
     this.bullets.forEach(bullet => {
       if (this.gameState.hasAdjudicator) {
-        // Adjudicator: Golden energy blasts
+        // Adjudicator: Golden energy blasts (no shadow for performance)
         this.ctx.fillStyle = '#FFFF00';
-        this.ctx.shadowColor = '#FFFF00';
-        this.ctx.shadowBlur = 10;
         this.ctx.fillRect(bullet.x - 6, bullet.y - 6, 12, 12);
         
         // Core effect
         this.ctx.fillStyle = '#FFFFFF';
         this.ctx.fillRect(bullet.x - 3, bullet.y - 3, 6, 6);
       } else {
-        // Ray Gun: Cyan lightning bolts
+        // Ray Gun: Cyan lightning bolts (no shadow for performance)
         this.ctx.fillStyle = '#00FFFF';
-        this.ctx.shadowColor = '#00FFFF';
-        this.ctx.shadowBlur = 8;
         this.ctx.fillRect(bullet.x - 4, bullet.y - 8, 8, 16);
         
         // Lightning core
