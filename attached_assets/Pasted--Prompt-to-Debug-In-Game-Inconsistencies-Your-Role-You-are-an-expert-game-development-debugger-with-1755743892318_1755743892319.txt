@@ -1,0 +1,31 @@
+
+Prompt to Debug In-Game Inconsistencies
+Your Role: You are an expert game development debugger with deep knowledge of JavaScript, HTML5 Canvas, and game loop mechanics. Your task is to analyze a set of described issues in my game, identify the likely root causes, and provide specific, actionable steps and code examples to resolve them.
+
+Game Context: The game is a 2D shooter built on HTML5 Canvas. It involves progressing through levels, player and enemy health systems, and UI elements like a title card and a game over screen.
+
+I have identified several critical bugs and inconsistencies that are negatively impacting the gameplay experience. Please inspect the following issues:
+
+1. UI Layering Defect: Game Over Card Obscures Title Card
+
+Problem Description: Under certain conditions, when the game ends, the "Game Over" card is rendered on top of the "Title Card" instead of replacing it or waiting for the title screen to be hidden. This creates a messy and unprofessional UI display.
+Expected Behavior: The game should have a clear state management system for its UI. When the game ends, it should transition to a "Game Over" state, display only the "Game Over" card, and then perhaps provide an option to return to the title screen. The title and game over screens should not be visible simultaneously.
+Your Task:
+Hypothesize the likely causes of this rendering-order issue. Is it a problem with z-index, improper clearing of the canvas, or a flaw in the game's state machine (e.g., being in both "Title" and "Game Over" states at once)?
+Provide a TypeScript/JavaScript code example of a simple state manager (e.g., using an enum or object) that would prevent this issue by ensuring only the UI for the active game state is rendered.
+2. Level Transition Failure: Lag, Reset, and Skipping
+
+Problem Description: There is a significant bug when transitioning from Level 2 to Level 3. The game experiences noticeable lag, the screen appears to reset or flash, and it often skips directly from the end of Level 2 to the beginning of Level 3 without a proper transition.
+Expected Behavior: The transition between levels should be smooth. A typical flow would be: Level 2 complete -> "Level Complete" screen or short pause -> Load Level 3 assets -> Start Level 3. There should be no jarring reset or skipping.
+Your Task:
+What are the most common causes for lag and screen resets during level loading in a JavaScript game? Consider asset loading, garbage collection, and issues with re-initializing the game state.
+Why might the game be "skipping" the transition? Suggest where in the game loop or level management logic this error might be occurring.
+Provide a code snippet illustrating a robust loadLevel(levelNumber) function that properly cleans up the previous level's entities, displays a loading indicator, and then initializes the new level to ensure a smooth transition.
+3. Inconsistent Player Damage System
+
+Problem Description: The player is supposed to be defeated after receiving three hits from an enemy. However, sometimes a single hit from an enemy results in an instant "game over." This inconsistency makes the game feel unfair and unpredictable.
+Expected Behavior: The damage system should be deterministic. Each enemy hit should reduce the player's health by a fixed amount (e.g., 1 point), and the game should only end when the player's health reaches zero.
+Your Task:
+Identify potential causes for this inconsistent damage. Could it be a race condition in the collision detection, multiple collision events being registered for a single impact, or a bug in how player health is decremented?
+Provide a code example of a collision handling function that includes a mechanism (like an invincibility timer or a "hit" flag) to prevent the player from taking multiple instances of damage from a single event. Show how to properly check and update the player's health state.
+Please provide your analysis for each of these three areas separately. Your response should be structured to help me locate these bugs in my codebase and implement reliable solutions.

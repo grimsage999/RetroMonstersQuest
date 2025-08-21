@@ -7,6 +7,9 @@ import { Cutscene, CutsceneData } from './Cutscene';
 import { SpatialGrid } from './SpatialGrid';
 import { SpriteBatcher } from './SpriteBatcher';
 import { AudioPool } from './AudioPool';
+import { GameStateManager, GamePhase } from './GameStateManager';
+import { LevelTransitionManager } from './LevelTransitionManager';
+import { DamageSystem } from './DamageSystem';
 
 export interface GameState {
   score: number;
@@ -49,6 +52,11 @@ export class GameEngine {
   private spatialGrid: SpatialGrid;
   private spriteBatcher: SpriteBatcher;
   private audioPool: AudioPool;
+  
+  // Bug fix systems
+  private stateManager: GameStateManager;
+  private transitionManager: LevelTransitionManager;
+  private damageSystem: DamageSystem;
 
   constructor(canvas: HTMLCanvasElement, onStateChange: (state: GameState) => void) {
     this.canvas = canvas;
@@ -77,6 +85,23 @@ export class GameEngine {
     this.spriteBatcher = new SpriteBatcher(this.ctx);
     this.audioPool = new AudioPool(5);
     this.initializeAudioPool();
+    
+    // Initialize bug fix systems
+    this.stateManager = new GameStateManager(GamePhase.TITLE);
+    this.transitionManager = new LevelTransitionManager(canvas);
+    this.damageSystem = new DamageSystem(3);
+    
+    // Set damage callbacks
+    this.damageSystem.setOnDamage((health, maxHealth) => {
+      this.gameState.lives = health;
+      this.updateState();
+    });
+    
+    this.damageSystem.setOnDeath(() => {
+      this.gameState.phase = 'gameOver';
+      this.stateManager.transitionTo(GamePhase.GAME_OVER);
+      this.updateState();
+    });
     
     this.gameState.totalCookies = this.currentLevel.getTotalCookies();
     this.updateState();
@@ -159,6 +184,11 @@ export class GameEngine {
     // Initialize audio if not already done
     await this.audioManager.initialize();
     
+    // Reset all systems
+    this.damageSystem.reset();
+    this.stateManager.reset();
+    this.stateManager.transitionTo(GamePhase.CUTSCENE);
+    
     this.gameState = {
       score: 0,
       lives: 3,
@@ -184,12 +214,24 @@ export class GameEngine {
   }
 
   public nextLevel() {
-    this.gameState.level++;
-    this.gameState.cookiesCollected = 0;
-    this.bullets = [];
+    // Use transition manager for smooth level change
+    const currentLevel = this.gameState.level;
+    const nextLevel = currentLevel + 1;
     
-    // Show cutscene for new level
-    this.showLevelCutscene();
+    this.stateManager.transitionTo(GamePhase.LEVEL_TRANSITION);
+    
+    // Start transition with loading screen
+    this.transitionManager.startTransition(currentLevel, nextLevel, () => {
+      this.gameState.level = nextLevel;
+      this.gameState.cookiesCollected = 0;
+      this.bullets = [];
+      
+      // Clean up previous level completely
+      this.currentLevel = null as any; // Force cleanup
+      
+      // Show cutscene for new level
+      this.showLevelCutscene();
+    });
   }
   
   private showLevelCutscene() {
@@ -301,7 +343,7 @@ export class GameEngine {
     
     if (nearestEnemy) {
       // Instant kill nearest enemy
-      nearestEnemy.destroy();
+      (nearestEnemy as Enemy).destroy();
       this.audioManager.playAdjudicator(); // Adjudicator kill sound
     }
     
@@ -395,9 +437,15 @@ export class GameEngine {
         console.warn(`Low FPS detected: ${this.currentFPS}`);
       }
     }
+    
+    // Update damage system
+    this.damageSystem.update(deltaTime);
+    
+    // Update transition manager
+    this.transitionManager.update(deltaTime);
 
     // Only update game logic if not in cutscene and playing
-    if (this.gameState.phase === 'playing' && !this.currentCutscene) {
+    if (this.gameState.phase === 'playing' && !this.currentCutscene && !this.transitionManager.isInTransition()) {
       this.update(deltaTime);
     }
     
@@ -465,18 +513,22 @@ export class GameEngine {
       this.updateState();
     }
     
-    // Check enemy collisions
+    // Check enemy collisions with damage system
     if (this.currentLevel.checkEnemyCollisions(playerBounds)) {
-      this.gameState.lives--;
-      this.audioManager.playHit();
+      // Use damage system to handle hits properly
+      const damageApplied = this.damageSystem.takeDamage('enemy', 1, {
+        x: playerBounds.x,
+        y: playerBounds.y
+      });
       
-      if (this.gameState.lives <= 0) {
-        this.gameState.phase = 'gameOver';
-      } else {
-        // Respawn player
-        this.player.reset(this.canvas.width / 2, this.canvas.height - 50);
+      if (damageApplied) {
+        this.audioManager.playHit();
+        
+        if (this.damageSystem.getHealth() > 0) {
+          // Respawn player but keep invincibility
+          this.player.reset(this.canvas.width / 2, this.canvas.height - 50);
+        }
       }
-      this.updateState();
     }
   }
 
@@ -492,23 +544,59 @@ export class GameEngine {
     this.ctx.fillStyle = '#000011';
     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
     
+    // Check state manager to prevent UI layering issues
+    if (this.stateManager.isInPhase(GamePhase.TITLE)) {
+      // Title screen is handled by React component
+      return;
+    }
+    
     // If cutscene is active, render it and return
     if (this.currentCutscene) {
       this.currentCutscene.render();
       return;
     }
     
-    // Render level background and objects
-    this.currentLevel.render(this.ctx);
+    // If transitioning, render transition effect
+    if (this.transitionManager.isInTransition()) {
+      // Render current level if available
+      if (this.currentLevel) {
+        this.currentLevel.render(this.ctx);
+      }
+      // Overlay transition effect
+      this.transitionManager.render();
+      return;
+    }
     
-    // Render player
-    this.player.render(this.ctx);
-    
-    // Render bullets
-    this.renderBullets();
-    
-    // Render weapon UI indicators
-    this.renderWeaponUI();
+    // Normal game rendering
+    if (this.currentLevel) {
+      // Render level background and objects
+      this.currentLevel.render(this.ctx);
+      
+      // Render player with invincibility effect
+      if (!this.damageSystem.shouldRenderInvincibility()) {
+        this.player.render(this.ctx);
+      } else {
+        // Blink effect during invincibility
+        this.ctx.save();
+        this.ctx.globalAlpha = 0.5;
+        this.player.render(this.ctx);
+        this.ctx.restore();
+      }
+      
+      // Render damage flash
+      if (this.damageSystem.shouldShowDamageFlash()) {
+        this.ctx.save();
+        this.ctx.fillStyle = 'rgba(255, 0, 0, 0.3)';
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        this.ctx.restore();
+      }
+      
+      // Render bullets
+      this.renderBullets();
+      
+      // Render weapon UI indicators
+      this.renderWeaponUI();
+    }
   }
 
   private renderBullets() {
