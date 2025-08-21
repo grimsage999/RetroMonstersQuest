@@ -10,6 +10,7 @@ import { AudioPool } from './AudioPool';
 import { GameStateManager, GamePhase } from './GameStateManager';
 import { LevelTransitionManager } from './LevelTransitionManager';
 import { DamageSystem } from './DamageSystem';
+import { UIStateController } from './UIStateController';
 
 export interface GameState {
   score: number;
@@ -57,6 +58,7 @@ export class GameEngine {
   private stateManager: GameStateManager;
   private transitionManager: LevelTransitionManager;
   private damageSystem: DamageSystem;
+  private uiController: UIStateController;
 
   constructor(canvas: HTMLCanvasElement, onStateChange: (state: GameState) => void) {
     this.canvas = canvas;
@@ -90,6 +92,7 @@ export class GameEngine {
     this.stateManager = new GameStateManager(GamePhase.TITLE);
     this.transitionManager = new LevelTransitionManager(canvas);
     this.damageSystem = new DamageSystem(3);
+    this.uiController = new UIStateController();
     
     // Set damage callbacks
     this.damageSystem.setOnDamage((health, maxHealth) => {
@@ -224,6 +227,34 @@ export class GameEngine {
     this.showLevelCutscene();
   }
 
+  private handleLevelComplete() {
+    console.log('GameEngine: Level complete!');
+    
+    // Use UI controller to properly queue the transition with delay
+    this.uiController.queueTransition('levelCard', () => {
+      this.nextLevel();
+    }, 2000); // 2 second delay to show "Level Complete" message
+  }
+  
+  private handleGameOver() {
+    console.log('GameEngine: Game over!');
+    this.gameState.phase = 'gameOver';
+    this.gameState.lives = 0;
+    this.stateManager.transitionTo(GamePhase.GAME_OVER);
+    this.audioManager.playHit(); // Use hit sound for game over
+    
+    // Use UI controller to properly queue the game over screen
+    this.uiController.queueTransition('gameOver', () => {
+      this.updateState();
+      // Stop the game after showing game over
+      setTimeout(() => {
+        this.stop();
+      }, 3000); // Show game over for 3 seconds
+    }, 1500); // 1.5 second delay before showing game over screen
+  }
+  
+
+
   public nextLevel() {
     // Use transition manager for smooth level change
     const currentLevel = this.gameState.level;
@@ -249,14 +280,17 @@ export class GameEngine {
     console.log(`GameEngine: Showing cutscene for level ${this.gameState.level}`);
     const cutsceneData: CutsceneData = this.getCutsceneData(this.gameState.level);
     
-    this.currentCutscene = new Cutscene(this.canvas, cutsceneData, () => {
-      console.log('GameEngine: Cutscene complete, initializing level');
-      this.currentCutscene = null;
-      this.stateManager.transitionTo(GamePhase.PLAYING);
-      this.initializeLevel();
+    // Use UI controller to prevent overlapping transitions
+    this.uiController.queueTransition('cutscene', () => {
+      this.currentCutscene = new Cutscene(this.canvas, cutsceneData, () => {
+        console.log('GameEngine: Cutscene complete, initializing level');
+        this.currentCutscene = null;
+        this.stateManager.transitionTo(GamePhase.PLAYING);
+        this.initializeLevel();
+      });
+      
+      this.currentCutscene.start();
     });
-    
-    this.currentCutscene.start();
   }
   
   private getCutsceneData(level: number): CutsceneData {
@@ -503,8 +537,8 @@ export class GameEngine {
           // Level complete: Progress in Cosmo's escape journey
           this.gameState.phase = 'levelComplete';
           this.audioManager.playSuccess();
+          this.handleLevelComplete();
         }
-        this.updateState();
       }
     }
   }
@@ -542,7 +576,10 @@ export class GameEngine {
       if (damageApplied) {
         this.audioManager.playHit();
         
-        if (this.damageSystem.getHealth() > 0) {
+        if (this.damageSystem.getHealth() <= 0) {
+          // Game over - use UI controller to properly queue the transition
+          this.handleGameOver();
+        } else {
           // Respawn player but keep invincibility
           this.player.reset(this.canvas.width / 2, this.canvas.height - 50);
         }
@@ -687,20 +724,31 @@ export class GameEngine {
   }
 
   private showVictorySequence() {
-    // Epilogue: Mystery + sequel tease as specified in design doc
-    const epilogueData: CutsceneData = {
-      levelNumber: 6,
-      title: "🎃 COSMIC PLAYGROUND EPILOGUE 🎃",
-      description: "Cosmo escapes through the facility doors...\nAmbience drops to empty hallway echoes.\nA white room appears...\n\n\"what?\"\n\nCosmic Playground will be back on Halloween!"
-    };
+    console.log('GameEngine: Victory!');
     
-    this.currentCutscene = new Cutscene(this.canvas, epilogueData, () => {
-      this.currentCutscene = null;
-      this.gameState.phase = 'victory';
-      this.updateState();
-    });
-    
-    this.currentCutscene.start();
+    // Use UI controller to properly queue the victory screen
+    this.uiController.queueTransition('victory', () => {
+      // Epilogue: Mystery + sequel tease as specified in design doc
+      const epilogueData: CutsceneData = {
+        levelNumber: 6,
+        title: "🎃 COSMIC PLAYGROUND EPILOGUE 🎃",
+        description: "Cosmo escapes through the facility doors...\nAmbience drops to empty hallway echoes.\nA white room appears...\n\n\"what?\"\n\nCosmic Playground will be back on Halloween!"
+      };
+      
+      this.currentCutscene = new Cutscene(this.canvas, epilogueData, () => {
+        this.currentCutscene = null;
+        this.gameState.phase = 'victory';
+        this.stateManager.transitionTo(GamePhase.VICTORY);
+        this.updateState();
+        
+        // Stop the game after showing victory
+        setTimeout(() => {
+          this.stop();
+        }, 5000); // Show victory for 5 seconds
+      });
+      
+      this.currentCutscene.start();
+    }, 1000); // 1 second delay before showing victory screen
   }
 
   private updateState() {
