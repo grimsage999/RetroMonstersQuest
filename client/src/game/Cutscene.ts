@@ -21,13 +21,14 @@ export class Cutscene {
   }
 
   public start() {
+    console.log('Cutscene: Starting cutscene');
     this.isActive = true;
     this.startTime = Date.now();
-    this.render();
     
     // Auto-advance after 3 seconds or on spacebar press
     const handleSkip = (e: KeyboardEvent) => {
-      if (e.key === ' ' || e.key === 'Space') {
+      if (e.key === ' ' || e.key === 'Space' || e.key === 'Enter') {
+        console.log('Cutscene: Skipped by user');
         this.complete();
         document.removeEventListener('keydown', handleSkip);
       }
@@ -35,17 +36,22 @@ export class Cutscene {
     
     document.addEventListener('keydown', handleSkip);
     
+    // Auto-advance after 3 seconds instead of 5
     setTimeout(() => {
       if (this.isActive) {
+        console.log('Cutscene: Auto-completing after timeout');
         this.complete();
         document.removeEventListener('keydown', handleSkip);
       }
-    }, 5000); // 5 seconds to read full narrative
+    }, 3000); // 3 seconds to read
   }
 
   private complete() {
+    console.log('Cutscene: Completing cutscene');
     this.isActive = false;
-    this.onComplete();
+    if (this.onComplete) {
+      this.onComplete();
+    }
   }
 
   public render() {

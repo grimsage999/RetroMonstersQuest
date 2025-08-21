@@ -164,19 +164,21 @@ export class GameEngine {
       // Initialize audio on user interaction (game start)
       await this.audioManager.initialize();
       
+      // Set running flag and start game loop first
+      this.isRunning = true;
+      this.lastTime = performance.now();
+      
       // Transition to playing state
       this.stateManager.transitionTo(GamePhase.CUTSCENE);
       
       this.audioManager.playGameStart();
       this.audioManager.playBackgroundMusic();
-      this.isRunning = true;
-      this.lastTime = performance.now();
       
-      // Show opening cutscene
-      this.showLevelCutscene();
-      
-      // Start game loop
+      // Start game loop - this must be running for cutscene to render
       this.gameLoop(this.lastTime);
+      
+      // Show opening cutscene after loop starts
+      this.showLevelCutscene();
       
       console.log('GameEngine: Game started successfully');
     }
