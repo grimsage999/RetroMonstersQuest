@@ -11,6 +11,7 @@ import { GameStateManager, GamePhase } from './GameStateManager';
 import { LevelTransitionManager } from './LevelTransitionManager';
 import { DamageSystem } from './DamageSystem';
 import { UIStateController } from './UIStateController';
+import { DiagnosticSystem } from './DiagnosticSystem';
 
 export interface GameState {
   score: number;
@@ -59,6 +60,7 @@ export class GameEngine {
   private transitionManager: LevelTransitionManager;
   private damageSystem: DamageSystem;
   private uiController: UIStateController;
+  private diagnosticSystem: DiagnosticSystem;
 
   constructor(canvas: HTMLCanvasElement, onStateChange: (state: GameState) => void) {
     this.canvas = canvas;
@@ -93,6 +95,15 @@ export class GameEngine {
     this.transitionManager = new LevelTransitionManager(canvas);
     this.damageSystem = new DamageSystem(3);
     this.uiController = new UIStateController();
+    
+    // Initialize diagnostic system
+    this.diagnosticSystem = new DiagnosticSystem(
+      this.stateManager,
+      this.uiController,
+      this.transitionManager,
+      this.damageSystem,
+      this.audioManager
+    );
     
     // Set damage callbacks
     this.damageSystem.setOnDamage((health, maxHealth) => {
@@ -184,6 +195,31 @@ export class GameEngine {
       this.showLevelCutscene();
       
       console.log('GameEngine: Game started successfully');
+    }
+  }
+
+  /**
+   * Run diagnostic check
+   */
+  public runDiagnostic() {
+    const report = this.diagnosticSystem.runDiagnostic(this.gameState, this.currentFPS);
+    this.diagnosticSystem.logDiagnostic(report);
+    
+    // Auto-fix critical issues
+    if (report.issues.length > 0) {
+      console.warn('🔧 Attempting auto-fix for critical issues...');
+      
+      // Check for overlapping transitions
+      if (report.issues.some(issue => issue.includes('overlapping'))) {
+        console.log('Fixing: Resetting UI controller');
+        this.uiController.forceReset();
+      }
+      
+      // Check for invalid states
+      if (report.issues.some(issue => issue.includes('Invalid transition'))) {
+        console.log('Fixing: Resetting state manager');
+        this.stateManager.forceTransitionTo(GamePhase.TITLE);
+      }
     }
   }
 
@@ -487,6 +523,11 @@ export class GameEngine {
       // Log performance metrics
       if (this.currentFPS < 30) {
         console.warn(`Low FPS detected: ${this.currentFPS}`);
+      }
+      
+      // Run diagnostic every 10 seconds when FPS is calculated
+      if (Math.random() < 0.1) { // 10% chance each second = roughly every 10 seconds
+        this.runDiagnostic();
       }
     }
     

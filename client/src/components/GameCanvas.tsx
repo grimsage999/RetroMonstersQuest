@@ -15,6 +15,22 @@ const GameCanvas: React.FC = () => {
     totalCookies: 0
   });
 
+  // Add keyboard shortcut for diagnostic
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      // Press 'D' to run diagnostic
+      if (e.key === 'd' || e.key === 'D') {
+        if (gameEngineRef.current) {
+          console.log('🔍 Running diagnostic check...');
+          gameEngineRef.current.runDiagnostic();
+        }
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, []);
+
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;

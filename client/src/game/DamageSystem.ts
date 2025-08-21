@@ -15,7 +15,7 @@ export class DamageSystem {
   private maxHealth: number;
   private invincibilityDuration: number = 1500; // 1.5 seconds of invincibility after hit
   private invincibilityTimer: number = 0;
-  private isInvincible: boolean = false;
+  public isInvincible: boolean = false;
   private lastDamageEvent: DamageEvent | null = null;
   private damageHistory: DamageEvent[] = [];
   private flashTimer: number = 0;
