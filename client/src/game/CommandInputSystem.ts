@@ -146,9 +146,14 @@ export class CommandInputSystem {
     };
     
     // Global keyboard capture
-    document.addEventListener('keydown', this.keyDownHandler);
-    document.addEventListener('keyup', this.keyUpHandler);
-    document.addEventListener('keydown', this.preventDefaultHandler);
+    try {
+      document.addEventListener('keydown', this.keyDownHandler);
+      document.addEventListener('keyup', this.keyUpHandler);
+      document.addEventListener('keydown', this.preventDefaultHandler);
+    } catch (error) {
+      console.error('CommandInputSystem: Failed to add event listeners:', error);
+      throw error; // Re-throw as this is critical for input functionality
+    }
   }
   
   /**
@@ -319,19 +324,27 @@ export class CommandInputSystem {
    * Cleanup - removes event listeners to prevent memory leaks
    */
   public cleanup(): void {
-    if (this.keyDownHandler) {
-      document.removeEventListener('keydown', this.keyDownHandler);
+    try {
+      if (this.keyDownHandler) {
+        document.removeEventListener('keydown', this.keyDownHandler);
+        this.keyDownHandler = undefined;
+      }
+      if (this.keyUpHandler) {
+        document.removeEventListener('keyup', this.keyUpHandler);
+        this.keyUpHandler = undefined;
+      }
+      if (this.preventDefaultHandler) {
+        document.removeEventListener('keydown', this.preventDefaultHandler);
+        this.preventDefaultHandler = undefined;
+      }
+      
+      console.log('CommandInputSystem: Event listeners cleaned up');
+    } catch (error) {
+      console.error('CommandInputSystem: Failed to cleanup event listeners:', error);
+      // Continue cleanup despite errors - set handlers to undefined anyway
       this.keyDownHandler = undefined;
-    }
-    if (this.keyUpHandler) {
-      document.removeEventListener('keyup', this.keyUpHandler);
       this.keyUpHandler = undefined;
-    }
-    if (this.preventDefaultHandler) {
-      document.removeEventListener('keydown', this.preventDefaultHandler);
       this.preventDefaultHandler = undefined;
     }
-    
-    console.log('CommandInputSystem: Event listeners cleaned up');
   }
 }

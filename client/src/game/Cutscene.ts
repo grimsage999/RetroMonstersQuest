@@ -17,7 +17,11 @@ export class Cutscene {
 
   constructor(canvas: HTMLCanvasElement, data: CutsceneData, onComplete: () => void) {
     this.canvas = canvas;
-    this.ctx = canvas.getContext('2d')!;
+    const context = canvas.getContext('2d');
+    if (!context) {
+      throw new Error('Failed to get 2D rendering context for cutscene');
+    }
+    this.ctx = context;
     this.data = data;
     this.onComplete = onComplete;
   }
@@ -43,12 +47,18 @@ export class Cutscene {
       document.addEventListener('keydown', this.skipHandler);
       
       // Auto-advance after 3 seconds instead of 5
-      this.autoAdvanceTimeout = window.setTimeout(() => {
-        if (this.isActive) {
-          console.log('Cutscene: Auto-completing after timeout');
-          this.complete();
-        }
-      }, 3000); // 3 seconds to read
+      try {
+        this.autoAdvanceTimeout = window.setTimeout(() => {
+          if (this.isActive) {
+            console.log('Cutscene: Auto-completing after timeout');
+            this.complete();
+          }
+        }, 3000);
+      } catch (error) {
+        console.error('Cutscene: Failed to create auto-advance timeout:', error);
+        // Fallback: complete immediately if timeout creation fails
+        this.complete();
+      } // 3 seconds to read
     } catch (error) {
       console.error('Cutscene: Error setting up event listeners:', error);
       this.complete(); // Fallback to complete immediately if setup fails
@@ -61,7 +71,11 @@ export class Cutscene {
     
     // Clean up event listeners and timeouts to prevent memory leaks
     if (this.skipHandler) {
-      document.removeEventListener('keydown', this.skipHandler);
+      try {
+        document.removeEventListener('keydown', this.skipHandler);
+      } catch (error) {
+        console.error('Cutscene: Failed to remove keydown listener:', error);
+      }
       this.skipHandler = null;
     }
     

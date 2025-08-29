@@ -69,20 +69,33 @@ export class UIStateController {
     console.log(`UIStateController: Starting ${type} transition`);
     
     // Add buffer before starting transition (track timeouts)
-    const bufferTimeout = window.setTimeout(() => {
+    try {
+      const bufferTimeout = window.setTimeout(() => {
+        callback();
+        
+        // Schedule cleanup after transition completes
+        try {
+          const cleanupTimeout = window.setTimeout(() => {
+            this.completeTransition();
+            this.activeTimeouts.delete(cleanupTimeout);
+          }, this.getTransitionDuration(type, customDelay));
+          
+          this.activeTimeouts.add(cleanupTimeout);
+        } catch (error) {
+          console.error('UIStateController: Failed to create cleanup timeout:', error);
+          // Fallback: complete transition immediately
+          this.completeTransition();
+        }
+        this.activeTimeouts.delete(bufferTimeout);
+      }, this.config.transitionBuffer);
+      
+      this.activeTimeouts.add(bufferTimeout);
+    } catch (error) {
+      console.error('UIStateController: Failed to create buffer timeout:', error);
+      // Fallback: execute callback immediately
       callback();
-      
-      // Schedule cleanup after transition completes
-      const cleanupTimeout = window.setTimeout(() => {
-        this.completeTransition();
-        this.activeTimeouts.delete(cleanupTimeout);
-      }, this.getTransitionDuration(type, customDelay));
-      
-      this.activeTimeouts.add(cleanupTimeout);
-      this.activeTimeouts.delete(bufferTimeout);
-    }, this.config.transitionBuffer);
-    
-    this.activeTimeouts.add(bufferTimeout);
+      this.completeTransition();
+    }
   }
   
   /**

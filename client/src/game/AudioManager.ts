@@ -78,12 +78,18 @@ export class AudioManager {
   public playHit() {
     if (this.hitSound && !this.isMuted && this.isInitialized) {
       // Clone the sound to allow overlapping playback
-      const soundClone = this.hitSound.cloneNode() as HTMLAudioElement;
-      soundClone.volume = 0.3;
-      soundClone.play().catch(error => {
-        console.log('Hit sound play prevented:', error);
-        // Continue despite audio errors - don't break game flow
-      });
+      try {
+        const soundClone = this.hitSound.cloneNode(true);
+        if (soundClone instanceof HTMLAudioElement) {
+          soundClone.volume = 0.3;
+          soundClone.play().catch(error => {
+            console.log('Hit sound play prevented:', error);
+            // Continue despite audio errors - don't break game flow
+          });
+        }
+      } catch (error) {
+        console.error('Audio clone failed:', error);
+      }
     }
   }
 
@@ -99,60 +105,90 @@ export class AudioManager {
   public playCrunch() {
     if (this.hitSound && !this.isMuted && this.isInitialized) {
       // Use hit sound with higher pitch for crunch effect
-      const soundClone = this.hitSound.cloneNode() as HTMLAudioElement;
-      soundClone.volume = 0.4;
-      soundClone.playbackRate = 1.5; // Higher pitch for crunch
-      soundClone.play().catch(error => {
-        console.log('Crunch sound play prevented:', error);
-      });
+      try {
+        const soundClone = this.hitSound.cloneNode(true);
+        if (soundClone instanceof HTMLAudioElement) {
+          soundClone.volume = 0.4;
+          soundClone.playbackRate = 1.5; // Higher pitch for crunch
+          soundClone.play().catch(error => {
+            console.log('Crunch sound play prevented:', error);
+          });
+        }
+      } catch (error) {
+        console.error('Audio clone failed for crunch:', error);
+      }
     }
   }
 
   public playRayGun() {
     if (this.hitSound && !this.isMuted && this.isInitialized) {
       // Use hit sound with lower pitch for ray gun
-      const soundClone = this.hitSound.cloneNode() as HTMLAudioElement;
-      soundClone.volume = 0.3;
-      soundClone.playbackRate = 0.8; // Lower pitch for energy weapon
-      soundClone.play().catch(error => {
-        console.log('Ray gun sound play prevented:', error);
-      });
+      try {
+        const soundClone = this.hitSound.cloneNode(true);
+        if (soundClone instanceof HTMLAudioElement) {
+          soundClone.volume = 0.3;
+          soundClone.playbackRate = 0.8; // Lower pitch for energy weapon
+          soundClone.play().catch(error => {
+            console.log('Ray gun sound play prevented:', error);
+          });
+        }
+      } catch (error) {
+        console.error('Audio clone failed for ray gun:', error);
+      }
     }
   }
 
   public playAdjudicator() {
     if (this.successSound && !this.isMuted && this.isInitialized) {
       // Use success sound with dramatic effect for adjudicator
-      const soundClone = this.successSound.cloneNode() as HTMLAudioElement;
-      soundClone.volume = 0.6;
-      soundClone.playbackRate = 0.7; // Deep, powerful sound
-      soundClone.play().catch(error => {
-        console.log('Adjudicator sound play prevented:', error);
-      });
+      try {
+        const soundClone = this.successSound.cloneNode(true);
+        if (soundClone instanceof HTMLAudioElement) {
+          soundClone.volume = 0.6;
+          soundClone.playbackRate = 0.7; // Deep, powerful sound
+          soundClone.play().catch(error => {
+            console.log('Adjudicator sound play prevented:', error);
+          });
+        }
+      } catch (error) {
+        console.error('Audio clone failed for adjudicator:', error);
+      }
     }
   }
 
   public playVictoryFanfare() {
     if (this.successSound && !this.isMuted && this.isInitialized) {
       // Epic victory sequence
-      const soundClone = this.successSound.cloneNode() as HTMLAudioElement;
-      soundClone.volume = 0.8;
-      soundClone.playbackRate = 1.2; // Triumphant tone
-      soundClone.play().catch(error => {
-        console.log('Victory fanfare play prevented:', error);
-      });
+      try {
+        const soundClone = this.successSound.cloneNode(true);
+        if (soundClone instanceof HTMLAudioElement) {
+          soundClone.volume = 0.8;
+          soundClone.playbackRate = 1.2; // Triumphant tone
+          soundClone.play().catch(error => {
+            console.log('Victory fanfare play prevented:', error);
+          });
+        }
+      } catch (error) {
+        console.error('Audio clone failed for victory fanfare:', error);
+      }
     }
   }
 
   public playGameStart() {
     if (this.successSound && !this.isMuted && this.isInitialized) {
       // Game start jingle
-      const soundClone = this.successSound.cloneNode() as HTMLAudioElement;
-      soundClone.volume = 0.5;
-      soundClone.playbackRate = 1.5; // Cheerful startup
-      soundClone.play().catch(error => {
-        console.log('Game start sound play prevented:', error);
-      });
+      try {
+        const soundClone = this.successSound.cloneNode(true);
+        if (soundClone instanceof HTMLAudioElement) {
+          soundClone.volume = 0.5;
+          soundClone.playbackRate = 1.5; // Cheerful startup
+          soundClone.play().catch(error => {
+            console.log('Game start sound play prevented:', error);
+          });
+        }
+      } catch (error) {
+        console.error('Audio clone failed for game start:', error);
+      }
     }
   }
 
