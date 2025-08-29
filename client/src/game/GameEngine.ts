@@ -215,7 +215,8 @@ export class GameEngine {
       }
       
       if (this.gameState.phase === 'gameOver' || this.gameState.phase === 'victory') {
-        this.restart();
+        // Don't handle restart here - let the UI handle it
+        return;
       } else if (this.gameState.phase === 'levelComplete') {
         this.nextLevel();
       } else if (this.gameState.hasRayGun && this.gameState.phase === 'playing') {
@@ -340,13 +341,13 @@ export class GameEngine {
     console.log('GameEngine: Stopped all game loops and cleaned up resources');
   }
 
-  public async restart() {
-    console.log('GameEngine: Restarting game...');
+  public restart() {
+    console.log('GameEngine: Restarting game to initial state...');
     
-    // Stop current game loop to prevent race conditions
+    // Stop current game completely
     this.stop();
     
-    // Reset all systems immediately (synchronous operations)
+    // Reset all systems
     this.damageSystem.reset();
     this.stateManager.reset();
     this.uiController.forceReset();
@@ -354,13 +355,14 @@ export class GameEngine {
     // Clear all game objects
     this.bullets = [];
     this.bossStateMachine = null;
+    this.currentCutscene = null;
     
-    // Reset game state to starting values
+    // Reset to completely fresh state
     this.gameState = {
       score: 0,
       lives: 3,
       level: 1,
-      phase: 'playing', // Reset to playing for compatibility
+      phase: 'playing',
       cookiesCollected: 0,
       totalCookies: 0,
       hasRayGun: false,
@@ -368,15 +370,18 @@ export class GameEngine {
       bossHealth: 100
     };
     
-    // Reset player and level
+    // Reset player to starting position
     this.player.reset(this.canvas.width / 2, this.canvas.height - 50);
     this.currentLevel = new Level(1, this.canvas.width, this.canvas.height);
     this.gameState.totalCookies = this.currentLevel.getTotalCookies();
     
-    // Update state for UI
+    // Clear canvas to prevent visual artifacts
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    
+    // Update state for React UI
     this.updateState();
     
-    console.log('GameEngine: Game reset to starting state. Use start() to begin again.');
+    console.log('GameEngine: Completely reset to starting state');
   }
 
   private handleLevelComplete() {

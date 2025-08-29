@@ -70,13 +70,13 @@ const GameCanvas: React.FC = () => {
     }
   };
 
-  const handleRestart = async () => {
+  const handleRestart = () => {
     if (gameEngineRef.current) {
       try {
-        // Reset game state and return to start screen
+        // Reset game completely and return to start screen
         gameEngineRef.current.restart();
-        setIsStarted(false); // Return to start screen
-        console.log('GameCanvas: Game reset, returning to start screen');
+        setIsStarted(false); // Show start screen again
+        console.log('GameCanvas: Reset to start screen');
       } catch (error) {
         console.error('GameCanvas: Error restarting game:', error);
       }
