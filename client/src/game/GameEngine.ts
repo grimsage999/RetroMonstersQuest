@@ -717,11 +717,19 @@ export class GameEngine {
     this.commandInputSystem.processEventQueue();
 
     // Only update game logic if not in cutscene and playing
-    if (this.gameState.phase === 'playing' && !this.currentCutscene && !this.transitionManager.isInTransition()) {
-      this.update(deltaTime);
+    try {
+      if (this.gameState.phase === 'playing' && !this.currentCutscene && !this.transitionManager.isInTransition()) {
+        this.update(deltaTime);
+      }
+      
+      this.render();
+    } catch (error) {
+      console.error('GameEngine: Critical error in game loop:', error);
+      // Emergency fallback: pause game and transition to safe state
+      this.isRunning = false;
+      this.stateManager.forceTransitionTo(GamePhase.TITLE);
+      this.uiController.forceReset();
     }
-    
-    this.render();
     
     this.animationId = requestAnimationFrame((time) => this.gameLoop(time));
   }

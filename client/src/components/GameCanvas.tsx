@@ -71,8 +71,13 @@ const GameCanvas: React.FC = () => {
 
   const handleRestart = async () => {
     if (gameEngineRef.current) {
-      await gameEngineRef.current.restart();
-      setIsStarted(true);
+      try {
+        await gameEngineRef.current.restart();
+        setIsStarted(true);
+        console.log('GameCanvas: Game restarted successfully');
+      } catch (error) {
+        console.error('GameCanvas: Error restarting game:', error);
+      }
     }
   };
 

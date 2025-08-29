@@ -84,8 +84,9 @@ export class Level {
 
   constructor(levelNumber: number, canvasWidth: number, canvasHeight: number) {
     this.levelNumber = levelNumber;
-    this.canvasWidth = canvasWidth;
-    this.canvasHeight = canvasHeight;
+    // Validate canvas dimensions to prevent edge cases
+    this.canvasWidth = Math.max(canvasWidth, 800);
+    this.canvasHeight = Math.max(canvasHeight, 600);
     this.config = this.levelConfigs[levelNumber] || this.levelConfigs[1];
     
     this.initializeLevel();
