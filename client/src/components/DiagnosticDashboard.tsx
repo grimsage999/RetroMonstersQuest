@@ -43,24 +43,34 @@ export function DiagnosticDashboard({ isVisible, gameEngine }: DiagnosticProps) 
   const [updateInterval, setUpdateInterval] = useState<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
+    // Clear any existing interval first
+    if (updateInterval) {
+      clearInterval(updateInterval);
+      setUpdateInterval(null);
+    }
+    
     if (isVisible && gameEngine) {
       // Update metrics every 500ms when visible
       const interval = setInterval(() => {
-        updateMetrics();
+        try {
+          updateMetrics();
+        } catch (error) {
+          console.error('Error updating diagnostic metrics:', error);
+        }
       }, 500);
       setUpdateInterval(interval);
       
       // Initial update
-      updateMetrics();
+      try {
+        updateMetrics();
+      } catch (error) {
+        console.error('Error updating diagnostic metrics:', error);
+      }
       
       return () => {
         if (interval) clearInterval(interval);
-      };
-    } else {
-      if (updateInterval) {
-        clearInterval(updateInterval);
         setUpdateInterval(null);
-      }
+      };
     }
   }, [isVisible, gameEngine]);
 

@@ -53,8 +53,13 @@ export class LevelTransitionManager {
     this.transitionTimer = 0;
     this.onComplete = onComplete;
 
-    // Start preloading assets for next level
-    await this.preloadLevelAssets(toLevel);
+    // Start preloading assets for next level (with error handling)
+    try {
+      await this.preloadLevelAssets(toLevel);
+    } catch (error) {
+      console.warn('Failed to preload some level assets:', error);
+      // Continue anyway - game can still function without preloaded assets
+    }
   }
 
   /**
@@ -72,8 +77,13 @@ export class LevelTransitionManager {
 
     this.assetsToPreload = levelAssets[level] || [];
     
-    // Simulate asset loading
-    const promises = this.assetsToPreload.map(asset => this.loadAsset(asset));
+    // Simulate asset loading (with error handling)
+    const promises = this.assetsToPreload.map(asset => 
+      this.loadAsset(asset).catch(error => {
+        console.warn(`Failed to load asset ${asset}:`, error);
+        return Promise.resolve(); // Continue despite individual failures
+      })
+    );
     await Promise.all(promises);
   }
 
@@ -112,9 +122,13 @@ export class LevelTransitionManager {
         if (this.transitionTimer >= this.config.loadingDuration) {
           this.transitionPhase = 'fadeIn';
           this.transitionTimer = 0;
-          // Initialize new level
+          // Initialize new level (with error handling)
           if (this.onComplete) {
-            this.onComplete();
+            try {
+              this.onComplete();
+            } catch (error) {
+              console.error('LevelTransitionManager: Error in onComplete callback:', error);
+            }
           }
         }
         break;

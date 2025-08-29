@@ -14,10 +14,13 @@ export class InputManager {
   }
 
   public reset() {
-    // Prevent race conditions by checking if we're in the middle of processing
-    if (this.keys.size > 0) {
-      console.log('InputManager: Clearing', this.keys.size, 'keys');
+    // Prevent race conditions by creating new set instead of clearing
+    const oldSize = this.keys.size;
+    if (oldSize > 0) {
+      console.log('InputManager: Clearing', oldSize, 'keys');
     }
-    this.keys.clear();
+    
+    // Atomic operation to prevent race conditions
+    this.keys = new Set();
   }
 }

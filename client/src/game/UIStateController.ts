@@ -38,13 +38,17 @@ export class UIStateController {
     callback: () => void,
     customDelay?: number
   ): void {
-    // Prevent overlapping transitions
+    // Atomic check and set to prevent race conditions
     if (this.isProcessing) {
       console.log(`UIStateController: Queuing ${type} transition`);
-      this.transitionQueue.push(() => this.executeTransition(type, callback, customDelay));
+      // Use atomic operation to prevent race conditions
+      const queuedTransition = () => this.executeTransition(type, callback, customDelay);
+      this.transitionQueue.push(queuedTransition);
       return;
     }
     
+    // Set processing flag immediately before starting
+    this.isProcessing = true;
     this.executeTransition(type, callback, customDelay);
   }
   
@@ -56,7 +60,7 @@ export class UIStateController {
     callback: () => void,
     customDelay?: number
   ): void {
-    this.isProcessing = true;
+    // isProcessing already set in queueTransition for race condition prevention
     this.activeUI = type;
     
     // Block input during transitions

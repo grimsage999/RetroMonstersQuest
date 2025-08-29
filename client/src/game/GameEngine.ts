@@ -57,6 +57,7 @@ export class GameEngine {
   private spatialGrid: SpatialGrid;
   private spriteBatcher: SpriteBatcher;
   private audioPool: AudioPool;
+  private activeTimeouts: Set<number> = new Set();
   
   // Bug fix systems
   private stateManager: GameStateManager;
@@ -297,10 +298,25 @@ export class GameEngine {
   }
 
   public stop() {
+    // Set flag first to prevent any new game loop iterations
     this.isRunning = false;
-    if (this.animationId) {
+    
+    // Cancel animation frame immediately
+    if (this.animationId !== null) {
       cancelAnimationFrame(this.animationId);
+      this.animationId = null;
     }
+    
+    // Clean up all active timeouts to prevent memory leaks
+    for (const timeout of this.activeTimeouts) {
+      clearTimeout(timeout);
+    }
+    this.activeTimeouts.clear();
+    
+    // Clean up command input system to prevent memory leaks
+    this.commandInputSystem.cleanup();
+    
+    console.log('GameEngine: Stopped all game loops and cleaned up resources');
   }
 
   public async restart() {
@@ -350,7 +366,7 @@ export class GameEngine {
     // Restart game loop if it was running
     if (wasRunning) {
       this.isRunning = true;
-      this.lastTime = performance.now();
+      this.lastTime = Math.max(0, performance.now()); // Bounds check to prevent negative values
       
       // Transition to TITLE phase
       this.stateManager.transitionTo(GamePhase.TITLE);
@@ -385,10 +401,19 @@ export class GameEngine {
     // Use UI controller to properly queue the game over screen
     this.uiController.queueTransition('gameOver', () => {
       this.updateState();
-      // Stop the game after showing game over
-      setTimeout(() => {
+      // Stop the game after showing game over (track timeout for cleanup)
+      const gameOverTimeout = window.setTimeout(() => {
         this.stop();
       }, 3000); // Show game over for 3 seconds
+      
+      // Track timeout for cleanup
+      this.activeTimeouts.add(gameOverTimeout);
+      
+      // Remove from set when timeout executes
+      const originalTimeout = gameOverTimeout;
+      setTimeout(() => {
+        this.activeTimeouts.delete(originalTimeout);
+      }, 3100); // Cleanup slightly after timeout executes
     }, 1500); // 1.5 second delay before showing game over screen
   }
   
@@ -581,9 +606,11 @@ export class GameEngine {
       }
     }
 
-    // Check bullet collisions using spatial grid
+    // Check bullet collisions using spatial grid (with bounds checking)
     for (let i = this.bullets.length - 1; i >= 0; i--) {
+      if (i >= this.bullets.length || i < 0) break; // Bounds check
       const bullet = this.bullets[i];
+      if (!bullet) continue; // Null check
       let bulletHit = false;
 
       const bulletBounds = {
@@ -915,7 +942,7 @@ export class GameEngine {
     // Adjudicator indicator
     if (this.gameState.hasAdjudicator) {
       const cooldownText = this.adjudicatorCooldown > 0 
-        ? `[${Math.ceil(this.adjudicatorCooldown / 1000)}s]` 
+        ? `[${Math.ceil(Math.max(this.adjudicatorCooldown, 0) / Math.max(1000, 1))}s]` 
         : '[X]';
       this.ctx.fillStyle = this.adjudicatorCooldown > 0 ? '#666666' : '#FFD700';
       this.ctx.fillText(`ADJUDICATOR ${cooldownText}`, 10, yOffset);
@@ -962,11 +989,15 @@ export class GameEngine {
         this.updateState();
         
         // Stop the game after showing victory (prevent memory leak)
-        const victoryTimeout = setTimeout(() => {
+        const victoryTimeout = window.setTimeout(() => {
           if (this.isRunning) {
             this.stop();
           }
+          this.activeTimeouts.delete(victoryTimeout);
         }, 5000); // Show victory for 5 seconds
+        
+        // Track timeout for cleanup
+        this.activeTimeouts.add(victoryTimeout);
         
         // Clear timeout if game is stopped manually
         const originalStop = this.stop.bind(this);

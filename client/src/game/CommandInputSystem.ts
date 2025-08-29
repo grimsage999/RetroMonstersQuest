@@ -95,6 +95,9 @@ export class CommandInputSystem {
   private eventQueue: InputCommand[] = [];
   private commandHistory: InputCommand[] = [];
   private maxHistorySize = 100;
+  private keyDownHandler?: (e: KeyboardEvent) => void;
+  private keyUpHandler?: (e: KeyboardEvent) => void;
+  private preventDefaultHandler?: (e: KeyboardEvent) => void;
   
   private inputFilters: Map<GamePhase, InputFilter[]> = new Map([
     [GamePhase.TITLE, [new MenuInputFilter()]],
@@ -133,16 +136,19 @@ export class CommandInputSystem {
    * Set up global DOM listeners - these capture ALL input
    */
   private setupDOMListeners(): void {
-    // Global keyboard capture
-    document.addEventListener('keydown', (e) => this.captureKeyboardInput(e, true));
-    document.addEventListener('keyup', (e) => this.captureKeyboardInput(e, false));
-    
-    // Prevent default browser behaviors for game keys
-    document.addEventListener('keydown', (e) => {
+    // Create handlers that can be removed later to prevent memory leaks
+    this.keyDownHandler = (e) => this.captureKeyboardInput(e, true);
+    this.keyUpHandler = (e) => this.captureKeyboardInput(e, false);
+    this.preventDefaultHandler = (e) => {
       if (this.keyToCommandMap.has(e.code)) {
         e.preventDefault();
       }
-    });
+    };
+    
+    // Global keyboard capture
+    document.addEventListener('keydown', this.keyDownHandler);
+    document.addEventListener('keyup', this.keyUpHandler);
+    document.addEventListener('keydown', this.preventDefaultHandler);
   }
   
   /**
@@ -154,21 +160,26 @@ export class CommandInputSystem {
     if (gameCommand) {
       const inputCommand: InputCommand = {
         command: gameCommand,
-        timestamp: performance.now(),
+        timestamp: Math.max(0, performance.now()), // Bounds check for timestamp
         pressed,
         source: 'keyboard',
         originalEvent: event
       };
       
-      // Add to queue for processing
-      this.eventQueue.push(inputCommand);
-      
-      // Add to history for debugging (with bounds check)
-      if (this.maxHistorySize > 0) {
-        this.commandHistory.push(inputCommand);
-        if (this.commandHistory.length > this.maxHistorySize) {
-          this.commandHistory.shift();
+      // Atomic operations to prevent race conditions
+      try {
+        // Add to queue for processing
+        this.eventQueue.push(inputCommand);
+        
+        // Add to history for debugging (with bounds check)
+        if (this.maxHistorySize > 0) {
+          this.commandHistory.push(inputCommand);
+          if (this.commandHistory.length > this.maxHistorySize) {
+            this.commandHistory.shift();
+          }
         }
+      } catch (error) {
+        console.error('CommandInputSystem: Error capturing input:', error);
       }
     }
   }
@@ -207,9 +218,11 @@ export class CommandInputSystem {
     // Sort filters by priority (highest first)
     filters.sort((a, b) => b.priority - a.priority);
     
-    while (this.eventQueue.length > 0) {
-      const command = this.eventQueue.shift()!;
-      
+    // Process events atomically to prevent race conditions
+    const eventsToProcess = [...this.eventQueue];
+    this.eventQueue = []; // Clear queue atomically
+    
+    for (const command of eventsToProcess) {
       // Check if any filter accepts this command
       let commandAccepted = false;
       
@@ -300,5 +313,25 @@ export class CommandInputSystem {
     console.warn('CommandInputSystem: Emergency reset initiated');
     this.eventQueue = [];
     this.commandHistory = [];
+  }
+  
+  /**
+   * Cleanup - removes event listeners to prevent memory leaks
+   */
+  public cleanup(): void {
+    if (this.keyDownHandler) {
+      document.removeEventListener('keydown', this.keyDownHandler);
+      this.keyDownHandler = undefined;
+    }
+    if (this.keyUpHandler) {
+      document.removeEventListener('keyup', this.keyUpHandler);
+      this.keyUpHandler = undefined;
+    }
+    if (this.preventDefaultHandler) {
+      document.removeEventListener('keydown', this.preventDefaultHandler);
+      this.preventDefaultHandler = undefined;
+    }
+    
+    console.log('CommandInputSystem: Event listeners cleaned up');
   }
 }

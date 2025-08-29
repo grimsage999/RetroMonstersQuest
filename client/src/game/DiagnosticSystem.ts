@@ -139,7 +139,7 @@ export class DiagnosticSystem {
       
       // Parse debug info
       const match = debugInfo.match(/Queue: (\d+)/);
-      const queueLength = match ? parseInt(match[1]) : 0;
+      const queueLength = match ? parseInt(match[1], 10) || 0 : 0;
       
       if (queueLength > 3) {
         this.warnings.push(`UIController: Large queue detected (${queueLength} items)`);

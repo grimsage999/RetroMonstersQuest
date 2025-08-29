@@ -81,20 +81,28 @@ export class GameStateManager {
       return false;
     }
 
-    // Perform transition
-    this.transitionInProgress = true;
-    this.previousPhase = this.currentPhase;
-    this.currentPhase = newPhase;
-
-    console.log(`Game state transition: ${this.previousPhase} -> ${this.currentPhase}`);
-
-    // Notify listeners
-    this.notifyListeners();
-
-    // Reset transition flag after a brief delay (track timeout)
+    // Clear any existing transition timeout first
     if (this.transitionTimeout) {
       clearTimeout(this.transitionTimeout);
+      this.transitionTimeout = null;
     }
+    
+    // Perform atomic transition
+    this.transitionInProgress = true;
+    const oldPhase = this.currentPhase;
+    this.previousPhase = oldPhase;
+    this.currentPhase = newPhase;
+
+    console.log(`Game state transition: ${oldPhase} -> ${newPhase}`);
+
+    // Notify listeners after state is fully set
+    try {
+      this.notifyListeners();
+    } catch (error) {
+      console.error('GameStateManager: Error notifying listeners:', error);
+    }
+
+    // Reset transition flag after a brief delay (track timeout)
     this.transitionTimeout = window.setTimeout(() => {
       this.transitionInProgress = false;
       this.transitionTimeout = null;

@@ -44,6 +44,7 @@ export class Confetti {
   public stop() {
     if (this.animationId) {
       cancelAnimationFrame(this.animationId);
+      this.animationId = 0; // Reset animation ID to prevent memory leaks
     }
   }
 
