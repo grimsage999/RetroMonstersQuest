@@ -17,8 +17,8 @@ export class AudioManager {
       // Create audio context on user interaction
       this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
       
-      // Load sounds after context is created
-      await this.loadSounds();
+      // Load sounds in background (non-blocking)
+      this.loadSounds(); // Don't await - let it load in background
       this.isInitialized = true;
     } catch (error) {
       console.log('Audio initialization failed:', error);
@@ -42,18 +42,36 @@ export class AudioManager {
       this.successSound = new Audio('/sounds/success.mp3');
       this.successSound.volume = 0.7;
       
-      // Preload all sounds
-      await Promise.all([
-        this.backgroundMusic.load(),
-        this.hitSound.load(),
-        this.successSound.load()
-      ]);
+      // Load sounds asynchronously without blocking
+      const loadPromises = [
+        new Promise<void>((resolve) => {
+          this.backgroundMusic!.addEventListener('canplaythrough', () => resolve(), { once: true });
+          this.backgroundMusic!.load();
+        }),
+        new Promise<void>((resolve) => {
+          this.hitSound!.addEventListener('canplaythrough', () => resolve(), { once: true });
+          this.hitSound!.load();
+        }),
+        new Promise<void>((resolve) => {
+          this.successSound!.addEventListener('canplaythrough', () => resolve(), { once: true });
+          this.successSound!.load();
+        })
+      ];
       
-      // Start background music after initialization
-      this.playBackgroundMusic();
+      // Don't await - let them load in background
+      Promise.all(loadPromises).then(() => {
+        console.log('AudioManager: All sounds loaded successfully');
+      }).catch(error => {
+        console.warn('AudioManager: Some sounds failed to load:', error);
+      });
+      
     } catch (error) {
       console.log('Audio loading failed:', error);
     }
+  }
+  
+  public getInitializationStatus(): boolean {
+    return this.isInitialized;
   }
 
 

@@ -263,21 +263,24 @@ export class GameEngine {
     if (!this.isRunning) {
       console.log('GameEngine: Starting game...');
       
-      // Initialize audio on user interaction (game start)
-      await this.audioManager.initialize();
-      
-      // Set running flag and start game loop first
+      // Set running flag and start game loop immediately for responsiveness
       this.isRunning = true;
       this.lastTime = performance.now();
       
-      // Start with TITLE phase, not cutscene
+      // Start with TITLE phase first
       this.stateManager.transitionTo(GamePhase.TITLE);
       
-      this.audioManager.playGameStart();
-      this.audioManager.playBackgroundMusic();
-      
-      // Start game loop
+      // Start game loop immediately to show UI
       this.gameLoop(this.lastTime);
+      
+      // Initialize audio asynchronously in background (non-blocking)
+      this.audioManager.initialize().then(() => {
+        this.audioManager.playGameStart();
+        this.audioManager.playBackgroundMusic();
+        console.log('GameEngine: Audio initialized successfully');
+      }).catch(error => {
+        console.warn('GameEngine: Audio initialization failed, continuing without audio:', error);
+      });
       
       console.log('GameEngine: Game started in TITLE phase');
     }
@@ -337,14 +340,7 @@ export class GameEngine {
     const wasRunning = this.isRunning;
     this.stop();
     
-    // Initialize audio if not already done (with error handling)
-    try {
-      await this.audioManager.initialize();
-    } catch (error) {
-      console.warn('GameEngine: Audio initialization failed, continuing without audio:', error);
-    }
-    
-    // Reset all systems
+    // Reset all systems immediately (synchronous operations)
     this.damageSystem.reset();
     this.stateManager.reset();
     this.uiController.forceReset();
@@ -374,20 +370,31 @@ export class GameEngine {
     // Update state
     this.updateState();
     
-    // Restart game loop if it was running
+    // Restart game loop immediately if it was running
     if (wasRunning) {
       this.isRunning = true;
-      this.lastTime = Math.max(0, performance.now()); // Bounds check to prevent negative values
+      this.lastTime = Math.max(0, performance.now());
       
       // Transition to TITLE phase
       this.stateManager.transitionTo(GamePhase.TITLE);
       
-      // Play audio
-      this.audioManager.playGameStart();
-      this.audioManager.playBackgroundMusic();
-      
-      // Restart game loop
+      // Start game loop immediately for responsive UI
       this.gameLoop(this.lastTime);
+      
+      // Handle audio restart asynchronously (non-blocking)
+      if (this.audioManager.getInitializationStatus()) {
+        // Audio already initialized, just play sounds
+        this.audioManager.playGameStart();
+        this.audioManager.playBackgroundMusic();
+      } else {
+        // Initialize audio in background if needed
+        this.audioManager.initialize().then(() => {
+          this.audioManager.playGameStart();
+          this.audioManager.playBackgroundMusic();
+        }).catch(error => {
+          console.warn('GameEngine: Audio initialization failed on restart:', error);
+        });
+      }
       
       console.log('GameEngine: Game restarted successfully in TITLE phase');
     }

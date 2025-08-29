@@ -60,7 +60,8 @@ const GameCanvas: React.FC = () => {
     if (gameEngineRef.current && !isStarted) {
       console.log('GameCanvas: Starting game...');
       try {
-        await gameEngineRef.current.start();
+        // Start game immediately (non-blocking)
+        gameEngineRef.current.start();
         setIsStarted(true);
         console.log('GameCanvas: Game started successfully');
       } catch (error) {
@@ -72,7 +73,8 @@ const GameCanvas: React.FC = () => {
   const handleRestart = async () => {
     if (gameEngineRef.current) {
       try {
-        await gameEngineRef.current.restart();
+        // Restart game immediately (non-blocking)
+        gameEngineRef.current.restart();
         setIsStarted(true);
         console.log('GameCanvas: Game restarted successfully');
       } catch (error) {
