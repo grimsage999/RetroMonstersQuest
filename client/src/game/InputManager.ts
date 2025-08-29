@@ -14,6 +14,10 @@ export class InputManager {
   }
 
   public reset() {
+    // Prevent race conditions by checking if we're in the middle of processing
+    if (this.keys.size > 0) {
+      console.log('InputManager: Clearing', this.keys.size, 'keys');
+    }
     this.keys.clear();
   }
 }

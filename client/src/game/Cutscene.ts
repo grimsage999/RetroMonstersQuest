@@ -12,6 +12,8 @@ export class Cutscene {
   private onComplete: () => void;
   private startTime: number = 0;
   private isActive: boolean = false;
+  private skipHandler: ((e: KeyboardEvent) => void) | null = null;
+  private autoAdvanceTimeout: number | null = null;
 
   constructor(canvas: HTMLCanvasElement, data: CutsceneData, onComplete: () => void) {
     this.canvas = canvas;
@@ -30,22 +32,20 @@ export class Cutscene {
     this.startTime = Date.now();
     
     // Auto-advance after 3 seconds or on spacebar press
-    const handleSkip = (e: KeyboardEvent) => {
+    this.skipHandler = (e: KeyboardEvent) => {
       if (e.key === ' ' || e.key === 'Space' || e.key === 'Enter') {
         console.log('Cutscene: Skipped by user');
         this.complete();
-        document.removeEventListener('keydown', handleSkip);
       }
     };
     
-    document.addEventListener('keydown', handleSkip);
+    document.addEventListener('keydown', this.skipHandler);
     
     // Auto-advance after 3 seconds instead of 5
-    setTimeout(() => {
+    this.autoAdvanceTimeout = window.setTimeout(() => {
       if (this.isActive) {
         console.log('Cutscene: Auto-completing after timeout');
         this.complete();
-        document.removeEventListener('keydown', handleSkip);
       }
     }, 3000); // 3 seconds to read
   }
@@ -53,6 +53,18 @@ export class Cutscene {
   private complete() {
     console.log('Cutscene: Completing cutscene');
     this.isActive = false;
+    
+    // Clean up event listeners and timeouts to prevent memory leaks
+    if (this.skipHandler) {
+      document.removeEventListener('keydown', this.skipHandler);
+      this.skipHandler = null;
+    }
+    
+    if (this.autoAdvanceTimeout) {
+      clearTimeout(this.autoAdvanceTimeout);
+      this.autoAdvanceTimeout = null;
+    }
+    
     if (this.onComplete) {
       this.onComplete();
     }

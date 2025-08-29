@@ -310,8 +310,12 @@ export class GameEngine {
     const wasRunning = this.isRunning;
     this.stop();
     
-    // Initialize audio if not already done
-    await this.audioManager.initialize();
+    // Initialize audio if not already done (with error handling)
+    try {
+      await this.audioManager.initialize();
+    } catch (error) {
+      console.warn('GameEngine: Audio initialization failed, continuing without audio:', error);
+    }
     
     // Reset all systems
     this.damageSystem.reset();
@@ -546,7 +550,8 @@ export class GameEngine {
     if (nearestEnemy) {
       // Instant kill nearest enemy
       (nearestEnemy as Enemy).destroy();
-      this.audioManager.playAdjudicator(); // Adjudicator kill sound
+      // Play adjudicator sound
+      this.audioManager.playAdjudicator();
     }
     
     this.adjudicatorCooldown = 5000; // 5 second cooldown
@@ -558,14 +563,21 @@ export class GameEngine {
       bullet.x += bullet.vx * deltaTime * 0.3;
       bullet.y += bullet.vy * deltaTime * 0.3;
     });
+    
+    // Clean up marked bullets after iteration to prevent splice issues
+    this.bullets = this.bullets.filter(bullet => !(bullet as any).toRemove);
 
-    // Rebuild spatial grid with current enemy positions
-    const enemies = this.currentLevel.getEnemies();
-    this.spatialGrid.clear();
-    for (const enemy of enemies) {
-      if (enemy.isActive()) {
-        const bounds = enemy.getBounds();
-        this.spatialGrid.insert(enemy, bounds.x, bounds.y, bounds.width, bounds.height);
+    // Rebuild spatial grid with current enemy positions (null check)
+    if (this.currentLevel) {
+      const enemies = this.currentLevel.getEnemies();
+      this.spatialGrid.clear();
+      for (const enemy of enemies) {
+        if (enemy && enemy.isActive()) {
+          const bounds = enemy.getBounds();
+          if (bounds) {
+            this.spatialGrid.insert(enemy, bounds.x, bounds.y, bounds.width, bounds.height);
+          }
+        }
       }
     }
 
@@ -592,10 +604,10 @@ export class GameEngine {
       // Check collision only with nearby enemies
       for (const enemy of potentialEnemies) {
         const typedEnemy = enemy as Enemy;
-        if (typedEnemy.isActive()) {
+        if (typedEnemy && typedEnemy.isActive()) {
           const enemyBounds = typedEnemy.getBounds();
 
-          if (this.checkCollision(bulletBounds, enemyBounds)) {
+          if (enemyBounds && this.checkCollision(bulletBounds, enemyBounds)) {
             // Instant kill with weapons
             typedEnemy.destroy();
             // Play hit sound with fallback
@@ -617,10 +629,10 @@ export class GameEngine {
         }
       }
 
-      // Remove bullets that should be removed or went off screen
+      // Mark bullets for removal instead of splicing during iteration
       if (bulletHit || bullet.y < 0 || bullet.y > this.canvas.height ||
           bullet.x < 0 || bullet.x > this.canvas.width) {
-        this.bullets.splice(i, 1);
+        (bullet as any).toRemove = true;
       }
     }
   }
@@ -730,7 +742,10 @@ export class GameEngine {
   }
 
   private checkCollisions() {
+    if (!this.player || !this.currentLevel) return;
+    
     const playerBounds = this.player.getBounds();
+    if (!playerBounds) return;
     
     // Check cookie collisions - Core feedback loop: Visual pop + audio crunch + brief screen flash
     const collectedCookies = this.currentLevel.checkCookieCollisions(playerBounds);
@@ -906,20 +921,22 @@ export class GameEngine {
       this.ctx.fillText(`ADJUDICATOR ${cooldownText}`, 10, yOffset);
       
       // Render floating orb above player if available
-      if (this.adjudicatorCooldown <= 0) {
+      if (this.adjudicatorCooldown <= 0 && this.player) {
         const playerBounds = this.player.getBounds();
-        this.ctx.fillStyle = '#FFD700';
-        this.ctx.shadowColor = '#FFD700';
-        this.ctx.shadowBlur = 10;
-        this.ctx.beginPath();
-        this.ctx.arc(
-          playerBounds.x + playerBounds.width / 2,
-          playerBounds.y - 20,
-          8,
-          0,
-          2 * Math.PI
-        );
-        this.ctx.fill();
+        if (playerBounds) {
+          this.ctx.fillStyle = '#FFD700';
+          this.ctx.shadowColor = '#FFD700';
+          this.ctx.shadowBlur = 10;
+          this.ctx.beginPath();
+          this.ctx.arc(
+            playerBounds.x + playerBounds.width / 2,
+            playerBounds.y - 20,
+            8,
+            0,
+            2 * Math.PI
+          );
+          this.ctx.fill();
+        }
       }
     }
     
@@ -944,10 +961,19 @@ export class GameEngine {
         this.stateManager.transitionTo(GamePhase.VICTORY);
         this.updateState();
         
-        // Stop the game after showing victory
-        setTimeout(() => {
-          this.stop();
+        // Stop the game after showing victory (prevent memory leak)
+        const victoryTimeout = setTimeout(() => {
+          if (this.isRunning) {
+            this.stop();
+          }
         }, 5000); // Show victory for 5 seconds
+        
+        // Clear timeout if game is stopped manually
+        const originalStop = this.stop.bind(this);
+        this.stop = () => {
+          clearTimeout(victoryTimeout);
+          originalStop();
+        };
       });
       
       this.currentCutscene.start();

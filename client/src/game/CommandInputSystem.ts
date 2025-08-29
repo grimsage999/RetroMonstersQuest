@@ -163,10 +163,12 @@ export class CommandInputSystem {
       // Add to queue for processing
       this.eventQueue.push(inputCommand);
       
-      // Add to history for debugging
-      this.commandHistory.push(inputCommand);
-      if (this.commandHistory.length > this.maxHistorySize) {
-        this.commandHistory.shift();
+      // Add to history for debugging (with bounds check)
+      if (this.maxHistorySize > 0) {
+        this.commandHistory.push(inputCommand);
+        if (this.commandHistory.length > this.maxHistorySize) {
+          this.commandHistory.shift();
+        }
       }
     }
   }

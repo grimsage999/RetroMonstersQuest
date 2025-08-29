@@ -18,6 +18,7 @@ export class UIStateController {
   private isProcessing: boolean = false;
   private config: UITransitionConfig;
   private blockInputUntil: number = 0;
+  private activeTimeouts: Set<number> = new Set();
   
   constructor() {
     this.config = {
@@ -63,16 +64,21 @@ export class UIStateController {
     
     console.log(`UIStateController: Starting ${type} transition`);
     
-    // Add buffer before starting transition
-    setTimeout(() => {
+    // Add buffer before starting transition (track timeouts)
+    const bufferTimeout = window.setTimeout(() => {
       callback();
       
       // Schedule cleanup after transition completes
-      setTimeout(() => {
+      const cleanupTimeout = window.setTimeout(() => {
         this.completeTransition();
+        this.activeTimeouts.delete(cleanupTimeout);
       }, this.getTransitionDuration(type, customDelay));
       
+      this.activeTimeouts.add(cleanupTimeout);
+      this.activeTimeouts.delete(bufferTimeout);
     }, this.config.transitionBuffer);
+    
+    this.activeTimeouts.add(bufferTimeout);
   }
   
   /**
@@ -108,9 +114,12 @@ export class UIStateController {
       const nextTransition = this.transitionQueue.shift();
       if (nextTransition) {
         // Add small delay between transitions
-        setTimeout(() => {
+        const queueTimeout = window.setTimeout(() => {
           nextTransition();
+          this.activeTimeouts.delete(queueTimeout);
         }, this.config.transitionBuffer);
+        
+        this.activeTimeouts.add(queueTimeout);
       }
     }
   }
@@ -134,6 +143,13 @@ export class UIStateController {
    */
   public forceReset(): void {
     console.warn('UIStateController: Force resetting all transitions');
+    
+    // Clear all active timeouts to prevent memory leaks
+    Array.from(this.activeTimeouts).forEach(timeout => {
+      clearTimeout(timeout);
+    });
+    this.activeTimeouts.clear();
+    
     this.activeUI = 'none';
     this.isProcessing = false;
     this.transitionQueue = [];

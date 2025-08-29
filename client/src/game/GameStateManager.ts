@@ -25,6 +25,7 @@ export class GameStateManager {
   private previousPhase: GamePhase | null = null;
   private transitionInProgress: boolean = false;
   private stateListeners: ((phase: GamePhase) => void)[] = [];
+  private transitionTimeout: number | null = null;
 
   // Define valid state transitions to prevent invalid states
   private validTransitions: Map<GamePhase, GamePhase[]> = new Map([
@@ -90,9 +91,13 @@ export class GameStateManager {
     // Notify listeners
     this.notifyListeners();
 
-    // Reset transition flag after a brief delay
-    setTimeout(() => {
+    // Reset transition flag after a brief delay (track timeout)
+    if (this.transitionTimeout) {
+      clearTimeout(this.transitionTimeout);
+    }
+    this.transitionTimeout = window.setTimeout(() => {
       this.transitionInProgress = false;
+      this.transitionTimeout = null;
     }, 100);
 
     return true;
@@ -153,6 +158,12 @@ export class GameStateManager {
    * Reset to initial state
    */
   reset(): void {
+    // Clear any pending transition timeout
+    if (this.transitionTimeout) {
+      clearTimeout(this.transitionTimeout);
+      this.transitionTimeout = null;
+    }
+    
     this.previousPhase = this.currentPhase;
     this.currentPhase = GamePhase.TITLE;
     this.transitionInProgress = false;
