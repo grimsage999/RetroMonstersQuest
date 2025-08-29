@@ -149,19 +149,30 @@ export class GameEngine {
     });
   }
 
-  private createBossContext(): GameContext {
+  private createBossContext(deltaTime: number = 16): GameContext {
+    // Add null check for player bounds
+    if (!this.player) {
+      throw new Error('GameEngine: Player not initialized when creating boss context');
+    }
+    
     const playerBounds = this.player.getBounds();
+    if (!playerBounds) {
+      throw new Error('GameEngine: Unable to get player bounds for boss context');
+    }
+    
+    // Build weapons array efficiently
+    const weapons: string[] = [];
+    if (this.gameState.hasRayGun) weapons.push('raygun');
+    if (this.gameState.hasAdjudicator) weapons.push('adjudicator');
+    
     return {
       playerPosition: { x: playerBounds.x, y: playerBounds.y },
       playerHealth: this.gameState.lives,
       bossHealth: this.gameState.bossHealth,
-      deltaTime: 16, // 60fps baseline
+      deltaTime: Math.max(1, deltaTime), // Use actual deltaTime, minimum 1ms
       canvasWidth: this.canvas.width,
       canvasHeight: this.canvas.height,
-      currentWeapons: [
-        this.gameState.hasRayGun ? 'raygun' : '',
-        this.gameState.hasAdjudicator ? 'adjudicator' : ''
-      ].filter(w => w !== '')
+      currentWeapons: weapons
     };
   }
 
@@ -519,7 +530,7 @@ export class GameEngine {
       console.log('GameEngine: Boss State Machine initialized for Level 5');
       
       // Start boss intro sequence
-      const context = this.createBossContext();
+      const context = this.createBossContext(16); // Default 16ms for initialization
       this.bossStateMachine.start('BOSS_INTRO', context);
     } else {
       this.bossStateMachine = null;
@@ -724,7 +735,7 @@ export class GameEngine {
     
     // Update boss state machine if active
     if (this.bossStateMachine) {
-      const context = this.createBossContext();
+      const context = this.createBossContext(deltaTime);
       const result = this.bossStateMachine.update(context);
       
       // Handle boss state transitions

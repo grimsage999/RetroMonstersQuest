@@ -38,7 +38,10 @@ export class SpriteBatcher {
       this.batches.set(key, []);
     }
     
-    this.batches.get(key)!.push(sprite);
+    const batch = this.batches.get(key);
+    if (batch) {
+      batch.push(sprite);
+    }
   }
 
   /**

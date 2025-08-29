@@ -3,7 +3,7 @@
  * Divides the game world into cells to reduce collision checks
  */
 export class SpatialGrid {
-  private grid: Map<string, Set<any>>;
+  private grid: Map<string, Set<object>>;
   private cellSize: number;
   private width: number;
   private height: number;
@@ -52,7 +52,7 @@ export class SpatialGrid {
   /**
    * Insert an entity into the grid
    */
-  insert(entity: any, x: number, y: number, width: number = 1, height: number = 1): void {
+  insert(entity: object, x: number, y: number, width: number = 1, height: number = 1): void {
     const keys = this.getKeysForBounds(x, y, width, height);
     
     for (const key of keys) {

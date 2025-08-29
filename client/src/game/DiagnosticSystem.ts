@@ -60,7 +60,7 @@ export class DiagnosticSystem {
   /**
    * Run full diagnostic check
    */
-  public runDiagnostic(gameState: any, fps: number): DiagnosticReport {
+  public runDiagnostic(gameState: { phase: string; lives: number; level: number; score: number; }, fps: number): DiagnosticReport {
     this.issues = [];
     this.warnings = [];
     this.recommendations = [];

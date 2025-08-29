@@ -26,7 +26,7 @@ export class Level {
   private cookies: Cookie[] = [];
   private enemies: Enemy[] = [];
   private boss: Enemy | null = null;
-  private finishLine: any;
+  private finishLine: { x: number; y: number; width: number; height: number; } | null = null;
   private config: LevelConfig;
 
   private levelConfigs: { [key: number]: LevelConfig } = {
@@ -796,6 +796,8 @@ export class Level {
   }
 
   private renderFinishLine(ctx: CanvasRenderingContext2D) {
+    if (!this.finishLine) return; // Guard against null finishLine
+    
     ctx.save();
     ctx.imageSmoothingEnabled = false;
     
@@ -834,7 +836,7 @@ export class Level {
     ctx.restore();
   }
 
-  public checkCookieCollisions(playerBounds: any): number {
+  public checkCookieCollisions(playerBounds: { x: number; y: number; width: number; height: number; }): number {
     let collected = 0;
     
     this.cookies.forEach(cookie => {
@@ -847,13 +849,13 @@ export class Level {
     return collected;
   }
 
-  public checkEnemyCollisions(playerBounds: any): boolean {
+  public checkEnemyCollisions(playerBounds: { x: number; y: number; width: number; height: number; }): boolean {
     return this.enemies.some(enemy => 
       enemy.isActive() && this.checkCollision(playerBounds, enemy.getBounds())
     );
   }
 
-  private checkCollision(rect1: any, rect2: any): boolean {
+  private checkCollision(rect1: { x: number; y: number; width: number; height: number; }, rect2: { x: number; y: number; width: number; height: number; }): boolean {
     return rect1.x < rect2.x + rect2.width &&
            rect1.x + rect1.width > rect2.x &&
            rect1.y < rect2.y + rect2.height &&

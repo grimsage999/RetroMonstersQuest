@@ -24,7 +24,7 @@ export interface InputCommand {
   timestamp: number;
   pressed: boolean; // true for press, false for release
   source: 'keyboard' | 'touch' | 'gamepad';
-  originalEvent?: any; // For debugging
+  originalEvent?: KeyboardEvent; // For debugging
 }
 
 export interface InputFilter {
@@ -267,11 +267,16 @@ export class CommandInputSystem {
   /**
    * Get current input state for debugging
    */
-  public getDebugInfo(): any {
+  public getDebugInfo(): { 
+    currentPhase: GamePhase;
+    queueSize: number;
+    historySize: number;
+    activeFilters: string[];
+  } {
     return {
       currentPhase: this.currentGamePhase,
       queueSize: this.eventQueue.length,
-      lastCommands: this.commandHistory.slice(-5),
+      historySize: this.commandHistory.length,
       activeFilters: this.inputFilters.get(this.currentGamePhase)?.map(f => f.name) || []
     };
   }
