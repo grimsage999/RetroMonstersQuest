@@ -268,11 +268,19 @@ export class GameEngine {
       this.isRunning = true;
       this.lastTime = performance.now();
       
-      // Start with TITLE phase first
-      this.stateManager.transitionTo(GamePhase.TITLE);
+      // Initialize game state for level 1
+      this.gameState.level = 1;
+      this.gameState.cookiesCollected = 0;
+      this.bullets = [];
       
-      // Start game loop immediately to show UI
+      // Go directly to CUTSCENE phase to show level title card
+      this.stateManager.transitionTo(GamePhase.CUTSCENE);
+      
+      // Start game loop immediately
       this.gameLoop(this.lastTime);
+      
+      // Show level title card immediately
+      this.showLevelCutscene();
       
       // Initialize audio asynchronously in background (non-blocking)
       this.audioManager.initialize().then(() => {
@@ -283,7 +291,7 @@ export class GameEngine {
         console.warn('GameEngine: Audio initialization failed, continuing without audio:', error);
       });
       
-      console.log('GameEngine: Game started in TITLE phase');
+      console.log('GameEngine: Game started, showing level title card');
     }
   }
 
