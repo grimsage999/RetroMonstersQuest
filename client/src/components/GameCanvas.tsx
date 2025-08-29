@@ -1,11 +1,13 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { GameEngine } from '../game/GameEngine';
+import { DiagnosticDashboard } from './DiagnosticDashboard';
 import GameUI from './GameUI';
 
 const GameCanvas: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const gameEngineRef = useRef<GameEngine | null>(null);
   const [isStarted, setIsStarted] = useState(false);
+  const [showDiagnostics, setShowDiagnostics] = useState(false);
   const [gameState, setGameState] = useState({
     score: 0,
     lives: 3,
@@ -15,7 +17,7 @@ const GameCanvas: React.FC = () => {
     totalCookies: 0
   });
 
-  // Add keyboard shortcut for diagnostic
+  // Add keyboard shortcuts for diagnostics
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
       // Press 'D' to run diagnostic
@@ -24,6 +26,10 @@ const GameCanvas: React.FC = () => {
           console.log('🔍 Running diagnostic check...');
           gameEngineRef.current.runDiagnostic();
         }
+      }
+      // Press 'C' to toggle diagnostic dashboard
+      if (e.key === 'c' || e.key === 'C') {
+        setShowDiagnostics(prev => !prev);
       }
     };
     
@@ -138,6 +144,7 @@ const GameCanvas: React.FC = () => {
       )}
       
       <GameUI gameState={gameState} />
+      <DiagnosticDashboard isVisible={showDiagnostics} gameEngine={gameEngineRef.current} />
       
       {/* Mobile Controls */}
       <div className="mobile-controls">
