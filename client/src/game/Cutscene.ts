@@ -20,6 +20,10 @@ export class Cutscene {
     this.onComplete = onComplete;
   }
 
+  public isReady(): boolean {
+    return this.isActive && this.startTime > 0;
+  }
+
   public start() {
     console.log('Cutscene: Starting cutscene');
     this.isActive = true;

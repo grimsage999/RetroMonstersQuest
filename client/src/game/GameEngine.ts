@@ -12,6 +12,8 @@ import { LevelTransitionManager } from './LevelTransitionManager';
 import { DamageSystem } from './DamageSystem';
 import { UIStateController } from './UIStateController';
 import { DiagnosticSystem } from './DiagnosticSystem';
+import { BossStateMachine, GameContext } from './BossStateMachine';
+import { CommandInputSystem, GameCommand, InputCommand } from './CommandInputSystem';
 
 export interface GameState {
   score: number;
@@ -22,6 +24,7 @@ export interface GameState {
   totalCookies: number;
   hasRayGun: boolean;
   hasAdjudicator: boolean;
+  bossHealth: number;
 }
 
 export class GameEngine {
@@ -61,6 +64,8 @@ export class GameEngine {
   private damageSystem: DamageSystem;
   private uiController: UIStateController;
   private diagnosticSystem: DiagnosticSystem;
+  private bossStateMachine: BossStateMachine | null = null;
+  private commandInputSystem: CommandInputSystem;
 
   constructor(canvas: HTMLCanvasElement, onStateChange: (state: GameState) => void) {
     this.canvas = canvas;
@@ -75,7 +80,8 @@ export class GameEngine {
       cookiesCollected: 0,
       totalCookies: 0,
       hasRayGun: false,
-      hasAdjudicator: false
+      hasAdjudicator: false,
+      bossHealth: 100
     };
 
     // Initialize game components
@@ -104,6 +110,10 @@ export class GameEngine {
       this.damageSystem,
       this.audioManager
     );
+    
+    // Initialize command input system with proper filtering
+    this.commandInputSystem = new CommandInputSystem();
+    this.setupCommandExecutors();
     
     // Set damage callbacks
     this.damageSystem.setOnDamage((health, maxHealth) => {
@@ -137,29 +147,80 @@ export class GameEngine {
     });
   }
 
-  private setupEventListeners() {
-    // Keyboard controls
-    document.addEventListener('keydown', (e) => {
-      this.inputManager.handleKeyDown(e.key);
+  private createBossContext(): GameContext {
+    const playerBounds = this.player.getBounds();
+    return {
+      playerPosition: { x: playerBounds.x, y: playerBounds.y },
+      playerHealth: this.gameState.lives,
+      bossHealth: this.gameState.bossHealth,
+      deltaTime: 16, // 60fps baseline
+      canvasWidth: this.canvas.width,
+      canvasHeight: this.canvas.height,
+      currentWeapons: [
+        this.gameState.hasRayGun ? 'raygun' : '',
+        this.gameState.hasAdjudicator ? 'adjudicator' : ''
+      ].filter(w => w !== '')
+    };
+  }
+
+  private setupCommandExecutors() {
+    // Set up command executors with proper filtering
+    this.commandInputSystem.registerCommandExecutor(GameCommand.MOVE_UP, (cmd: InputCommand) => {
+      if (cmd.pressed) this.inputManager.handleKeyDown('ArrowUp');
+      else this.inputManager.handleKeyUp('ArrowUp');
+    });
+    
+    this.commandInputSystem.registerCommandExecutor(GameCommand.MOVE_DOWN, (cmd: InputCommand) => {
+      if (cmd.pressed) this.inputManager.handleKeyDown('ArrowDown');
+      else this.inputManager.handleKeyUp('ArrowDown');
+    });
+    
+    this.commandInputSystem.registerCommandExecutor(GameCommand.MOVE_LEFT, (cmd: InputCommand) => {
+      if (cmd.pressed) this.inputManager.handleKeyDown('ArrowLeft');
+      else this.inputManager.handleKeyUp('ArrowLeft');
+    });
+    
+    this.commandInputSystem.registerCommandExecutor(GameCommand.MOVE_RIGHT, (cmd: InputCommand) => {
+      if (cmd.pressed) this.inputManager.handleKeyDown('ArrowRight');
+      else this.inputManager.handleKeyUp('ArrowRight');
+    });
+    
+    this.commandInputSystem.registerCommandExecutor(GameCommand.FIRE_PRIMARY, (cmd: InputCommand) => {
+      if (!cmd.pressed) return; // Only on key press, not release
       
-      // Special keys
-      if (e.key === ' ' || e.key === 'Space') {
-        if (this.gameState.phase === 'gameOver' || this.gameState.phase === 'victory') {
-          this.restart();
-        } else if (this.gameState.phase === 'levelComplete') {
-          this.nextLevel();
-        } else if (this.gameState.hasRayGun && this.gameState.phase === 'playing') {
-          this.fireRayGun();
-        }
-      } else if (e.key === 'x' || e.key === 'X') {
-        if (this.gameState.hasAdjudicator && this.adjudicatorCooldown <= 0) {
-          this.fireAdjudicator();
-        }
+      if (this.gameState.phase === 'gameOver' || this.gameState.phase === 'victory') {
+        this.restart();
+      } else if (this.gameState.phase === 'levelComplete') {
+        this.nextLevel();
+      } else if (this.gameState.hasRayGun && this.gameState.phase === 'playing') {
+        this.fireRayGun();
       }
     });
+    
+    this.commandInputSystem.registerCommandExecutor(GameCommand.FIRE_SECONDARY, (cmd: InputCommand) => {
+      if (!cmd.pressed) return; // Only on key press, not release
+      
+      if (this.gameState.hasAdjudicator && this.adjudicatorCooldown <= 0) {
+        this.fireAdjudicator();
+      }
+    });
+    
+    this.commandInputSystem.registerCommandExecutor(GameCommand.SKIP_CUTSCENE, (cmd: InputCommand) => {
+      if (!cmd.pressed) return;
+      // Handled by cutscene directly
+    });
+    
+    this.commandInputSystem.registerCommandExecutor(GameCommand.DEBUG_DIAGNOSTIC, (cmd: InputCommand) => {
+      if (!cmd.pressed) return;
+      this.runDiagnostic();
+    });
+  }
 
-    document.addEventListener('keyup', (e) => {
-      this.inputManager.handleKeyUp(e.key);
+  private setupEventListeners() {
+    // The CommandInputSystem now handles all input with proper filtering
+    // Update game phase when state changes
+    this.stateManager.addListener((phase: GamePhase) => {
+      this.commandInputSystem.setGamePhase(phase);
     });
   }
 
@@ -247,7 +308,8 @@ export class GameEngine {
       cookiesCollected: 0,
       totalCookies: 0,
       hasRayGun: false,
-      hasAdjudicator: false
+      hasAdjudicator: false,
+      bossHealth: 100
     };
     
     // Initialize level 1 first, then show cutscene
@@ -382,6 +444,21 @@ export class GameEngine {
     
     this.player.reset(this.canvas.width / 2, this.canvas.height - 50);
     this.currentLevel = new Level(this.gameState.level, this.canvas.width, this.canvas.height);
+    
+    // Initialize boss for Level 5
+    if (this.gameState.level === 5 && this.currentLevel.hasBoss()) {
+      this.bossStateMachine = new BossStateMachine();
+      this.gameState.bossHealth = 100;
+      console.log('GameEngine: Boss State Machine initialized for Level 5');
+      
+      // Start boss intro sequence
+      const context = this.createBossContext();
+      this.bossStateMachine.start('BOSS_INTRO', context);
+    } else {
+      this.bossStateMachine = null;
+      this.gameState.bossHealth = 0;
+    }
+    
     this.gameState.totalCookies = this.currentLevel.getTotalCookies();
     this.gameState.phase = 'playing';
     this.bullets = []; // Clear bullets when starting new level
@@ -536,6 +613,9 @@ export class GameEngine {
     
     // Update transition manager
     this.transitionManager.update(deltaTime);
+    
+    // Process filtered input events
+    this.commandInputSystem.processEventQueue();
 
     // Only update game logic if not in cutscene and playing
     if (this.gameState.phase === 'playing' && !this.currentCutscene && !this.transitionManager.isInTransition()) {
@@ -554,6 +634,24 @@ export class GameEngine {
     // Update level (enemies, etc.)
     this.currentLevel.update(deltaTime);
     
+    // Update boss state machine if active
+    if (this.bossStateMachine) {
+      const context = this.createBossContext();
+      const result = this.bossStateMachine.update(context);
+      
+      // Handle boss state transitions
+      if (result && result.shouldTransition) {
+        console.log(`Boss State Machine: ${result.message || 'State transition'}`);
+        
+        // Boss defeated - trigger victory
+        if (result.nextState === 'DEFEATED') {
+          this.gameState.bossHealth = 0;
+          this.audioManager.playVictoryFanfare();
+          console.log('GameEngine: Boss defeated! Victory condition met.');
+        }
+      }
+    }
+    
     // Update bullets
     this.updateBullets(deltaTime);
     
@@ -570,6 +668,11 @@ export class GameEngine {
       const finishLine = this.currentLevel.getFinishLine();
       if (this.checkCollision(this.player.getBounds(), finishLine)) {
         if (this.gameState.level >= 5) {
+          // Level 5: Must also defeat boss to win
+          if (this.bossStateMachine && this.gameState.bossHealth > 0) {
+            // Boss still alive - cannot finish level
+            return;
+          }
           // Final victory: Cosmic resistance successful, joy reclaimed
           this.gameState.phase = 'victory';
           this.audioManager.playVictoryFanfare();
@@ -646,8 +749,13 @@ export class GameEngine {
     }
     
     // If cutscene is active, render it and return
-    if (this.currentCutscene) {
+    if (this.currentCutscene && this.currentCutscene.isReady()) {
       this.currentCutscene.render();
+      return;
+    } else if (this.currentCutscene) {
+      // Cutscene exists but not ready - render black screen to prevent flickering
+      this.ctx.fillStyle = '#000022';
+      this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
       return;
     }
     

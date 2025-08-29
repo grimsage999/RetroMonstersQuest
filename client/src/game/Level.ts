@@ -25,6 +25,7 @@ export class Level {
   private canvasHeight: number;
   private cookies: Cookie[] = [];
   private enemies: Enemy[] = [];
+  private boss: Enemy | null = null;
   private finishLine: any;
   private config: LevelConfig;
 
@@ -149,6 +150,15 @@ export class Level {
         'zombie'
       ));
     }
+    
+    // Boss for Level 5
+    if (this.levelNumber === 5) {
+      this.boss = new Enemy(
+        this.canvasWidth / 2,
+        80, // Near top of screen
+        'boss'
+      );
+    }
   }
 
   public update(deltaTime: number) {
@@ -156,6 +166,11 @@ export class Level {
     this.enemies.forEach(enemy => {
       enemy.update(deltaTime, this.canvasWidth, this.canvasHeight);
     });
+    
+    // Update boss if it exists
+    if (this.boss) {
+      this.boss.update(deltaTime, this.canvasWidth, this.canvasHeight);
+    }
   }
 
   public render(ctx: CanvasRenderingContext2D) {
@@ -173,6 +188,11 @@ export class Level {
     this.enemies.forEach(enemy => {
       enemy.render(ctx);
     });
+    
+    // Render boss if it exists
+    if (this.boss) {
+      this.boss.render(ctx);
+    }
     
     // Render finish line
     this.renderFinishLine(ctx);
@@ -850,5 +870,13 @@ export class Level {
 
   public getFinishLine() {
     return this.finishLine;
+  }
+
+  public getBoss(): Enemy | null {
+    return this.boss;
+  }
+
+  public hasBoss(): boolean {
+    return this.boss !== null;
   }
 }
