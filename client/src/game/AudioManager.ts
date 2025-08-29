@@ -22,6 +22,9 @@ export class AudioManager {
       this.isInitialized = true;
     } catch (error) {
       console.log('Audio initialization failed:', error);
+      // Set flag to prevent further audio operations that would fail
+      this.isInitialized = false;
+      throw error; // Re-throw to let caller handle
     }
   }
 
@@ -59,6 +62,8 @@ export class AudioManager {
     if (this.backgroundMusic && !this.isMuted && this.isInitialized) {
       this.backgroundMusic.play().catch(error => {
         console.log('Background music play prevented:', error);
+        // Disable background music to prevent repeated errors
+        this.backgroundMusic = null;
       });
     }
   }
@@ -77,6 +82,7 @@ export class AudioManager {
       soundClone.volume = 0.3;
       soundClone.play().catch(error => {
         console.log('Hit sound play prevented:', error);
+        // Continue despite audio errors - don't break game flow
       });
     }
   }

@@ -56,12 +56,18 @@ export class DamageSystem {
       position: position || { x: 0, y: 0 }
     };
 
-    this.lastDamageEvent = damageEvent;
-    this.damageHistory.push(damageEvent);
+    try {
+      this.lastDamageEvent = damageEvent;
+      this.damageHistory.push(damageEvent);
 
-    // Keep only last 10 damage events for debugging
-    if (this.damageHistory.length > 10) {
-      this.damageHistory.shift();
+      // Keep only last 10 damage events for debugging
+      if (this.damageHistory.length > 10) {
+        this.damageHistory.shift();
+      }
+    } catch (error) {
+      console.error('DamageSystem: Error updating damage history:', error);
+      // Fallback: at least record the damage event even if history fails
+      this.lastDamageEvent = damageEvent;
     }
 
     console.log(`Player took ${amount} damage from ${source}. Health: ${this.health}/${this.maxHealth}`);
@@ -72,15 +78,23 @@ export class DamageSystem {
     // Trigger flash effect
     this.flashTimer = this.flashDuration;
 
-    // Notify damage callback
+    // Notify damage callback with error handling
     if (this.onDamage) {
-      this.onDamage(this.health, this.maxHealth);
+      try {
+        this.onDamage(this.health, this.maxHealth);
+      } catch (error) {
+        console.error('DamageSystem: Error in onDamage callback:', error);
+      }
     }
 
-    // Check for death
+    // Check for death with error handling
     if (this.health <= 0 && this.onDeath) {
       console.log('Player defeated!');
-      this.onDeath();
+      try {
+        this.onDeath();
+      } catch (error) {
+        console.error('DamageSystem: Error in onDeath callback:', error);
+      }
     }
 
     return true;

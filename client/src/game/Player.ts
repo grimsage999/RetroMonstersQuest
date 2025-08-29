@@ -52,8 +52,12 @@ export class Player {
     const movement = this.movementSystem.update(inputX, inputY, isDashPressed, deltaTime);
     
     // Apply movement
-    this.x += movement.dx;
-    this.y += movement.dy;
+    // Sanitize movement to prevent NaN/Infinity crashes
+    const safeDx = Number.isFinite(movement.dx) ? movement.dx : 0;
+    const safeDy = Number.isFinite(movement.dy) ? movement.dy : 0;
+    
+    this.x += safeDx;
+    this.y += safeDy;
     
     // Keep player within bounds
     this.x = Math.max(0, Math.min(canvasWidth - this.width, this.x));

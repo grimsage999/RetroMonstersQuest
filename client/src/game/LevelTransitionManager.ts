@@ -128,6 +128,10 @@ export class LevelTransitionManager {
               this.onComplete();
             } catch (error) {
               console.error('LevelTransitionManager: Error in onComplete callback:', error);
+              // Reset transition state to prevent being stuck
+              this.isTransitioning = false;
+              this.transitionPhase = 'complete';
+              this.transitionTimer = 0;
             }
           }
         }

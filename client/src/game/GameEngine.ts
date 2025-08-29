@@ -38,7 +38,7 @@ export class GameEngine {
   private audioManager: AudioManager;
   private inputManager: InputManager;
   
-  private bullets: Array<{x: number, y: number, vx: number, vy: number, hits: number}> = [];
+  private bullets: Array<{x: number, y: number, vx: number, vy: number, hits: number, toRemove?: boolean}> = [];
   private adjudicatorCooldown: number = 0;
   private currentCutscene: Cutscene | null = null;
   
@@ -302,15 +302,15 @@ export class GameEngine {
     this.isRunning = false;
     
     // Cancel animation frame immediately
-    if (this.animationId !== null) {
+    if (this.animationId !== 0) {
       cancelAnimationFrame(this.animationId);
-      this.animationId = null;
+      this.animationId = 0;
     }
     
     // Clean up all active timeouts to prevent memory leaks
-    for (const timeout of this.activeTimeouts) {
+    Array.from(this.activeTimeouts).forEach(timeout => {
       clearTimeout(timeout);
-    }
+    });
     this.activeTimeouts.clear();
     
     // Clean up command input system to prevent memory leaks
@@ -411,9 +411,10 @@ export class GameEngine {
       
       // Remove from set when timeout executes
       const originalTimeout = gameOverTimeout;
-      setTimeout(() => {
+      const cleanupTimeout = window.setTimeout(() => {
         this.activeTimeouts.delete(originalTimeout);
       }, 3100); // Cleanup slightly after timeout executes
+      this.activeTimeouts.add(cleanupTimeout);
     }, 1500); // 1.5 second delay before showing game over screen
   }
   
@@ -590,7 +591,7 @@ export class GameEngine {
     });
     
     // Clean up marked bullets after iteration to prevent splice issues
-    this.bullets = this.bullets.filter(bullet => !(bullet as any).toRemove);
+    this.bullets = this.bullets.filter(bullet => !bullet.toRemove);
 
     // Rebuild spatial grid with current enemy positions (null check)
     if (this.currentLevel) {
@@ -608,9 +609,15 @@ export class GameEngine {
 
     // Check bullet collisions using spatial grid (with bounds checking)
     for (let i = this.bullets.length - 1; i >= 0; i--) {
-      if (i >= this.bullets.length || i < 0) break; // Bounds check
+      if (i >= this.bullets.length) break; // Array bounds check
       const bullet = this.bullets[i];
       if (!bullet) continue; // Null check
+      
+      // Sanitize bullet position to prevent NaN/Infinity crashes
+      if (!Number.isFinite(bullet.x) || !Number.isFinite(bullet.y)) {
+        bullet.toRemove = true;
+        continue;
+      }
       let bulletHit = false;
 
       const bulletBounds = {
@@ -659,7 +666,7 @@ export class GameEngine {
       // Mark bullets for removal instead of splicing during iteration
       if (bulletHit || bullet.y < 0 || bullet.y > this.canvas.height ||
           bullet.x < 0 || bullet.x > this.canvas.width) {
-        (bullet as any).toRemove = true;
+        bullet.toRemove = true;
       }
     }
   }
@@ -852,6 +859,7 @@ export class GameEngine {
       this.ctx.textAlign = 'center';
       this.ctx.fillText('Loading...', this.canvas.width / 2, this.canvas.height / 2);
       this.ctx.textAlign = 'left';
+    this.ctx.textBaseline = 'alphabetic'; // Reset text baseline for consistency
       return;
     }
     
@@ -1000,11 +1008,13 @@ export class GameEngine {
         this.activeTimeouts.add(victoryTimeout);
         
         // Clear timeout if game is stopped manually
-        const originalStop = this.stop.bind(this);
-        this.stop = () => {
+        const clearVictoryTimeout = () => {
+          this.activeTimeouts.delete(victoryTimeout);
           clearTimeout(victoryTimeout);
-          originalStop();
         };
+        
+        // Store timeout reference for cleanup during stop()
+        // Timeout will auto-cleanup when it executes
       });
       
       this.currentCutscene.start();
