@@ -126,9 +126,7 @@ export class GameEngine {
     });
     
     this.damageSystem.setOnDeath(() => {
-      this.gameState.phase = 'gameOver';
-      this.stateManager.transitionTo(GamePhase.GAME_OVER);
-      this.updateState();
+      this.handleGameOver();
     });
     
     this.gameState.totalCookies = this.currentLevel.getTotalCookies();
@@ -346,7 +344,6 @@ export class GameEngine {
     console.log('GameEngine: Restarting game...');
     
     // Stop current game loop to prevent race conditions
-    const wasRunning = this.isRunning;
     this.stop();
     
     // Reset all systems immediately (synchronous operations)
@@ -358,12 +355,12 @@ export class GameEngine {
     this.bullets = [];
     this.bossStateMachine = null;
     
-    // Reset game state
+    // Reset game state to starting values
     this.gameState = {
       score: 0,
       lives: 3,
       level: 1,
-      phase: 'playing', // Old state system compatibility
+      phase: 'playing', // Reset to playing for compatibility
       cookiesCollected: 0,
       totalCookies: 0,
       hasRayGun: false,
@@ -371,42 +368,15 @@ export class GameEngine {
       bossHealth: 100
     };
     
-    // Initialize level 1
+    // Reset player and level
     this.player.reset(this.canvas.width / 2, this.canvas.height - 50);
     this.currentLevel = new Level(1, this.canvas.width, this.canvas.height);
     this.gameState.totalCookies = this.currentLevel.getTotalCookies();
     
-    // Update state
+    // Update state for UI
     this.updateState();
     
-    // Restart game loop immediately if it was running
-    if (wasRunning) {
-      this.isRunning = true;
-      this.lastTime = Math.max(0, performance.now());
-      
-      // Transition to TITLE phase
-      this.stateManager.transitionTo(GamePhase.TITLE);
-      
-      // Start game loop immediately for responsive UI
-      this.gameLoop(this.lastTime);
-      
-      // Handle audio restart asynchronously (non-blocking)
-      if (this.audioManager.getInitializationStatus()) {
-        // Audio already initialized, just play sounds
-        this.audioManager.playGameStart();
-        this.audioManager.playBackgroundMusic();
-      } else {
-        // Initialize audio in background if needed
-        this.audioManager.initialize().then(() => {
-          this.audioManager.playGameStart();
-          this.audioManager.playBackgroundMusic();
-        }).catch(error => {
-          console.warn('GameEngine: Audio initialization failed on restart:', error);
-        });
-      }
-      
-      console.log('GameEngine: Game restarted successfully in TITLE phase');
-    }
+    console.log('GameEngine: Game reset to starting state. Use start() to begin again.');
   }
 
   private handleLevelComplete() {
@@ -419,30 +389,18 @@ export class GameEngine {
   }
   
   private handleGameOver() {
-    console.log('GameEngine: Game over!');
+    console.log('GameEngine: Game over - player health depleted');
+    
+    // Clean transition to game over state
     this.gameState.phase = 'gameOver';
     this.gameState.lives = 0;
     this.stateManager.transitionTo(GamePhase.GAME_OVER);
-    this.audioManager.playHit(); // Use hit sound for game over
+    this.audioManager.playHit();
     
-    // Use UI controller to properly queue the game over screen
-    this.uiController.queueTransition('gameOver', () => {
-      this.updateState();
-      // Stop the game after showing game over (track timeout for cleanup)
-      const gameOverTimeout = window.setTimeout(() => {
-        this.stop();
-      }, 3000); // Show game over for 3 seconds
-      
-      // Track timeout for cleanup
-      this.activeTimeouts.add(gameOverTimeout);
-      
-      // Remove from set when timeout executes
-      const originalTimeout = gameOverTimeout;
-      const cleanupTimeout = window.setTimeout(() => {
-        this.activeTimeouts.delete(originalTimeout);
-      }, 3100); // Cleanup slightly after timeout executes
-      this.activeTimeouts.add(cleanupTimeout);
-    }, 1500); // 1.5 second delay before showing game over screen
+    // Update state immediately to show game over screen
+    this.updateState();
+    
+    console.log('GameEngine: Game over screen displayed with final score:', this.gameState.score);
   }
   
 

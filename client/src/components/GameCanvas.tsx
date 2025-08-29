@@ -73,10 +73,10 @@ const GameCanvas: React.FC = () => {
   const handleRestart = async () => {
     if (gameEngineRef.current) {
       try {
-        // Restart game immediately (non-blocking)
+        // Reset game state and return to start screen
         gameEngineRef.current.restart();
-        setIsStarted(true);
-        console.log('GameCanvas: Game restarted successfully');
+        setIsStarted(false); // Return to start screen
+        console.log('GameCanvas: Game reset, returning to start screen');
       } catch (error) {
         console.error('GameCanvas: Error restarting game:', error);
       }
@@ -199,11 +199,14 @@ const GameCanvas: React.FC = () => {
       {gameState.phase === 'gameOver' && (
         <div className="game-over-screen">
           <div>💀 GAME OVER 💀</div>
-          <div style={{ fontSize: '16px', marginTop: '10px' }}>
+          <div style={{ fontSize: '16px', marginTop: '10px', color: '#FFFF00' }}>
             Final Score: {gameState.score}
           </div>
+          <div style={{ fontSize: '14px', marginTop: '15px', color: '#CCCCCC' }}>
+            Better luck next time, cosmic traveler!
+          </div>
           <button className="restart-btn" onClick={handleRestart}>
-            Press SPACE to Restart
+            🔄 Return to Start
           </button>
         </div>
       )}
