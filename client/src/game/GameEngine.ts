@@ -188,6 +188,20 @@ export class GameEngine {
     this.commandInputSystem.registerCommandExecutor(GameCommand.FIRE_PRIMARY, (cmd: InputCommand) => {
       if (!cmd.pressed) return; // Only on key press, not release
       
+      // Handle title screen - start the game
+      if (this.stateManager.getCurrentPhase() === GamePhase.TITLE) {
+        console.log('GameEngine: Starting gameplay from title screen');
+        
+        // Initialize the game state and first level
+        this.gameState.level = 1;
+        this.gameState.phase = 'playing';
+        this.initializeLevel();
+        
+        this.stateManager.transitionTo(GamePhase.CUTSCENE);
+        this.showLevelCutscene();
+        return;
+      }
+      
       if (this.gameState.phase === 'gameOver' || this.gameState.phase === 'victory') {
         this.restart();
       } else if (this.gameState.phase === 'levelComplete') {
