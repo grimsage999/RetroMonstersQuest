@@ -358,15 +358,29 @@ export class GameEngine {
     });
     this.activeTimeouts.clear();
     
-    // Reset all systems but keep input system alive
+    // Reset all systems comprehensively
     this.damageSystem.reset();
     this.stateManager.reset();
     this.uiController.forceReset();
+    this.transitionManager.reset();
+    
+    // Reset optimization systems to prevent state pollution
+    this.spatialGrid.clear();
+    this.audioPool.stopAll();
+    this.spriteBatcher.clear();
+    
+    // Reset performance tracking
+    this.frameCount = 0;
+    this.fpsTimer = 0;
+    this.currentFPS = 0;
+    this.drawCallCount = 0;
+    this.entityCount = 0;
     
     // Clear all game objects
     this.bullets = [];
     this.bossStateMachine = null;
     this.currentCutscene = null;
+    this.adjudicatorCooldown = 0;
     
     // Reset to completely fresh state
     this.gameState = {
@@ -381,8 +395,14 @@ export class GameEngine {
       bossHealth: 100
     };
     
-    // Reset player to starting position
+    // Reset player completely including movement system
     this.player.reset(this.canvas.width / 2, this.canvas.height - 50);
+    this.player.resetMovementSystem();
+    
+    // Reset input manager to clear any stuck keys
+    this.inputManager.reset();
+    
+    // Create fresh level
     this.currentLevel = new Level(1, this.canvas.width, this.canvas.height);
     this.gameState.totalCookies = this.currentLevel.getTotalCookies();
     
@@ -396,7 +416,7 @@ export class GameEngine {
     // Update state for React UI
     this.updateState();
     
-    console.log('GameEngine: Completely reset to starting state with input system intact');
+    console.log('GameEngine: Complete system reset - all functionality restored');
   }
 
   private handleLevelComplete() {

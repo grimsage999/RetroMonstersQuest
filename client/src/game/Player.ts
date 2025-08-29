@@ -212,6 +212,15 @@ export class Player {
     this.isMoving = false;
     this.animationFrame = 0;
     this.animationTimer = 0;
+    this.direction = 'right';
     this.movementSystem.reset();
+  }
+
+  public resetMovementSystem() {
+    // Completely reset movement system state
+    this.movementSystem.reset();
+    this.isMoving = false;
+    this.animationFrame = 0;
+    this.animationTimer = 0;
   }
 }

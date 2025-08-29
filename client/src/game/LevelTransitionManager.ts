@@ -261,6 +261,19 @@ export class LevelTransitionManager {
   }
 
   /**
+   * Reset transition manager to clean state
+   */
+  reset(): void {
+    this.isTransitioning = false;
+    this.transitionPhase = 'complete';
+    this.transitionTimer = 0;
+    this.onComplete = null;
+    this.currentLevel = 1;
+    this.nextLevel = 1;
+    this.assetsToPreload = [];
+  }
+
+  /**
    * Configure transition settings
    */
   configure(config: Partial<LevelTransitionConfig>): void {
