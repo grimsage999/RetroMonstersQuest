@@ -1,0 +1,97 @@
+Game Development Quality Assurance & Integrity Checkpoint
+Core Directive Assessment
+Before proceeding with any changes, conduct this comprehensive self-evaluation:
+1. Mission Alignment Check
+Question: What was the original core purpose/directive of this game application?
+
+State the primary gameplay mechanic
+Identify the target user experience
+Confirm the main success criteria
+
+Reflection: Am I still aligned with this core mission, or have I drifted from the original vision?
+2. Functionality Integrity Audit
+Current State Analysis:
+
+Are all intended game mechanics working as specified?
+Do user interactions produce expected outcomes?
+Are win/lose conditions properly implemented?
+Is the game loop functioning correctly?
+
+Professional Standard Check:
+"Would I confidently demonstrate this current build to my employer/client without reservation?"
+3. Technical Consistency Review
+Code Quality Assessment:
+
+Is the logic consistent throughout the application?
+Are there any silent failures or edge cases not handled?
+Does the performance meet professional standards?
+Are all features complete rather than placeholder implementations?
+
+4. Design Preservation Protocol
+CRITICAL RULE:
+
+NO visual changes without explicit user approval
+NO aesthetic modifications during QA reviews
+NO style updates "for improvement" without permission
+
+Permitted Actions During QA:
+✅ Fix broken functionality
+✅ Correct logic errors
+✅ Improve performance
+✅ Handle edge cases
+✅ Debug issues
+Requires User Permission:
+❌ Color scheme changes
+❌ Layout modifications
+❌ Font or typography updates
+❌ Animation style changes
+❌ UI element repositioning
+❌ Visual effect alterations
+5. Gap Analysis Framework
+Identify Discrepancies:
+
+What was promised vs. what currently exists?
+Which features are incomplete or non-functional?
+What would prevent this from being production-ready?
+
+Priority Classification:
+
+Critical: Game-breaking issues that prevent core functionality
+Major: Features that don't work as intended but don't break the game
+Minor: Polish items that would enhance professionalism
+
+6. Professional Deliverable Standards
+Ask Yourself:
+
+Does this meet the quality bar of commercial game development?
+Are there obvious bugs or inconsistencies a QA tester would catch?
+Is the user experience smooth and intuitive?
+Would this reflect well on my professional capabilities?
+
+7. Recommendation Protocol
+After Assessment, Provide:
+
+Status Summary: Current alignment with original directive
+Critical Issues List: Must-fix items for professional standards
+Functionality Gaps: Missing or incomplete features
+Quality Recommendations: Improvements that maintain design integrity
+
+Before Making Changes:
+
+Clearly state what needs fixing and why
+Distinguish between functional fixes and visual changes
+Request explicit permission for any aesthetic modifications
+Provide rationale for each recommended change
+
+Implementation Checklist
+
+ Original directive clearly restated
+ Current functionality honestly assessed
+ Professional standards benchmarked
+ Visual design preservation confirmed
+ Critical issues prioritized
+ User permission requested for any visual changes
+ Quality gaps identified with solutions
+ Professional deliverable standards met
+
+Remember: The goal is functional excellence while respecting design decisions. Focus on making the game work perfectly as intended, not making it "look better" without permission.
