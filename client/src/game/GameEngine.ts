@@ -137,12 +137,10 @@ export class GameEngine {
   }
   
   private initializeAudioPool(): void {
-    // Initialize audio pools for different sound effects
-    this.audioPool.initializeSound('shoot', '/sounds/shoot.mp3', 8);
+    // Initialize audio pools for existing sound effects only
     this.audioPool.initializeSound('hit', '/sounds/hit.mp3', 6);
-    this.audioPool.initializeSound('pickup', '/sounds/pickup.mp3', 4);
-    this.audioPool.initializeSound('crunch', '/sounds/crunch.mp3', 5);
-    this.audioPool.initializeSound('adjudicator', '/sounds/adjudicator.mp3', 3);
+    this.audioPool.initializeSound('success', '/sounds/success.mp3', 4);
+    this.audioPool.initializeSound('background', '/sounds/background.mp3', 1);
     
     // Preload all sounds
     this.audioPool.preloadAll().catch(err => {
@@ -405,10 +403,10 @@ export class GameEngine {
       this.gameState.cookiesCollected = 0;
       this.bullets = [];
       
-      // Clean up previous level completely
-      this.currentLevel = null as any; // Force cleanup
+      // Initialize new level immediately to prevent null reference issues
+      this.initializeLevel();
       
-      // Show cutscene for new level
+      // Show cutscene for new level after initialization
       this.showLevelCutscene();
     });
   }
@@ -600,7 +598,12 @@ export class GameEngine {
           if (this.checkCollision(bulletBounds, enemyBounds)) {
             // Instant kill with weapons
             typedEnemy.destroy();
-            this.audioPool.play('hit'); // Use audio pool
+            // Play hit sound with fallback
+            try {
+              this.audioPool.play('hit');
+            } catch (error) {
+              this.audioManager.playHit();
+            }
             this.gameState.score += 50;
             bullet.hits++;
             
@@ -641,8 +644,8 @@ export class GameEngine {
         console.warn(`Low FPS detected: ${this.currentFPS}`);
       }
       
-      // Run diagnostic every 10 seconds when FPS is calculated
-      if (Math.random() < 0.1) { // 10% chance each second = roughly every 10 seconds
+      // Only run diagnostic when FPS drops significantly
+      if (this.currentFPS < 30) {
         this.runDiagnostic();
       }
     }
@@ -735,8 +738,12 @@ export class GameEngine {
       this.gameState.cookiesCollected += collectedCookies;
       this.gameState.score += collectedCookies * 10;
       
-      // Satisfying feedback: Cookie collection chime (crunchy/pop from design doc)
-      this.audioManager.playCrunch();
+      // Satisfying feedback: Cookie collection sound
+      try {
+        this.audioPool.play('success');
+      } catch (error) {
+        this.audioManager.playSuccess();
+      }
       
       // Screen flash effect for visual feedback
       this.ctx.save();
@@ -793,9 +800,16 @@ export class GameEngine {
       this.currentCutscene.render();
       return;
     } else if (this.currentCutscene) {
-      // Cutscene exists but not ready - render black screen to prevent flickering
+      // Cutscene exists but not ready - render black screen with loading text
       this.ctx.fillStyle = '#000022';
       this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+      
+      // Show loading text to reduce perceived glitch
+      this.ctx.fillStyle = '#FFFFFF';
+      this.ctx.font = '20px monospace';
+      this.ctx.textAlign = 'center';
+      this.ctx.fillText('Loading...', this.canvas.width / 2, this.canvas.height / 2);
+      this.ctx.textAlign = 'left';
       return;
     }
     
