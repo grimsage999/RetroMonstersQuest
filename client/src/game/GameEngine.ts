@@ -76,7 +76,7 @@ export class GameEngine {
       score: 0,
       lives: 3,
       level: 1,
-      phase: 'playing',
+      phase: 'playing', // Will be synced with state manager
       cookiesCollected: 0,
       totalCookies: 0,
       hasRayGun: false,
@@ -114,6 +114,9 @@ export class GameEngine {
     // Initialize command input system with proper filtering
     this.commandInputSystem = new CommandInputSystem();
     this.setupCommandExecutors();
+    
+    // Sync initial state with state manager to prevent opening glitches
+    this.commandInputSystem.setGamePhase(GamePhase.TITLE);
     
     // Set damage callbacks
     this.damageSystem.setOnDamage((health, maxHealth) => {
@@ -779,8 +782,9 @@ export class GameEngine {
     this.ctx.fillStyle = '#000011';
     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
     
-    // Don't render if game hasn't started yet (title screen is React component)
-    if (!this.isRunning) {
+    // Don't render game content if we're still in TITLE phase (React overlay handles it)
+    const currentPhase = this.stateManager.getCurrentPhase();
+    if (!this.isRunning || currentPhase === GamePhase.TITLE) {
       return;
     }
     
