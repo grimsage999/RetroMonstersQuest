@@ -243,19 +243,16 @@ export class GameEngine {
       this.isRunning = true;
       this.lastTime = performance.now();
       
-      // Transition to playing state
-      this.stateManager.transitionTo(GamePhase.CUTSCENE);
+      // Start with TITLE phase, not cutscene
+      this.stateManager.transitionTo(GamePhase.TITLE);
       
       this.audioManager.playGameStart();
       this.audioManager.playBackgroundMusic();
       
-      // Start game loop - this must be running for cutscene to render
+      // Start game loop
       this.gameLoop(this.lastTime);
       
-      // Show opening cutscene after loop starts
-      this.showLevelCutscene();
-      
-      console.log('GameEngine: Game started successfully');
+      console.log('GameEngine: Game started in TITLE phase');
     }
   }
 
@@ -292,19 +289,30 @@ export class GameEngine {
   }
 
   public async restart() {
+    console.log('GameEngine: Restarting game...');
+    
+    // Stop current game loop to prevent race conditions
+    const wasRunning = this.isRunning;
+    this.stop();
+    
     // Initialize audio if not already done
     await this.audioManager.initialize();
     
     // Reset all systems
     this.damageSystem.reset();
     this.stateManager.reset();
-    this.stateManager.transitionTo(GamePhase.CUTSCENE);
+    this.uiController.forceReset();
     
+    // Clear all game objects
+    this.bullets = [];
+    this.bossStateMachine = null;
+    
+    // Reset game state
     this.gameState = {
       score: 0,
       lives: 3,
       level: 1,
-      phase: 'playing',
+      phase: 'playing', // Old state system compatibility
       cookiesCollected: 0,
       totalCookies: 0,
       hasRayGun: false,
@@ -312,17 +320,31 @@ export class GameEngine {
       bossHealth: 100
     };
     
-    // Initialize level 1 first, then show cutscene
+    // Initialize level 1
     this.player.reset(this.canvas.width / 2, this.canvas.height - 50);
     this.currentLevel = new Level(1, this.canvas.width, this.canvas.height);
     this.gameState.totalCookies = this.currentLevel.getTotalCookies();
     
-    // Play audio
-    this.audioManager.playGameStart();
-    this.audioManager.playBackgroundMusic();
+    // Update state
+    this.updateState();
     
-    // Show opening cutscene
-    this.showLevelCutscene();
+    // Restart game loop if it was running
+    if (wasRunning) {
+      this.isRunning = true;
+      this.lastTime = performance.now();
+      
+      // Transition to TITLE phase
+      this.stateManager.transitionTo(GamePhase.TITLE);
+      
+      // Play audio
+      this.audioManager.playGameStart();
+      this.audioManager.playBackgroundMusic();
+      
+      // Restart game loop
+      this.gameLoop(this.lastTime);
+      
+      console.log('GameEngine: Game restarted successfully in TITLE phase');
+    }
   }
 
   private handleLevelComplete() {
