@@ -344,10 +344,21 @@ export class GameEngine {
   public restart() {
     console.log('GameEngine: Restarting game to initial state...');
     
-    // Stop current game completely
-    this.stop();
+    // Stop current game loop but don't cleanup input system
+    this.isRunning = false;
     
-    // Reset all systems
+    if (this.animationId !== 0) {
+      cancelAnimationFrame(this.animationId);
+      this.animationId = 0;
+    }
+    
+    // Clear timeouts
+    Array.from(this.activeTimeouts).forEach(timeout => {
+      clearTimeout(timeout);
+    });
+    this.activeTimeouts.clear();
+    
+    // Reset all systems but keep input system alive
     this.damageSystem.reset();
     this.stateManager.reset();
     this.uiController.forceReset();
@@ -378,10 +389,14 @@ export class GameEngine {
     // Clear canvas to prevent visual artifacts
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     
+    // Reset input system state without cleaning up listeners
+    this.commandInputSystem.emergencyReset();
+    this.commandInputSystem.setGamePhase(GamePhase.TITLE);
+    
     // Update state for React UI
     this.updateState();
     
-    console.log('GameEngine: Completely reset to starting state');
+    console.log('GameEngine: Completely reset to starting state with input system intact');
   }
 
   private handleLevelComplete() {
