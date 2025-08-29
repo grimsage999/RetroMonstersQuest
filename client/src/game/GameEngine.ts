@@ -205,11 +205,12 @@ export class GameEngine {
       if (this.stateManager.getCurrentPhase() === GamePhase.TITLE) {
         console.log('GameEngine: Starting gameplay from title screen');
         
-        // Initialize the game state and first level
+        // Initialize the game state for level 1
         this.gameState.level = 1;
-        this.gameState.phase = 'playing';
-        this.initializeLevel();
+        this.gameState.cookiesCollected = 0;
+        this.bullets = [];
         
+        // Transition to CUTSCENE phase first, don't set gameState.phase yet
         this.stateManager.transitionTo(GamePhase.CUTSCENE);
         this.showLevelCutscene();
         return;
@@ -463,17 +464,20 @@ export class GameEngine {
     console.log(`GameEngine: Showing cutscene for level ${this.gameState.level}`);
     const cutsceneData: CutsceneData = this.getCutsceneData(this.gameState.level);
     
-    // Use UI controller to prevent overlapping transitions
-    this.uiController.queueTransition('cutscene', () => {
-      this.currentCutscene = new Cutscene(this.canvas, cutsceneData, () => {
-        console.log('GameEngine: Cutscene complete, initializing level');
-        this.currentCutscene = null;
-        this.stateManager.transitionTo(GamePhase.PLAYING);
-        this.initializeLevel();
-      });
+    // Create cutscene immediately without UI controller queue to prevent conflicts
+    this.currentCutscene = new Cutscene(this.canvas, cutsceneData, () => {
+      console.log('GameEngine: Cutscene complete, transitioning to gameplay');
+      this.currentCutscene = null;
       
-      this.currentCutscene.start();
+      // Now set the game phase and initialize level
+      this.gameState.phase = 'playing';
+      this.initializeLevel();
+      this.stateManager.transitionTo(GamePhase.PLAYING);
+      
+      console.log('GameEngine: Level initialized and ready for gameplay');
     });
+    
+    this.currentCutscene.start();
   }
   
   private getCutsceneData(level: number): CutsceneData {
