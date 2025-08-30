@@ -625,12 +625,23 @@ export class GameEngine {
     if (this.currentLevel) {
       const enemies = this.currentLevel.getEnemies();
       this.spatialGrid.clear();
+      
+      // Add regular enemies to spatial grid
       for (const enemy of enemies) {
         if (enemy && enemy.isActive()) {
           const bounds = enemy.getBounds();
           if (bounds) {
             this.spatialGrid.insert(enemy, bounds.x, bounds.y, bounds.width, bounds.height);
           }
+        }
+      }
+      
+      // CRITICAL FIX: Add boss to spatial grid for bullet collision detection
+      const boss = this.currentLevel.getBoss();
+      if (boss && boss.isActive()) {
+        const bounds = boss.getBounds();
+        if (bounds) {
+          this.spatialGrid.insert(boss, bounds.x, bounds.y, bounds.width, bounds.height);
         }
       }
     }
@@ -670,21 +681,44 @@ export class GameEngine {
           const enemyBounds = typedEnemy.getBounds();
 
           if (enemyBounds && this.checkCollision(bulletBounds, enemyBounds)) {
-            // Instant kill with weapons
-            typedEnemy.destroy();
-            // Play hit sound with fallback
-            try {
-              this.audioPool.play('hit');
-            } catch (error) {
-              this.audioManager.playHit();
-            }
-            this.gameState.score += 50;
-            bullet.hits++;
-            
-            // Ray Gun bullets disappear after hitting enemy
-            // Adjudicator bullets pierce through (up to 3 enemies)
-            if (!this.gameState.hasAdjudicator || bullet.hits >= 3) {
+            // Check if this is the boss
+            const boss = this.currentLevel.getBoss();
+            if (boss && typedEnemy === boss) {
+              // BOSS DAMAGE SYSTEM: Reduce boss health instead of instant kill
+              const damageAmount = this.gameState.hasAdjudicator ? 25 : 10; // Adjudicator does more damage
+              this.gameState.bossHealth = Math.max(0, this.gameState.bossHealth - damageAmount);
+              
+              console.log(`Boss hit! Health: ${this.gameState.bossHealth}/100 (${damageAmount} damage)`);
+              
+              // Play boss hit sound
+              try {
+                this.audioPool.play('hit');
+              } catch (error) {
+                this.audioManager.playHit();
+              }
+              
+              this.gameState.score += 100; // Boss hits worth more points
+              bullet.hits++;
+              
+              // Bullets always disappear when hitting boss (even Adjudicator)
               bulletHit = true;
+            } else {
+              // Regular enemy - instant kill with weapons
+              typedEnemy.destroy();
+              // Play hit sound with fallback
+              try {
+                this.audioPool.play('hit');
+              } catch (error) {
+                this.audioManager.playHit();
+              }
+              this.gameState.score += 50;
+              bullet.hits++;
+              
+              // Ray Gun bullets disappear after hitting enemy
+              // Adjudicator bullets pierce through (up to 3 enemies)
+              if (!this.gameState.hasAdjudicator || bullet.hits >= 3) {
+                bulletHit = true;
+              }
             }
             break;
           }
