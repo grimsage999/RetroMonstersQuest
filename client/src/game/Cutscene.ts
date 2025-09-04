@@ -1,9 +1,5 @@
-export interface CutsceneData {
-  levelNumber: number;
-  title: string;
-  description: string;
-  weaponUnlocked?: string;
-}
+import { CutsceneData } from './CutsceneData'; // Assuming CutsceneData is in a separate file
+import { CosmicTextRenderer } from './CosmicTextRenderer'; // Import the new renderer
 
 export class Cutscene {
   private canvas: HTMLCanvasElement;
@@ -14,6 +10,7 @@ export class Cutscene {
   private isActive: boolean = false;
   private skipHandler: ((e: KeyboardEvent) => void) | null = null;
   private autoAdvanceTimeout: number | null = null;
+  private cosmicTextRenderer: CosmicTextRenderer; // Added for cosmic text rendering
 
   constructor(canvas: HTMLCanvasElement, data: CutsceneData, onComplete: () => void) {
     this.canvas = canvas;
@@ -24,6 +21,8 @@ export class Cutscene {
     this.ctx = context;
     this.data = data;
     this.onComplete = onComplete;
+    // Initialize the CosmicTextRenderer
+    this.cosmicTextRenderer = new CosmicTextRenderer(this.ctx);
   }
 
   public isReady(): boolean {
@@ -34,7 +33,7 @@ export class Cutscene {
     console.log('Cutscene: Starting cutscene');
     this.isActive = true;
     this.startTime = Date.now();
-    
+
     // Auto-advance after 4.5 seconds (more time to read) or on spacebar press
     this.skipHandler = (e: KeyboardEvent) => {
       if (e.key === ' ' || e.key === 'Space' || e.key === 'Enter') {
@@ -42,10 +41,10 @@ export class Cutscene {
         this.complete();
       }
     };
-    
+
     try {
       document.addEventListener('keydown', this.skipHandler);
-      
+
       // Extended timing for comfortable reading
       try {
         this.autoAdvanceTimeout = window.setTimeout(() => {
@@ -67,7 +66,7 @@ export class Cutscene {
   private complete() {
     console.log('Cutscene: Completing cutscene');
     this.isActive = false;
-    
+
     // Clean up event listeners and timeouts to prevent memory leaks
     if (this.skipHandler) {
       try {
@@ -77,12 +76,12 @@ export class Cutscene {
       }
       this.skipHandler = null;
     }
-    
+
     if (this.autoAdvanceTimeout) {
       clearTimeout(this.autoAdvanceTimeout);
       this.autoAdvanceTimeout = null;
     }
-    
+
     if (this.onComplete) {
       this.onComplete();
     }
@@ -95,15 +94,15 @@ export class Cutscene {
     this.ctx.imageSmoothingEnabled = false;
 
     const elapsed = Date.now() - this.startTime;
-    
+
     // Smooth easing function for natural animations
     const easeOutCubic = (t: number): number => 1 - Math.pow(1 - t, 3);
     const easeInOutCubic = (t: number): number => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-    
+
     // Extended fade-in timing for smoother transition
     const fadeProgress = Math.min(elapsed / 800, 1); // 800ms smooth fade
     const fadeAlpha = easeOutCubic(fadeProgress);
-    
+
     // Background with gradient for depth
     const gradient = this.ctx.createRadialGradient(
       this.canvas.width / 2, this.canvas.height / 2, 0,
@@ -132,7 +131,7 @@ export class Cutscene {
       if (titleProgress > 0) {
         const titleEase = easeInOutCubic(titleProgress);
         const titleY = this.canvas.height / 2 - 80 + (50 * (1 - titleEase));
-        
+
         this.ctx.save();
         this.ctx.globalAlpha = titleEase;
         this.ctx.shadowColor = '#00FFFF';
@@ -151,14 +150,14 @@ export class Cutscene {
         this.ctx.font = '16px monospace';
         this.ctx.textAlign = 'center';
         const lines = this.data.description.split('\n');
-        
+
         lines.forEach((line, index) => {
           const lineDelay = index * 100; // Stagger each line by 100ms
           const lineProgress = Math.min(Math.max((elapsed - 800 - lineDelay) / 600, 0), 1);
           if (lineProgress > 0) {
             const lineEase = easeOutCubic(lineProgress);
             const lineX = this.canvas.width / 2 + (30 * (1 - lineEase));
-            
+
             this.ctx.save();
             this.ctx.globalAlpha = lineEase;
             this.ctx.fillText(line, lineX, this.canvas.height / 2 - 20 + (index * 22));
@@ -173,13 +172,13 @@ export class Cutscene {
         if (weaponProgress > 0) {
           const weaponEase = easeInOutCubic(weaponProgress);
           const scale = 0.5 + (0.5 * weaponEase); // Scale from 50% to 100%
-          
+
           this.ctx.save();
           this.ctx.globalAlpha = weaponEase;
           this.ctx.translate(this.canvas.width / 2, this.canvas.height / 2 + 100);
           this.ctx.scale(scale, scale);
           this.ctx.translate(-this.canvas.width / 2, -(this.canvas.height / 2 + 100));
-          
+
           this.ctx.shadowColor = '#FFFF00';
           this.ctx.shadowBlur = 12 + Math.sin(elapsed * 0.004) * 4;
           this.ctx.fillStyle = '#FFFF00';

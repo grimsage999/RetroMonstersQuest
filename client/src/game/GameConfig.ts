@@ -125,6 +125,50 @@ export const GAME_CONFIG = {
     CUTSCENE_DESCRIPTION_DURATION: 600,
     CONTINUE_PROMPT_PULSE_DURATION: 500,
   },
+
+  // Cosmic Text Styling Configuration
+  TEXT_STYLES: {
+    TITLE: {
+      FONT_SIZE: 48,
+      OUTLINE_WIDTH: 4,
+      SHADOW_OFFSET: 6,
+      GLOW_INTENSITY: 8,
+      PRIMARY_COLOR: '#FFD700', // Cosmic gold
+      OUTLINE_COLOR: '#8A2BE2', // Deep purple
+      SHADOW_COLOR: '#FF1493', // Hot pink
+      GLOW_COLOR: '#00FFFF', // Cyan glow
+    },
+    LEVEL_CARD: {
+      FONT_SIZE: 36,
+      OUTLINE_WIDTH: 3,
+      SHADOW_OFFSET: 4,
+      GLOW_INTENSITY: 6,
+      PRIMARY_COLOR: '#00FF7F', // Spring green
+      OUTLINE_COLOR: '#FF4500', // Orange red
+      SHADOW_COLOR: '#4B0082', // Indigo
+      GLOW_COLOR: '#FFFF00', // Yellow glow
+    },
+    DESCRIPTION: {
+      FONT_SIZE: 18,
+      OUTLINE_WIDTH: 2,
+      SHADOW_OFFSET: 2,
+      GLOW_INTENSITY: 4,
+      PRIMARY_COLOR: '#FFFFFF', // White
+      OUTLINE_COLOR: '#000000', // Black
+      SHADOW_COLOR: '#FF69B4', // Hot pink
+      GLOW_COLOR: '#32CD32', // Lime green
+    },
+    UI_TEXT: {
+      FONT_SIZE: 24,
+      OUTLINE_WIDTH: 2,
+      SHADOW_OFFSET: 3,
+      GLOW_INTENSITY: 5,
+      PRIMARY_COLOR: '#FF6347', // Tomato
+      OUTLINE_COLOR: '#191970', // Midnight blue
+      SHADOW_COLOR: '#FF1493', // Deep pink
+      GLOW_COLOR: '#00BFFF', // Deep sky blue
+    }
+  },
 } as const;
 
 export const LEVEL_CONFIGS = {
