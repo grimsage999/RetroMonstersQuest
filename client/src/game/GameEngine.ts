@@ -24,8 +24,6 @@ export interface GameState {
   phase: 'playing' | 'gameOver' | 'victory' | 'levelComplete';
   cookiesCollected: number;
   totalCookies: number;
-  hasRayGun: boolean;
-  hasAdjudicator: boolean;
   bossHealth: number;
 }
 
@@ -40,8 +38,7 @@ export class GameEngine {
   private audioManager: AudioManager;
   private inputManager: InputManager;
 
-  private bullets: Array<{x: number, y: number, vx: number, vy: number, hits: number, toRemove?: boolean}> = [];
-  private adjudicatorCooldown: number = 0;
+  // Removed bullets and weapon cooldowns for performance
   private currentCutscene: Cutscene | null = null;
 
   private animationId: number = 0;
@@ -82,8 +79,6 @@ export class GameEngine {
       phase: 'playing', // Will be synced with state manager
       cookiesCollected: 0,
       totalCookies: 0,
-      hasRayGun: false,
-      hasAdjudicator: false,
       bossHealth: 100
     };
 
@@ -160,10 +155,8 @@ export class GameEngine {
       throw new Error('GameEngine: Unable to get player bounds for boss context');
     }
 
-    // Build weapons array efficiently
+    // No weapons in simplified game
     const weapons: string[] = [];
-    if (this.gameState.hasRayGun) weapons.push('raygun');
-    if (this.gameState.hasAdjudicator) weapons.push('adjudicator');
 
     return {
       playerPosition: { x: playerBounds.x, y: playerBounds.y },
@@ -208,7 +201,6 @@ export class GameEngine {
         // Initialize the game state for level 1
         this.gameState.level = 1;
         this.gameState.cookiesCollected = 0;
-        this.bullets = [];
 
         // Transition to CUTSCENE phase first, don't set gameState.phase yet
         this.stateManager.transitionTo(GamePhase.CUTSCENE);
@@ -221,17 +213,14 @@ export class GameEngine {
         return;
       } else if (this.gameState.phase === 'levelComplete') {
         this.nextLevel();
-      } else if (this.gameState.hasRayGun && this.gameState.phase === 'playing') {
-        this.fireRayGun();
       }
+      // No weapon firing in simplified game
     });
 
     this.commandInputSystem.registerCommandExecutor(GameCommand.FIRE_SECONDARY, (cmd: InputCommand) => {
       if (!cmd.pressed) return; // Only on key press, not release
 
-      if (this.gameState.hasAdjudicator && this.adjudicatorCooldown <= 0) {
-        this.fireAdjudicator();
-      }
+      // No secondary weapon in simplified game
     });
 
     this.commandInputSystem.registerCommandExecutor(GameCommand.SKIP_CUTSCENE, (cmd: InputCommand) => {
@@ -272,7 +261,6 @@ export class GameEngine {
       // Initialize game state for level 1
       this.gameState.level = 1;
       this.gameState.cookiesCollected = 0;
-      this.bullets = [];
 
       // Go directly to CUTSCENE phase to show level title card
       this.stateManager.transitionTo(GamePhase.CUTSCENE);
@@ -379,10 +367,8 @@ export class GameEngine {
     this.entityCount = 0;
 
     // Clear all game objects
-    this.bullets = [];
     this.bossStateMachine = null;
     this.currentCutscene = null;
-    this.adjudicatorCooldown = 0;
 
     // Reset to completely fresh state
     this.gameState = {
@@ -392,8 +378,6 @@ export class GameEngine {
       phase: 'playing',
       cookiesCollected: 0,
       totalCookies: 0,
-      hasRayGun: false,
-      hasAdjudicator: false,
       bossHealth: 100
     };
 
@@ -458,7 +442,7 @@ export class GameEngine {
     this.transitionManager.startTransition(currentLevel, nextLevel, () => {
       this.gameState.level = nextLevel;
       this.gameState.cookiesCollected = 0;
-      this.bullets = [];
+      // No bullets in simplified game
 
       // Initialize new level immediately to prevent null reference issues
       this.initializeLevel();
@@ -529,15 +513,7 @@ export class GameEngine {
   private initializeLevel() {
     console.log(`GameEngine: Initializing level ${this.gameState.level}`);
 
-    // Unlock Ray Gun starting from Level 3
-    if (this.gameState.level >= 3) {
-      this.gameState.hasRayGun = true;
-    }
-
-    // Unlock Adjudicator in Level 5
-    if (this.gameState.level >= 5) {
-      this.gameState.hasAdjudicator = true;
-    }
+    // No weapons in simplified game for better performance
 
     this.player.reset(this.canvas.width / 2, this.canvas.height - 50);
     this.currentLevel = new Level(this.gameState.level, this.canvas.width, this.canvas.height);
@@ -558,182 +534,17 @@ export class GameEngine {
 
     this.gameState.totalCookies = this.currentLevel.getTotalCookies();
     this.gameState.phase = 'playing';
-    this.bullets = []; // Clear bullets when starting new level
+    // No bullets in simplified game
     this.updateState();
 
     console.log(`GameEngine: Level ${this.gameState.level} initialized with ${this.gameState.totalCookies} cookies`);
   }
 
-  private fireRayGun() {
-    if (!this.gameState.hasRayGun) return;
+  // Removed fireRayGun for better performance
 
-    const playerBounds = this.player.getBounds();
-    const bullet = {
-      x: playerBounds.x + playerBounds.width / 2,
-      y: playerBounds.y,
-      vx: 0,
-      vy: -8, // Fast upward velocity
-      hits: 0
-    };
+  // Removed fireAdjudicator for better performance
 
-    this.bullets.push(bullet);
-    this.audioManager.playHit(); // Ray gun firing sound
-  }
-
-  private fireAdjudicator() {
-    if (!this.gameState.hasAdjudicator || this.adjudicatorCooldown > 0) return;
-
-    // Find nearest enemy for tracking orb
-    const enemies = this.currentLevel.getEnemies();
-    const playerBounds = this.player.getBounds();
-    let nearestEnemy = null;
-    let minDistance = Infinity;
-
-    enemies.forEach(enemy => {
-      if (enemy.isActive()) {
-        const enemyBounds = enemy.getBounds();
-        const dx = enemyBounds.x - playerBounds.x;
-        const dy = enemyBounds.y - playerBounds.y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-
-        if (distance < minDistance) {
-          minDistance = distance;
-          nearestEnemy = enemy;
-        }
-      }
-    });
-
-    if (nearestEnemy) {
-      // Instant kill nearest enemy
-      (nearestEnemy as Enemy).destroy();
-      // Play adjudicator sound
-      this.audioManager.playAdjudicator();
-    }
-
-    this.adjudicatorCooldown = 5000; // 5 second cooldown
-  }
-
-  private updateBullets(deltaTime: number) {
-    // Update bullet positions - faster bullets
-    this.bullets.forEach(bullet => {
-      bullet.x += bullet.vx * deltaTime * 0.3;
-      bullet.y += bullet.vy * deltaTime * 0.3;
-    });
-
-    // Clean up marked bullets after iteration to prevent splice issues
-    this.bullets = this.bullets.filter(bullet => !bullet.toRemove);
-
-    // Rebuild spatial grid with current enemy positions (null check)
-    if (this.currentLevel) {
-      const enemies = this.currentLevel.getEnemies();
-      this.spatialGrid.clear();
-
-      // Add regular enemies to spatial grid
-      for (const enemy of enemies) {
-        if (enemy && enemy.isActive()) {
-          const bounds = enemy.getBounds();
-          if (bounds) {
-            this.spatialGrid.insert(enemy, bounds.x, bounds.y, bounds.width, bounds.height);
-          }
-        }
-      }
-
-      // CRITICAL FIX: Add boss to spatial grid for bullet collision detection
-      const boss = this.currentLevel.getBoss();
-      if (boss && boss.isActive()) {
-        const bounds = boss.getBounds();
-        if (bounds) {
-          this.spatialGrid.insert(boss, bounds.x, bounds.y, bounds.width, bounds.height);
-        }
-      }
-    }
-
-    // Check bullet collisions using spatial grid (with bounds checking)
-    for (let i = this.bullets.length - 1; i >= 0; i--) {
-      if (i >= this.bullets.length) break; // Array bounds check
-      const bullet = this.bullets[i];
-      if (!bullet) continue; // Null check
-
-      // Sanitize bullet position to prevent NaN/Infinity crashes
-      if (!Number.isFinite(bullet.x) || !Number.isFinite(bullet.y)) {
-        bullet.toRemove = true;
-        continue;
-      }
-      let bulletHit = false;
-
-      const bulletBounds = GameUtils.createBounds(
-        bullet.x - COLLISION_CONFIG.BULLET_OFFSET,
-        bullet.y - COLLISION_CONFIG.BULLET_OFFSET,
-        COLLISION_CONFIG.BULLET_SIZE,
-        COLLISION_CONFIG.BULLET_SIZE
-      );
-
-      // Get only nearby enemies from spatial grid
-      const potentialEnemies = this.spatialGrid.getPotentialCollisions(
-        bulletBounds.x, 
-        bulletBounds.y, 
-        bulletBounds.width, 
-        bulletBounds.height
-      );
-
-      // Check collision only with nearby enemies
-      for (const enemy of potentialEnemies) {
-        const typedEnemy = enemy as Enemy;
-        if (typedEnemy && typedEnemy.isActive()) {
-          const enemyBounds = typedEnemy.getBounds();
-
-          if (enemyBounds && this.checkCollision(bulletBounds, enemyBounds)) {
-            // Check if this is the boss
-            const boss = this.currentLevel.getBoss();
-            if (boss && typedEnemy === boss) {
-              // BOSS DAMAGE SYSTEM: More balanced weapon progression
-              const damageAmount = this.gameState.hasAdjudicator ? 15 : 8; // Reduced Adjudicator advantage
-              this.gameState.bossHealth = Math.max(0, this.gameState.bossHealth - damageAmount);
-
-              console.log(`Boss hit! Health: ${this.gameState.bossHealth}/100 (${damageAmount} damage)`);
-
-              // Play boss hit sound
-              try {
-                this.audioPool.play('hit');
-              } catch (error) {
-                this.audioManager.playHit();
-              }
-
-              this.gameState.score += 100; // Boss hits worth more points
-              bullet.hits++;
-
-              // Bullets always disappear when hitting boss (even Adjudicator)
-              bulletHit = true;
-            } else {
-              // Regular enemy - instant kill with weapons
-              typedEnemy.destroy();
-              // Play hit sound with fallback
-              try {
-                this.audioPool.play('hit');
-              } catch (error) {
-                this.audioManager.playHit();
-              }
-              this.gameState.score += 50;
-              bullet.hits++;
-
-              // Ray Gun bullets disappear after hitting enemy
-              // Adjudicator bullets pierce through (up to 3 enemies)
-              if (!this.gameState.hasAdjudicator || bullet.hits >= 3) {
-                bulletHit = true;
-              }
-            }
-            break;
-          }
-        }
-      }
-
-      // Mark bullets for removal instead of splicing during iteration
-      if (bulletHit || bullet.y < 0 || bullet.y > this.canvas.height ||
-          bullet.x < 0 || bullet.x > this.canvas.width) {
-        bullet.toRemove = true;
-      }
-    }
-  }
+  // Removed updateBullets for better performance
 
   private gameLoop(currentTime: number) {
     if (!this.isRunning) return;
@@ -817,13 +628,7 @@ export class GameEngine {
       }
     }
 
-    // Update bullets
-    this.updateBullets(deltaTime);
-
-    // Update weapon cooldowns
-    if (this.adjudicatorCooldown > 0) {
-      this.adjudicatorCooldown -= deltaTime;
-    }
+    // No weapon updates in simplified game for better performance
 
     // Check collisions
     this.checkCollisions();
@@ -990,85 +795,13 @@ export class GameEngine {
         this.ctx.restore();
       }
 
-      // Render bullets
-      this.renderBullets();
-
-      // Render weapon UI indicators
-      this.renderWeaponUI();
+      // No weapon rendering in simplified game for better performance
     }
   }
 
-  private renderBullets() {
-    this.ctx.save();
+  // Removed renderBullets for better performance
 
-    // Disable shadows for better performance
-    this.ctx.shadowBlur = 0;
-
-    this.bullets.forEach(bullet => {
-      if (this.gameState.hasAdjudicator) {
-        // Adjudicator: Golden energy blasts (no shadow for performance)
-        this.ctx.fillStyle = '#FFFF00';
-        this.ctx.fillRect(bullet.x - 6, bullet.y - 6, 12, 12);
-
-        // Core effect
-        this.ctx.fillStyle = '#FFFFFF';
-        this.ctx.fillRect(bullet.x - 3, bullet.y - 3, 6, 6);
-      } else {
-        // Ray Gun: Cyan lightning bolts (no shadow for performance)
-        this.ctx.fillStyle = '#00FFFF';
-        this.ctx.fillRect(bullet.x - 4, bullet.y - 8, 8, 16);
-
-        // Lightning core
-        this.ctx.fillStyle = '#FFFFFF';
-        this.ctx.fillRect(bullet.x - 2, bullet.y - 6, 4, 12);
-      }
-    });
-    this.ctx.restore();
-  }
-
-  private renderWeaponUI() {
-    this.ctx.save();
-    this.ctx.font = '12px monospace';
-
-    let yOffset = 20;
-
-    // Ray Gun indicator
-    if (this.gameState.hasRayGun) {
-      this.ctx.fillStyle = '#00FFFF';
-      this.ctx.fillText('RAY GUN [SPACE]', 10, yOffset);
-      yOffset += 20;
-    }
-
-    // Adjudicator indicator
-    if (this.gameState.hasAdjudicator) {
-      const cooldownText = this.adjudicatorCooldown > 0 
-        ? `[${Math.ceil(Math.max(this.adjudicatorCooldown, 0) / Math.max(1000, 1))}s]` 
-        : '[X]';
-      this.ctx.fillStyle = this.adjudicatorCooldown > 0 ? '#666666' : '#FFD700';
-      this.ctx.fillText(`ADJUDICATOR ${cooldownText}`, 10, yOffset);
-
-      // Render floating orb above player if available
-      if (this.adjudicatorCooldown <= 0 && this.player) {
-        const playerBounds = this.player.getBounds();
-        if (playerBounds) {
-          this.ctx.fillStyle = '#FFD700';
-          this.ctx.shadowColor = '#FFD700';
-          this.ctx.shadowBlur = 10;
-          this.ctx.beginPath();
-          this.ctx.arc(
-            playerBounds.x + playerBounds.width / 2,
-            playerBounds.y - 20,
-            8,
-            0,
-            2 * Math.PI
-          );
-          this.ctx.fill();
-        }
-      }
-    }
-
-    this.ctx.restore();
-  }
+  // Removed renderWeaponUI for better performance
 
   private showVictorySequence() {
     console.log('GameEngine: Victory!');

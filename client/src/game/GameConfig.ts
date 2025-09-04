@@ -195,7 +195,7 @@ export const CUTSCENE_DATA = {
     levelNumber: 3,
     title: "Level 3: Abandoned Subway",
     description: "Underground tunnels echo with danger.\nRadioactive rats emerge from dark corners.\nIn the debris, you discover alien technology...",
-    weaponUnlocked: "⚡ RAY GUN ACQUIRED ⚡\nPress SPACE to fire lightning bolts!\n(3 hits to defeat enemies)"
+    weaponUnlocked: "🚀 ENHANCED AGILITY 🚀\nCosmo's movement becomes more responsive!\nDodge faster and collect more cookies!"
   },
   4: {
     levelNumber: 4,
@@ -206,6 +206,6 @@ export const CUTSCENE_DATA = {
     levelNumber: 5,
     title: "Level 5: Government Lab",
     description: "The sterile facility hides dark secrets.\nInteract with lab equipment to uncover fragments.\nSomewhere here lies The Adjudicator...",
-    weaponUnlocked: "🔮 THE ADJUDICATOR 🔮\nPress X for instant death rays!\nGlowing orb grants ultimate power!"
+    weaponUnlocked: "🌟 COSMIC MASTERY 🌟\nCosmo reaches peak performance!\nUltimate speed and agility unlocked!"
   }
 } as const;
