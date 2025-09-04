@@ -15,7 +15,7 @@ import { DiagnosticSystem } from './DiagnosticSystem';
 import { BossStateMachine, GameContext } from './BossStateMachine';
 import { CommandInputSystem, GameCommand, InputCommand } from './CommandInputSystem';
 import { GameUtils } from './GameUtils'; // Assuming GameUtils contains createBounds
-import { COLLISION_CONFIG } from './Constants'; // Assuming COLLISION_CONFIG has BULLET_OFFSET and BULLET_SIZE
+import { COLLISION_CONFIG } from './GameConstants';
 
 export interface GameState {
   score: number;

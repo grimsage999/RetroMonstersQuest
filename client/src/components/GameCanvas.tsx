@@ -7,6 +7,7 @@ const GameCanvas: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const gameEngineRef = useRef<GameEngine | null>(null);
   const [isStarted, setIsStarted] = useState(false);
+  const [showDiagnostics, setShowDiagnostics] = useState(false);
   const [gameState, setGameState] = useState({
     score: 0,
     lives: 3,
