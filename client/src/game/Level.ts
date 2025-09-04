@@ -18,6 +18,7 @@ interface LevelConfig {
   cookies: number;
   title: string;
   description: string;
+  starField?: boolean; // Added for cosmic theme
 }
 
 export class Level {
@@ -38,7 +39,14 @@ export class Level {
     this.canvasWidth = Math.max(canvasWidth, 800);
     this.canvasHeight = Math.max(canvasHeight, 600);
     this.config = this.levelConfigs[levelNumber as keyof typeof LEVEL_CONFIGS] || this.levelConfigs[1];
-    
+
+    // Ensure starField is defined for cosmic levels
+    if (this.levelNumber >= 5) { // Assuming levels 5+ are cosmic
+      this.config.starField = true;
+    } else {
+      this.config.starField = false;
+    }
+
     this.initializeLevel();
   }
 
@@ -65,7 +73,7 @@ export class Level {
 
     // Create enemies
     this.enemies = [];
-    
+
     // CIA Agents
     for (let i = 0; i < this.config.fbiAgents; i++) {
       this.enemies.push(new Enemy(
@@ -74,7 +82,7 @@ export class Level {
         'cia'
       ));
     }
-    
+
     // Army Men
     for (let i = 0; i < this.config.armyMen; i++) {
       this.enemies.push(new Enemy(
@@ -83,7 +91,7 @@ export class Level {
         'army'
       ));
     }
-    
+
     // Radioactive Rats
     for (let i = 0; i < this.config.radioactiveRats; i++) {
       this.enemies.push(new Enemy(
@@ -92,7 +100,7 @@ export class Level {
         'rat'
       ));
     }
-    
+
     // Zombies
     for (let i = 0; i < this.config.zombies; i++) {
       this.enemies.push(new Enemy(
@@ -101,7 +109,7 @@ export class Level {
         'zombie'
       ));
     }
-    
+
     // Boss for Level 5
     if (this.levelNumber === 5) {
       this.boss = new Enemy(
@@ -117,7 +125,7 @@ export class Level {
     this.enemies.forEach(enemy => {
       enemy.update(deltaTime, this.canvasWidth, this.canvasHeight);
     });
-    
+
     // Update boss if it exists
     if (this.boss) {
       this.boss.update(deltaTime, this.canvasWidth, this.canvasHeight);
@@ -125,26 +133,30 @@ export class Level {
   }
 
   public render(ctx: CanvasRenderingContext2D) {
-    // Render background
-    this.renderBackground(ctx);
-    
-    // Render cookies
-    this.cookies.forEach(cookie => {
-      if (!cookie.collected) {
-        this.renderCookie(ctx, cookie);
-      }
-    });
-    
-    // Render enemies
-    this.enemies.forEach(enemy => {
-      enemy.render(ctx);
-    });
-    
+    // Clear canvas with level background
+    ctx.fillStyle = this.config.background;
+    ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
+
+    // Render cosmic star field if enabled
+    if (this.config.starField) {
+      this.renderStarField(ctx);
+    }
+
+    // Render environment based on level
+    this.renderEnvironment(ctx);
+
+    // Render cosmic floating elements
+    this.renderCosmicElements(ctx);
+
+    // Render entities
+    this.cookies.forEach(cookie => cookie.render(ctx));
+    this.enemies.forEach(enemy => enemy.render(ctx));
+
     // Render boss if it exists
     if (this.boss) {
       this.boss.render(ctx);
     }
-    
+
     // Render finish line
     this.renderFinishLine(ctx);
   }
@@ -152,7 +164,7 @@ export class Level {
   private renderBackground(ctx: CanvasRenderingContext2D) {
     ctx.save();
     ctx.imageSmoothingEnabled = false;
-    
+
     switch (this.levelNumber) {
       case 1: // Desert - Area 51
         this.renderDesertBackground(ctx);
@@ -166,17 +178,80 @@ export class Level {
       case 4: // Graveyard
         this.renderGraveyardBackground(ctx);
         break;
-      case 5: // Government Lab
-        this.renderLabBackground(ctx);
+      case 5: // Government Lab (becomes Cosmic Lab)
+        this.renderCosmicLabBackground(ctx); // Changed to cosmic version
         break;
       default:
-        this.renderSpaceBackground(ctx);
+        this.renderSpaceBackground(ctx); // Default to space for other cosmic levels
     }
-    
+
     ctx.restore();
-    
+
     // Add environmental details
     this.renderEnvironment(ctx);
+  }
+
+  // New method for cosmic star field
+  private renderStarField(ctx: CanvasRenderingContext2D) {
+    ctx.fillStyle = '#000011'; // Deep space background
+    ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
+
+    ctx.fillStyle = '#FFFFFF'; // White stars
+    for (let i = 0; i < 200; i++) { // More stars for a richer field
+      const x = Math.random() * this.canvasWidth;
+      const y = Math.random() * this.canvasHeight;
+      const size = Math.random() * 2; // Small random star sizes
+      ctx.fillRect(x, y, size, size);
+    }
+  }
+
+  // New method for rendering cosmic floating elements
+  private renderCosmicElements(ctx: CanvasRenderingContext2D) {
+    ctx.save();
+    ctx.imageSmoothingEnabled = false;
+
+    // Floating planets/asteroids (simple shapes)
+    const cosmicElements = [
+      { type: 'planet', x: 100, y: 150, size: 40, color: '#FF69B4' }, // Pink planet
+      { type: 'asteroid', x: 300, y: 80, size: 20, color: '#A9A9A9' }, // Gray asteroid
+      { type: 'planet', x: 500, y: 200, size: 50, color: '#8A2BE2' }, // Purple planet
+      { type: 'ufo', x: 700, y: 100, size: 30, color: '#32CD32' }, // Green UFO
+    ];
+
+    cosmicElements.forEach(element => {
+      ctx.fillStyle = element.color;
+      if (element.type === 'planet') {
+        // Simple circle for planets
+        ctx.beginPath();
+        ctx.arc(element.x, element.y, element.size / 2, 0, Math.PI * 2);
+        ctx.fill();
+        // Add subtle texture/shading
+        ctx.fillStyle = 'rgba(255,255,255,0.3)';
+        ctx.beginPath();
+        ctx.arc(element.x - element.size * 0.1, element.y - element.size * 0.1, element.size / 2 * 0.8, 0, Math.PI * 2);
+        ctx.fill();
+      } else if (element.type === 'asteroid') {
+        // Irregular shape for asteroid
+        ctx.beginPath();
+        ctx.moveTo(element.x, element.y);
+        ctx.lineTo(element.x + element.size * 0.5, element.y - element.size * 0.3);
+        ctx.lineTo(element.x + element.size * 0.2, element.y - element.size * 0.8);
+        ctx.lineTo(element.x - element.size * 0.3, element.y - element.size * 0.5);
+        ctx.closePath();
+        ctx.fill();
+      } else if (element.type === 'ufo') {
+        // Simple UFO shape
+        ctx.beginPath();
+        ctx.ellipse(element.x, element.y, element.size * 0.8, element.size * 0.3, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = 'rgba(255,255,255,0.4)';
+        ctx.beginPath();
+        ctx.ellipse(element.x, element.y - element.size * 0.1, element.size * 0.4, element.size * 0.1, 0, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    });
+
+    ctx.restore();
   }
 
   private renderDesertBackground(ctx: CanvasRenderingContext2D) {
@@ -188,7 +263,7 @@ export class Level {
     skyGradient.addColorStop(1, '#F4A460'); // Sandy transition
     ctx.fillStyle = skyGradient;
     ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight * 0.7);
-    
+
     // Add stylized sun
     ctx.fillStyle = '#FFD700';
     ctx.shadowColor = '#FFD700';
@@ -196,21 +271,21 @@ export class Level {
     ctx.beginPath();
     ctx.arc(this.canvasWidth * 0.8, this.canvasHeight * 0.2, 32, 0, 2 * Math.PI);
     ctx.fill();
-    
+
     // Desert sand with warm tones
     const sandGradient = ctx.createLinearGradient(0, this.canvasHeight * 0.7, 0, this.canvasHeight);
     sandGradient.addColorStop(0, '#DEB887'); // Burlywood
     sandGradient.addColorStop(1, '#CD853F'); // Peru
     ctx.fillStyle = sandGradient;
     ctx.fillRect(0, this.canvasHeight * 0.7, this.canvasWidth, this.canvasHeight * 0.3);
-    
+
     // PERFORMANCE OPTIMIZATION: Simplified sand dunes - larger chunks, less math
     for (let x = 0; x < this.canvasWidth; x += 32) {
       const waveHeight = Math.sin(x * 0.01) * 8;
       ctx.fillStyle = '#F4A460';
       ctx.fillRect(x, this.canvasHeight * 0.7 + waveHeight, 32, this.canvasHeight * 0.3 - waveHeight);
     }
-    
+
     // PERFORMANCE OPTIMIZATION: Simplified star rendering - remove animation
     ctx.shadowBlur = 0;
     ctx.fillStyle = '#FFFF99';
@@ -233,7 +308,7 @@ export class Level {
     skyGradient.addColorStop(1, '#2F4F4F'); // Dark slate gray
     ctx.fillStyle = skyGradient;
     ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight * 0.7);
-    
+
     // Add floating geometric shapes (cyberpunk aesthetic)
     ctx.fillStyle = '#00FFFF';
     ctx.globalAlpha = 0.3;
@@ -243,11 +318,11 @@ export class Level {
       ctx.fillRect(x, y, 8, 8);
     }
     ctx.globalAlpha = 1;
-    
+
     // Sleek pavement with grid pattern
     ctx.fillStyle = '#483D8B'; // Dark slate blue
     ctx.fillRect(0, this.canvasHeight * 0.7, this.canvasWidth, this.canvasHeight * 0.3);
-    
+
     // Add grid lines for futuristic feel
     ctx.strokeStyle = '#00CED1'; // Dark turquoise
     ctx.lineWidth = 1;
@@ -277,7 +352,7 @@ export class Level {
     wallGradient.addColorStop(1, '#2F2F2F'); // Dark gray
     ctx.fillStyle = wallGradient;
     ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight * 0.8);
-    
+
     // Colorful mosaic floor tiles
     const tileSize = 16;
     const tileColors = ['#4169E1', '#1E90FF', '#00CED1', '#20B2AA', '#4682B4'];
@@ -287,7 +362,7 @@ export class Level {
         ctx.fillStyle = tileColors[colorIndex];
         ctx.globalAlpha = 0.8;
         ctx.fillRect(x, y, tileSize, tileSize);
-        
+
         // Add tile borders
         ctx.globalAlpha = 1;
         ctx.strokeStyle = '#1C1C1C';
@@ -295,14 +370,14 @@ export class Level {
         ctx.strokeRect(x, y, tileSize, tileSize);
       }
     }
-    
+
     // Add warm ambient lighting effects
     const ambientLights = [
       { x: this.canvasWidth * 0.2, color: '#FFD700' },
       { x: this.canvasWidth * 0.5, color: '#FF6347' },
       { x: this.canvasWidth * 0.8, color: '#32CD32' }
     ];
-    
+
     ambientLights.forEach(light => {
       const lightGradient = ctx.createRadialGradient(
         light.x, this.canvasHeight * 0.1, 0,
@@ -323,7 +398,7 @@ export class Level {
     skyGradient.addColorStop(1, '#1C1C1C'); // Very dark ground
     ctx.fillStyle = skyGradient;
     ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
-    
+
     // Add eerie moon
     ctx.fillStyle = '#F5F5DC';
     ctx.shadowColor = '#F5F5DC';
@@ -332,7 +407,7 @@ export class Level {
     ctx.arc(this.canvasWidth * 0.8, this.canvasHeight * 0.2, 28, 0, 2 * Math.PI);
     ctx.fill();
     ctx.shadowBlur = 0;
-    
+
     // Add mist effect
     ctx.globalAlpha = 0.3;
     ctx.fillStyle = '#DCDCDC';
@@ -343,49 +418,62 @@ export class Level {
     ctx.globalAlpha = 1;
   }
 
-  private renderLabBackground(ctx: CanvasRenderingContext2D) {
-    // Sterile government lab environment
-    const bgGradient = ctx.createLinearGradient(0, 0, 0, this.canvasHeight);
-    bgGradient.addColorStop(0, '#E0E0E0'); // Light gray ceiling
-    bgGradient.addColorStop(0.3, '#F5F5F5'); // White walls
-    bgGradient.addColorStop(0.7, '#DCDCDC'); // Gray floor transition
-    bgGradient.addColorStop(1, '#C0C0C0'); // Darker floor
+  // Modified to reflect cosmic theme
+  private renderCosmicLabBackground(ctx: CanvasRenderingContext2D) {
+    // Cosmic lab environment with nebulae and stars
+    const bgGradient = ctx.createLinearGradient(0, 0, this.canvasWidth, this.canvasHeight);
+    bgGradient.addColorStop(0, '#191970'); // Midnight blue
+    bgGradient.addColorStop(0.5, '#483D8B'); // Dark slate blue
+    bgGradient.addColorStop(1, '#000080'); // Navy
     ctx.fillStyle = bgGradient;
     ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
-    
-    // Add fluorescent lighting strips
+
+    // Add swirling nebulae effects
+    for (let i = 0; i < 5; i++) {
+      const nebulaX = Math.random() * this.canvasWidth;
+      const nebulaY = Math.random() * this.canvasHeight;
+      const nebulaSize = Math.random() * 200 + 100;
+      const nebulaGradient = ctx.createRadialGradient(
+        nebulaX, nebulaY, 0,
+        nebulaX, nebulaY, nebulaSize
+      );
+      nebulaGradient.addColorStop(0, `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, 0.3)`);
+      nebulaGradient.addColorStop(1, 'transparent');
+      ctx.fillStyle = nebulaGradient;
+      ctx.fillRect(nebulaX - nebulaSize, nebulaY - nebulaSize, nebulaSize * 2, nebulaSize * 2);
+    }
+
+    // Add scattered stars
     ctx.fillStyle = '#FFFFFF';
-    for (let x = 100; x < this.canvasWidth; x += 200) {
-      ctx.fillRect(x, 20, 80, 8);
-      // Add glow effect
-      ctx.shadowColor = '#FFFFFF';
-      ctx.shadowBlur = 10;
-      ctx.fillRect(x, 20, 80, 8);
-      ctx.shadowBlur = 0;
+    for (let i = 0; i < 150; i++) {
+      const x = Math.random() * this.canvasWidth;
+      const y = Math.random() * this.canvasHeight;
+      const size = Math.random() * 1.5;
+      ctx.fillRect(x, y, size, size);
     }
-    
-    // Add grid floor pattern
-    ctx.strokeStyle = '#B0B0B0';
-    ctx.lineWidth = 1;
-    for (let x = 0; x < this.canvasWidth; x += 32) {
-      ctx.beginPath();
-      ctx.moveTo(x, this.canvasHeight * 0.7);
-      ctx.lineTo(x, this.canvasHeight);
-      ctx.stroke();
-    }
-    for (let y = this.canvasHeight * 0.7; y < this.canvasHeight; y += 32) {
-      ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.lineTo(this.canvasWidth, y);
-      ctx.stroke();
-    }
+
+    // Add glowing lab equipment (futuristic, cosmic feel)
+    ctx.fillStyle = '#00FFFF'; // Cyan glow
+    ctx.shadowColor = '#00FFFF';
+    ctx.shadowBlur = 15;
+    ctx.beginPath();
+    ctx.arc(this.canvasWidth * 0.2, this.canvasHeight * 0.8, 20, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = '#FFD700'; // Gold glow
+    ctx.shadowColor = '#FFD700';
+    ctx.shadowBlur = 15;
+    ctx.fillRect(this.canvasWidth * 0.7, this.canvasHeight * 0.7, 30, 30);
+
+    ctx.shadowBlur = 0; // Reset shadow blur
   }
+
 
   private renderSpaceBackground(ctx: CanvasRenderingContext2D) {
     // Deep space
     ctx.fillStyle = '#000011';
     ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
-    
+
     // Add stars
     ctx.fillStyle = '#FFFFFF';
     for (let i = 0; i < 100; i++) {
@@ -399,29 +487,33 @@ export class Level {
   private renderEnvironment(ctx: CanvasRenderingContext2D) {
     ctx.save();
     ctx.imageSmoothingEnabled = false;
-    
+
     switch (this.levelNumber) {
       case 1: // Desert - Area 51 with UFO wreckage and structures
         this.renderDesertEnvironment(ctx);
         break;
-        
+
       case 2: // City - Dystopian buildings and debris
         this.renderCityEnvironment(ctx);
         break;
-        
+
       case 3: // Subway - Underground infrastructure
         this.renderSubwayEnvironment(ctx);
         break;
-        
+
       case 4: // Graveyard - Tombstones and dead trees
         this.renderGraveyardEnvironment(ctx);
         break;
-        
-      case 5: // Government Lab - Lab equipment and desks
-        this.renderLabEnvironment(ctx);
+
+      case 5: // Government Lab (becomes Cosmic Lab)
+        this.renderCosmicLabEnvironment(ctx); // Changed to cosmic version
+        break;
+
+      default: // For other cosmic levels, render space environment details
+        this.renderSpaceEnvironment(ctx);
         break;
     }
-    
+
     ctx.restore();
   }
 
@@ -439,7 +531,7 @@ export class Level {
       ctx.fillRect(pos.x, pos.y, 24, 8);
       ctx.fillStyle = '#2F4F4F'; // Dark slate gray
       ctx.fillRect(pos.x + 4, pos.y - 4, 16, 4);
-      
+
       // Burn marks
       ctx.fillStyle = '#1C1C1C';
       ctx.fillRect(pos.x - 8, pos.y + 8, 40, 4);
@@ -467,7 +559,7 @@ export class Level {
     ctx.fillRect(50, this.canvasHeight * 0.4, 120, 80);
     ctx.fillStyle = '#1C1C1C';
     ctx.fillRect(60, this.canvasHeight * 0.4 + 10, 100, 60);
-    
+
     // Warning signs
     ctx.fillStyle = '#FFD700';
     ctx.fillRect(250, this.canvasHeight - 60, 16, 16);
@@ -493,11 +585,11 @@ export class Level {
 
     buildings.forEach(building => {
       const y = this.canvasHeight - building.height;
-      
+
       // Main building structure
       ctx.fillStyle = '#2F2F2F';
       ctx.fillRect(building.x, y, building.width, building.height);
-      
+
       // Windows (some lit, some dark)
       const windowSize = 6;
       const windowSpacing = 12;
@@ -508,7 +600,7 @@ export class Level {
           ctx.fillRect(wx, wy, windowSize, windowSize);
         }
       }
-      
+
       // Antenna or details on top
       if (Math.random() > 0.5) {
         ctx.fillStyle = '#FF0000';
@@ -540,11 +632,11 @@ export class Level {
     pillarPositions.forEach(x => {
       ctx.fillStyle = '#4A4A4A';
       ctx.fillRect(x, 0, 16, this.canvasHeight);
-      
+
       // Pillar details
       ctx.fillStyle = '#6A6A6A';
       ctx.fillRect(x + 2, 0, 12, this.canvasHeight);
-      
+
       // Rust/wear marks
       ctx.fillStyle = '#8B4513';
       for (let y = 50; y < this.canvasHeight; y += 100) {
@@ -556,7 +648,7 @@ export class Level {
     ctx.fillStyle = '#708090'; // Slate gray
     ctx.fillRect(0, this.canvasHeight - 24, this.canvasWidth, 8);
     ctx.fillRect(0, this.canvasHeight - 12, this.canvasWidth, 8);
-    
+
     // Track ties
     ctx.fillStyle = '#654321'; // Dark brown
     for (let x = 0; x < this.canvasWidth; x += 24) {
@@ -572,7 +664,7 @@ export class Level {
       lightGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
       ctx.fillStyle = lightGradient;
       ctx.fillRect(x - 60, 0, 120, 120);
-      
+
       // Light fixture
       ctx.fillStyle = '#2F2F2F';
       ctx.fillRect(x - 8, 20, 16, 8);
@@ -583,7 +675,7 @@ export class Level {
     ctx.fillRect(200, this.canvasHeight - 200, 24, 16);
     ctx.fillStyle = '#00FF00'; // Lime green
     ctx.fillRect(400, this.canvasHeight - 180, 32, 12);
-    
+
     // Water drips/stains
     ctx.fillStyle = '#1C1C1C';
     const stainPositions = [75, 225, 425, 625];
@@ -608,19 +700,19 @@ export class Level {
       ctx.save();
       ctx.translate(tomb.x + 12, tomb.y + 30);
       ctx.rotate(tomb.tilt * Math.PI / 180);
-      
+
       // Tombstone base
       ctx.fillStyle = '#696969'; // Dim gray
       ctx.fillRect(-12, -30, 24, 40);
-      
+
       // Tombstone top (rounded)
       ctx.fillRect(-8, -35, 16, 10);
-      
+
       // Moss/weathering
       ctx.fillStyle = '#228B22';
       ctx.fillRect(-10, -20, 4, 6);
       ctx.fillRect(6, -25, 3, 8);
-      
+
       ctx.restore();
     });
 
@@ -630,7 +722,7 @@ export class Level {
       // Tree trunk
       ctx.fillStyle = '#2F2F2F';
       ctx.fillRect(x, this.canvasHeight - 180, 8, 60);
-      
+
       // Bare branches
       ctx.strokeStyle = '#2F2F2F';
       ctx.lineWidth = 2;
@@ -643,8 +735,9 @@ export class Level {
     });
   }
 
-  private renderLabEnvironment(ctx: CanvasRenderingContext2D) {
-    // Lab tables/desks
+  // Modified to reflect cosmic theme
+  private renderCosmicLabEnvironment(ctx: CanvasRenderingContext2D) {
+    // Lab tables/desks with a cosmic twist
     const tablePositions = [
       { x: 100, y: this.canvasHeight - 80 },
       { x: 300, y: this.canvasHeight - 80 },
@@ -652,55 +745,101 @@ export class Level {
     ];
 
     tablePositions.forEach(table => {
-      // Table surface
-      ctx.fillStyle = '#D3D3D3'; // Light gray
+      // Table surface with metallic sheen
+      ctx.fillStyle = '#B0C4DE'; // Light steel blue
       ctx.fillRect(table.x, table.y, 80, 16);
-      
+
       // Table legs
-      ctx.fillStyle = '#A9A9A9';
+      ctx.fillStyle = '#778899'; // Light slate gray
       ctx.fillRect(table.x + 4, table.y + 16, 4, 20);
       ctx.fillRect(table.x + 72, table.y + 16, 4, 20);
-      
-      // Lab equipment on tables
-      ctx.fillStyle = '#4169E1'; // Royal blue (beakers)
+
+      // Lab equipment with glowing elements
+      ctx.fillStyle = '#FF6347'; // Tomato red (glowing tubes)
+      ctx.shadowColor = '#FF6347';
+      ctx.shadowBlur = 8;
       ctx.fillRect(table.x + 20, table.y - 8, 6, 8);
-      ctx.fillStyle = '#32CD32'; // Lime green (liquid)
+      ctx.fillStyle = '#32CD32'; // Lime green (glowing liquid)
+      ctx.shadowColor = '#32CD32';
+      ctx.shadowBlur = 6;
       ctx.fillRect(table.x + 21, table.y - 6, 4, 4);
-      
-      // Computer/monitor
-      ctx.fillStyle = '#2F2F2F';
+      ctx.shadowBlur = 0; // Reset shadow
+
+      // Computer/monitor with cosmic display
+      ctx.fillStyle = '#2C3E50'; // Dark desaturated blue
       ctx.fillRect(table.x + 40, table.y - 12, 20, 12);
-      ctx.fillStyle = '#00FF00';
+      ctx.fillStyle = '#00FFFF'; // Cyan screen
+      ctx.shadowColor = '#00FFFF';
+      ctx.shadowBlur = 4;
       ctx.fillRect(table.x + 42, table.y - 10, 16, 8);
+      ctx.shadowBlur = 0; // Reset shadow
     });
 
-    // Wall cabinets
-    ctx.fillStyle = '#F5F5F5';
+    // Wall cabinets with a futuristic, sleek design
+    ctx.fillStyle = '#2F4F4F'; // Dark slate gray
     for (let x = 50; x < this.canvasWidth - 50; x += 120) {
       ctx.fillRect(x, 100, 60, 40);
-      // Cabinet doors
-      ctx.strokeStyle = '#C0C0C0';
+      // Cabinet doors with subtle glow lines
+      ctx.strokeStyle = '#40E0D0'; // Turquoise glow
       ctx.lineWidth = 1;
+      ctx.shadowColor = '#40E0D0';
+      ctx.shadowBlur = 3;
       ctx.strokeRect(x, 100, 60, 40);
       ctx.strokeRect(x + 30, 100, 30, 40);
+      ctx.shadowBlur = 0; // Reset shadow
     }
 
-    // Special bag on desk (The Adjudicator)
+    // Special bag on desk (The Adjudicator) - now with cosmic energy
     if (this.levelNumber === 5) {
-      ctx.fillStyle = '#FFD700'; // Gold
+      ctx.fillStyle = '#DA70D6'; // Orchid
+      ctx.shadowColor = '#DA70D6';
+      ctx.shadowBlur = 10;
       ctx.fillRect(320, this.canvasHeight - 88, 12, 8);
-      // Glow effect
-      ctx.shadowColor = '#FFD700';
-      ctx.shadowBlur = 8;
+      // Pulsating glow effect
+      const pulse = Math.sin(Date.now() * 0.01) * 0.5 + 0.5; // 0.5 to 1.0
+      ctx.shadowBlur = 8 + pulse * 4;
       ctx.fillRect(320, this.canvasHeight - 88, 12, 8);
-      ctx.shadowBlur = 0;
+      ctx.shadowBlur = 0; // Reset shadow
     }
   }
+
+  private renderSpaceEnvironment(ctx: CanvasRenderingContext2D) {
+    // Render some floating cosmic debris and a distant nebula
+    ctx.fillStyle = '#FFFFFF';
+    const debrisCount = 20;
+    for (let i = 0; i < debrisCount; i++) {
+      const x = Math.random() * this.canvasWidth;
+      const y = Math.random() * this.canvasHeight;
+      const size = Math.random() * 5 + 2;
+      const type = Math.random();
+      if (type < 0.5) { // Asteroid fragments
+        ctx.fillRect(x, y, size, size);
+        ctx.fillRect(x + size, y + size, size * 0.5, size * 0.5);
+      } else { // Ice crystals
+        ctx.fillStyle = 'rgba(200, 200, 255, 0.7)';
+        ctx.fillRect(x, y, size * 0.8, size * 1.2);
+        ctx.fillRect(x + size * 0.5, y + size * 0.5, size * 0.6, size * 0.9);
+        ctx.fillStyle = '#FFFFFF';
+      }
+    }
+
+    // Distant nebula effect
+    const nebulaX = this.canvasWidth * 0.7;
+    const nebulaY = this.canvasHeight * 0.3;
+    const nebulaRadius = this.canvasWidth * 0.4;
+    const nebulaGradient = ctx.createRadialGradient(nebulaX, nebulaY, 0, nebulaX, nebulaY, nebulaRadius);
+    nebulaGradient.addColorStop(0, 'rgba(128, 0, 128, 0.4)'); // Purple
+    nebulaGradient.addColorStop(0.5, 'rgba(255, 105, 180, 0.3)'); // Hot Pink
+    nebulaGradient.addColorStop(1, 'transparent');
+    ctx.fillStyle = nebulaGradient;
+    ctx.fillRect(nebulaX - nebulaRadius, nebulaY - nebulaRadius, nebulaRadius * 2, nebulaRadius * 2);
+  }
+
 
   private renderCookie(ctx: CanvasRenderingContext2D, cookie: Cookie) {
     ctx.save();
     ctx.imageSmoothingEnabled = false;
-    
+
     // Cookie pixel art (8x8) - based on reference image
     const cookiePixels = [
       [0,0,1,1,1,1,0,0], // Row 0
@@ -712,14 +851,14 @@ export class Level {
       [0,1,2,2,2,2,1,0], // Row 6
       [0,0,1,1,1,1,0,0], // Row 7
     ];
-    
+
     const colors = [
       'transparent', // 0
       '#CD853F',     // 1 - cookie outline (Peru)
       '#DEB887',     // 2 - cookie base (BurlyWood)
       '#8B4513',     // 3 - chocolate chips (SaddleBrown)
     ];
-    
+
     const scale = 4; // Much bigger cookies to match character scale
     for (let row = 0; row < cookiePixels.length; row++) {
       for (let col = 0; col < cookiePixels[row].length; col++) {
@@ -727,31 +866,31 @@ export class Level {
         if (colorIndex > 0) {
           ctx.fillStyle = colors[colorIndex];
           ctx.fillRect(
-            cookie.x + col * scale, 
-            cookie.y + row * scale, 
-            scale, 
+            cookie.x + col * scale,
+            cookie.y + row * scale,
+            scale,
             scale
           );
         }
       }
     }
-    
+
     // Add subtle glow
     ctx.shadowColor = '#DAA520';
     ctx.shadowBlur = 3;
     ctx.strokeStyle = '#DAA520';
     ctx.lineWidth = 1;
     ctx.strokeRect(cookie.x - 1, cookie.y - 1, cookie.width + 2, cookie.height + 2);
-    
+
     ctx.restore();
   }
 
   private renderFinishLine(ctx: CanvasRenderingContext2D) {
     if (!this.finishLine) return; // Guard against null finishLine
-    
+
     ctx.save();
     ctx.imageSmoothingEnabled = false;
-    
+
     // Checkered finish line pattern (based on reference image)
     const tileSize = 16; // Larger tiles to match character scale
     const pattern = [
@@ -759,9 +898,9 @@ export class Level {
       [0,1,0,1,0,1,0,1,0,1,0,1,0],
       [1,0,1,0,1,0,1,0,1,0,1,0,1],
     ];
-    
+
     const colors = ['#000000', '#ffffff']; // Black and white
-    
+
     // Draw checkered pattern
     for (let row = 0; row < pattern.length; row++) {
       for (let col = 0; col < pattern[row].length; col++) {
@@ -775,7 +914,7 @@ export class Level {
         );
       }
     }
-    
+
     // Add "FINISH" text in pixel font style
     ctx.fillStyle = '#ffff00';
     ctx.shadowColor = '#ffff00';
@@ -783,25 +922,25 @@ export class Level {
     ctx.font = 'bold 8px monospace';
     ctx.textAlign = 'center';
     ctx.fillText('FINISH', this.finishLine.x + this.finishLine.width/2, this.finishLine.y + 12);
-    
+
     ctx.restore();
   }
 
   public checkCookieCollisions(playerBounds: { x: number; y: number; width: number; height: number; }): number {
     let collected = 0;
-    
+
     this.cookies.forEach(cookie => {
       if (!cookie.collected && this.checkCollision(playerBounds, cookie)) {
         cookie.collected = true;
         collected++;
       }
     });
-    
+
     return collected;
   }
 
   public checkEnemyCollisions(playerBounds: { x: number; y: number; width: number; height: number; }): boolean {
-    return this.enemies.some(enemy => 
+    return this.enemies.some(enemy =>
       enemy.isActive() && this.checkCollision(playerBounds, enemy.getBounds())
     );
   }
