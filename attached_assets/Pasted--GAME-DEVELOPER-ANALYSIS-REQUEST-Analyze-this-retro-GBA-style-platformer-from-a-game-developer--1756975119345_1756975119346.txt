@@ -1,0 +1,60 @@
+// GAME DEVELOPER ANALYSIS REQUEST
+// Analyze this retro GBA-style platformer from a game developer perspective
+// Focus on: gameplay mechanics, player experience, and GBA authenticity
+
+/*
+COSMIC PLAYGROUND - GBA Style Analysis Needed
+
+Game Overview:
+- 16x16 pixel art platformer starring Cosmo the Alien
+- Core mechanics: stealth, dodging, cookie collection
+- 5 levels with escalating difficulty
+- Boss battle finale
+- Target: Authentic GBA feel with modern polish
+
+Please analyze and provide feedback on:
+
+1. GAMEPLAY FLOW & PACING
+   - Does the difficulty curve feel natural?
+   - Are the controls responsive enough for GBA-style precision?
+   - Is the core loop (collect cookies → avoid enemies → reach exit) engaging?
+   - How does the 3-hit Ray Gun vs instant-kill Adjudicator balance feel?
+
+2. GBA AUTHENTICITY
+   - Does the 16x16 pixel art maintain GBA visual standards?
+   - Are the screen transitions and effects true to GBA limitations?
+   - Is the color palette within GBA's 32,768 color range?
+   - Do the sound effects match GBA audio quality/style?
+
+3. LEVEL DESIGN QUALITY
+   - Level 1 (Desert): Does it teach mechanics effectively?
+   - Level 2 (City): Good difficulty progression?
+   - Level 3 (Subway): Ray Gun introduction well-paced?
+   - Level 4 (Graveyard): Zombie mechanics balanced?
+   - Level 5 (Lab/Cathedral): Boss fight satisfying?
+
+4. PLAYER ENGAGEMENT
+   - Is the humor landing effectively?
+   - Does the stealth feel meaningful or frustrating?
+   - Are the enemy patterns predictable but challenging?
+   - Is cookie collection rewarding enough?
+
+5. TECHNICAL PERFORMANCE
+   - Maintaining 60fps on weaker hardware?
+   - Loading times between levels acceptable?
+   - Input lag staying under 50ms?
+   - Memory usage optimized for browser/mobile?
+
+6. AREAS FOR IMPROVEMENT
+   - What feels unpolished or incomplete?
+   - Where could the GBA authenticity be stronger?
+   - Which mechanics need refinement?
+   - What would make this more addictive?
+
+Please play through the game and provide specific, actionable feedback as if you were a senior game developer reviewing this for a GBA-style indie game submission.
+*/
+
+// TODO: Implement your analysis in comments throughout the codebase
+// TODO: Suggest specific improvements for GBA authenticity
+// TODO: Identify any gameplay balance issues
+// TODO: Rate overall game feel on 1-10 scale with reasoning
