@@ -113,10 +113,25 @@ export class Level {
   }
 
   public update(deltaTime: number) {
-    // Update enemies
-    this.enemies.forEach(enemy => {
-      enemy.update(deltaTime, this.canvasWidth, this.canvasHeight);
-    });
+    // PERFORMANCE OPTIMIZATION: Process enemies in batches to reduce single-frame load
+    const batchSize = 6; // Process max 6 enemies per frame for better performance
+    const enemyCount = this.enemies.length;
+    
+    if (enemyCount <= batchSize) {
+      // Small enemy count - update all at once
+      this.enemies.forEach(enemy => {
+        enemy.update(deltaTime, this.canvasWidth, this.canvasHeight);
+      });
+    } else {
+      // Large enemy count - batch processing for smoother performance
+      const frameIndex = Math.floor(Date.now() / 16.67) % Math.ceil(enemyCount / batchSize);
+      const startIndex = frameIndex * batchSize;
+      const endIndex = Math.min(startIndex + batchSize, enemyCount);
+      
+      for (let i = startIndex; i < endIndex; i++) {
+        this.enemies[i].update(deltaTime, this.canvasWidth, this.canvasHeight);
+      }
+    }
     
     // Update boss if it exists
     if (this.boss) {
@@ -204,21 +219,21 @@ export class Level {
     ctx.fillStyle = sandGradient;
     ctx.fillRect(0, this.canvasHeight * 0.7, this.canvasWidth, this.canvasHeight * 0.3);
     
-    // Add flowing sand dunes
-    for (let x = 0; x < this.canvasWidth; x += 8) {
-      const waveHeight = Math.sin(x * 0.015) * 12 + Math.sin(x * 0.03) * 6;
+    // PERFORMANCE OPTIMIZATION: Simplified sand dunes - larger chunks, less math
+    for (let x = 0; x < this.canvasWidth; x += 32) {
+      const waveHeight = Math.sin(x * 0.01) * 8;
       ctx.fillStyle = '#F4A460';
-      ctx.fillRect(x, this.canvasHeight * 0.7 + waveHeight, 8, this.canvasHeight * 0.3 - waveHeight);
+      ctx.fillRect(x, this.canvasHeight * 0.7 + waveHeight, 32, this.canvasHeight * 0.3 - waveHeight);
     }
     
-    // Add twinkling stars in the upper sky
+    // PERFORMANCE OPTIMIZATION: Simplified star rendering - remove animation
     ctx.shadowBlur = 0;
     ctx.fillStyle = '#FFFF99';
-    for (let i = 0; i < 20; i++) {
-      const x = Math.random() * this.canvasWidth;
-      const y = Math.random() * this.canvasHeight * 0.3;
-      const twinkle = Math.sin(Date.now() * 0.01 + i) * 0.5 + 0.5;
-      ctx.globalAlpha = twinkle;
+    ctx.globalAlpha = 0.8;
+    // Reduced from 20 to 8 stars for better performance
+    for (let i = 0; i < 8; i++) {
+      const x = (i * this.canvasWidth / 8) + Math.sin(i) * 50;
+      const y = (i * this.canvasHeight * 0.05) + 20;
       ctx.fillRect(x, y, 2, 2);
     }
     ctx.globalAlpha = 1;

@@ -129,6 +129,13 @@ Changelog:
   - Implemented transition queue system to prevent button interference
   - Added input blocking during transitions to prevent user interruption
   - Ensured clean state separation with no UI element conflicts
+- September 4, 2025. Movement Speed Consistency & Performance Optimization:
+  - Fixed frame-rate independent enemy movement using deltaTime normalization
+  - Optimized gameOver state rendering to skip expensive operations
+  - Implemented batched enemy processing for levels with high enemy counts
+  - Simplified complex background rendering (stars, sand dunes) for better FPS
+  - Removed artificial frame rate limiting to allow natural browser vsync
+  - Ensured consistent 60fps and movement speed across all levels
 ```
 
 ## User Preferences

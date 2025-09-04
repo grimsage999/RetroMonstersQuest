@@ -104,9 +104,11 @@ export class Enemy {
   public update(deltaTime: number, canvasWidth: number, canvasHeight: number) {
     if (!this.active) return;
     
-    // Move enemy
-    this.x += this.speedX;
-    this.y += this.speedY;
+    // PERFORMANCE FIX: Frame-rate independent movement using deltaTime
+    // This ensures consistent movement speed regardless of FPS
+    const frameMultiplier = deltaTime / 16.67; // Normalize to 60fps baseline
+    this.x += this.speedX * frameMultiplier;
+    this.y += this.speedY * frameMultiplier;
     
     // Bounce off walls
     if (this.x <= 0 || this.x + this.width >= canvasWidth) {
