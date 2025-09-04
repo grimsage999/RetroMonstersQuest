@@ -741,14 +741,13 @@ export class GameEngine {
     const deltaTime = currentTime - this.lastTime;
     this.lastTime = currentTime;
 
-    // Performance monitoring with frame limiting
+    // Performance monitoring 
     this.frameCount++;
     this.fpsTimer += deltaTime;
     
-    // Limit to 60fps for consistency (GBA was 59.7fps)
-    if (deltaTime < 16.67) {
-      return; // Skip frame if running too fast
-    }
+    // PERFORMANCE FIX: Remove artificial frame limiting - let browser handle vsync
+    // The previous frame limiting logic was causing unnecessary function calls
+    // Modern browsers already handle frame rate limiting efficiently
     
     if (this.fpsTimer >= 1000) {
       this.currentFPS = this.frameCount;
@@ -928,6 +927,12 @@ export class GameEngine {
     // Don't render game content if we're still in TITLE phase (React overlay handles it)
     const currentPhase = this.stateManager.getCurrentPhase();
     if (!this.isRunning || currentPhase === GamePhase.TITLE) {
+      return;
+    }
+
+    // PERFORMANCE FIX: Skip expensive rendering during gameOver state
+    // React overlay handles the game over screen, so no need to render game content
+    if (currentPhase === GamePhase.GAME_OVER || this.gameState.phase === 'gameOver') {
       return;
     }
 
