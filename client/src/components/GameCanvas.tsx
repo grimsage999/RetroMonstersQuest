@@ -7,7 +7,6 @@ const GameCanvas: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const gameEngineRef = useRef<GameEngine | null>(null);
   const [isStarted, setIsStarted] = useState(false);
-  const [showDiagnostics, setShowDiagnostics] = useState(false);
   const [gameState, setGameState] = useState({
     score: 0,
     lives: 3,
@@ -16,26 +15,6 @@ const GameCanvas: React.FC = () => {
     cookiesCollected: 0,
     totalCookies: 0
   });
-
-  // Add keyboard shortcuts for diagnostics
-  useEffect(() => {
-    const handleKeyPress = (e: KeyboardEvent) => {
-      // Press 'D' to run diagnostic
-      if (e.key === 'd' || e.key === 'D') {
-        if (gameEngineRef.current) {
-          console.log('🔍 Running diagnostic check...');
-          gameEngineRef.current.runDiagnostic();
-        }
-      }
-      // Press 'C' to toggle diagnostic dashboard
-      if (e.key === 'c' || e.key === 'C') {
-        setShowDiagnostics(prev => !prev);
-      }
-    };
-    
-    window.addEventListener('keydown', handleKeyPress);
-    return () => window.removeEventListener('keydown', handleKeyPress);
-  }, []);
 
   useEffect(() => {
     const canvas = canvasRef.current;

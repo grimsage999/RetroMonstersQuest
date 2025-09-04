@@ -1,5 +1,49 @@
 export type EnemyType = 'cia' | 'army' | 'rat' | 'zombie' | 'boss';
 
+
+// Enemy sprite color palettes
+class EnemySpriteData {
+  static readonly CIA_COLORS = [
+    'transparent', // 0
+    '#000000',     // 1 - black hair/suit
+    '#fdbcb4',     // 2 - skin
+    '#333333',     // 3 - sunglasses
+    '#ffffff',     // 4 - collar
+    '#1a1a1a',     // 5 - dark suit
+    '#ff0000',     // 6 - red tie
+  ];
+
+  static readonly ARMY_COLORS = [
+    'transparent', // 0
+    '#228b22',     // 1 - green uniform/helmet
+    '#fdbcb4',     // 2 - skin
+    '#000000',     // 3 - eyes/details
+    '#1f5f1f',     // 4 - dark green camo
+  ];
+
+  static readonly RAT_COLORS = [
+    'transparent', // 0
+    '#1a5f1a',     // 1 - dark green outline
+    '#39ff14',     // 2 - bright radioactive green
+    '#ff0000',     // 3 - red eyes
+    '#ffffff',     // 4 - white eye highlights
+    '#000000',     // 5 - nose/mouth
+    '#32cd32',     // 6 - tail
+  ];
+
+  static readonly ZOMBIE_COLORS = [
+    'transparent', // 0
+    '#2F4F2F',     // 1 - dark green skin
+    '#228B22',     // 2 - lighter green
+    '#8B0000',     // 3 - dark red blood
+    '#FF0000',     // 4 - bright red
+    '#654321',     // 5 - brown clothes
+    '#1C1C1C',     // 6 - black shadows
+    '#FFFFFF'      // 7 - white teeth/eyes
+  ];
+}
+
+
 export class Enemy {
   private x: number;
   private y: number;
@@ -90,22 +134,64 @@ export class Enemy {
     ctx.save();
     ctx.imageSmoothingEnabled = false;
     
-    switch (this.type) {
-      case 'cia':
-        this.renderCIAAgent(ctx);
-        break;
-      case 'army':
-        this.renderArmyMan(ctx);
-        break;
-      case 'rat':
-        this.renderRadioactiveRat(ctx);
-        break;
-      case 'zombie':
-        this.renderZombie(ctx);
-        break;
-    }
+    const spriteData = this.getSpriteData();
+    this.renderEnemySprite(ctx, spriteData);
     
     ctx.restore();
+  }
+
+  private getSpriteData(): { pixels: number[][], colors: string[], hasGlow?: boolean } {
+    const frame = this.animationFrame === 0 ? 1 : 2;
+    
+    switch (this.type) {
+      case 'cia':
+        return {
+          pixels: frame === 1 ? this.getCIAWalkFrame1() : this.getCIAWalkFrame2(),
+          colors: EnemySpriteData.CIA_COLORS
+        };
+      case 'army':
+        return {
+          pixels: frame === 1 ? this.getArmyWalkFrame1() : this.getArmyWalkFrame2(),
+          colors: EnemySpriteData.ARMY_COLORS
+        };
+      case 'rat':
+        return {
+          pixels: frame === 1 ? this.getRatWalkFrame1() : this.getRatWalkFrame2(),
+          colors: EnemySpriteData.RAT_COLORS,
+          hasGlow: true
+        };
+      case 'zombie':
+        return {
+          pixels: frame === 1 ? this.getZombieWalkFrame1() : this.getZombieWalkFrame2(),
+          colors: EnemySpriteData.ZOMBIE_COLORS
+        };
+      default:
+        return {
+          pixels: this.getCIAWalkFrame1(),
+          colors: EnemySpriteData.CIA_COLORS
+        };
+    }
+  }
+
+  private renderEnemySprite(ctx: CanvasRenderingContext2D, spriteData: { pixels: number[][], colors: string[], hasGlow?: boolean }) {
+    const { pixels, colors, hasGlow } = spriteData;
+    
+    if (hasGlow) {
+      const glowIntensity = Math.sin(Date.now() * 0.01) * 2 + 3;
+      ctx.shadowColor = '#39ff14';
+      ctx.shadowBlur = glowIntensity;
+    }
+    
+    const scale = 3;
+    for (let row = 0; row < pixels.length; row++) {
+      for (let col = 0; col < pixels[row].length; col++) {
+        const colorIndex = pixels[row][col];
+        if (colorIndex > 0) {
+          ctx.fillStyle = colors[colorIndex];
+          ctx.fillRect(this.x + col * scale, this.y + row * scale, scale, scale);
+        }
+      }
+    }
   }
 
   private renderCIAAgent(ctx: CanvasRenderingContext2D) {

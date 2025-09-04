@@ -1,13 +1,30 @@
+
+// Sprite constants for better organization
+class PlayerSpriteColors {
+  static readonly COSMO_PALETTE = [
+    'transparent',  // 0 - transparent
+    '#2D5016',      // 1 - dark green outline
+    '#39FF14',      // 2 - bright alien green
+    '#000000',      // 3 - black eyes
+    '#FFFFFF',      // 4 - white eye highlights
+    '#228B22',      // 5 - medium green
+    '#32CD32',      // 6 - lime green details
+    '#FFD700',      // 7 - golden details
+  ];
+  
+  static readonly SPRITE_SCALE = 3;
+}
+
+
 import { InputManager } from './InputManager';
 import { MovementSystem } from './MovementSystem';
-import { GAME_CONFIG } from './GameConfig';
 
 export class Player {
   private x: number;
   private y: number;
-  private width: number = GAME_CONFIG.PLAYER.COLLISION_SIZE;
-  private height: number = GAME_CONFIG.PLAYER.COLLISION_SIZE;
-  private speed: number = 8; // Visual animation speed
+  private width: number = 48; // 16 * 3 scale
+  private height: number = 48; // 16 * 3 scale
+  private speed: number = 8; // Increased speed for better gameplay
   private isMoving: boolean = false;
   private direction: string = 'right';
   private animationFrame: number = 0;
@@ -18,15 +35,15 @@ export class Player {
     this.x = x;
     this.y = y;
     this.movementSystem = new MovementSystem();
-    // Configure movement with game settings
+    // Configure for smoother gameplay
     this.movementSystem.configure({
-      baseSpeed: GAME_CONFIG.MOVEMENT.BASE_SPEED,
-      maxSpeed: GAME_CONFIG.MOVEMENT.MAX_SPEED,
-      acceleration: GAME_CONFIG.MOVEMENT.ACCELERATION,
-      deceleration: GAME_CONFIG.MOVEMENT.DECELERATION,
-      dashSpeed: GAME_CONFIG.MOVEMENT.DASH_SPEED,
-      dashDuration: GAME_CONFIG.MOVEMENT.DASH_DURATION,
-      dashCooldown: GAME_CONFIG.MOVEMENT.DASH_COOLDOWN
+      baseSpeed: 4,
+      maxSpeed: 6,
+      acceleration: 0.25,
+      deceleration: 0.15,
+      dashSpeed: 10,
+      dashDuration: 200,
+      dashCooldown: 800
     });
   }
 
@@ -83,35 +100,26 @@ export class Player {
   }
 
   public render(ctx: CanvasRenderingContext2D) {
-    // Draw Cosmo as "little green man" with walk cycle animation
     ctx.save();
-    
-    // Disable image smoothing for pixelated effect
     ctx.imageSmoothingEnabled = false;
     
-    // Choose sprite based on movement and animation frame
-    let spritePixels;
+    const spritePixels = this.getCurrentSpriteFrame();
+    this.renderSprite(ctx, spritePixels);
+    
+    ctx.restore();
+  }
+
+  private getCurrentSpriteFrame(): number[][] {
     if (this.isMoving) {
-      // Walk cycle animation (2 frames)
-      spritePixels = this.animationFrame === 0 ? this.getWalkFrame1() : this.getWalkFrame2();
-    } else {
-      // Idle animation
-      spritePixels = this.getIdleFrame();
+      return this.animationFrame === 0 ? this.getWalkFrame1() : this.getWalkFrame2();
     }
+    return this.getIdleFrame();
+  }
+
+  private renderSprite(ctx: CanvasRenderingContext2D, spritePixels: number[][]) {
+    const colors = PlayerSpriteColors.COSMO_PALETTE;
+    const scale = PlayerSpriteColors.SPRITE_SCALE;
     
-    // Classic "little green man" color palette
-    const colors = [
-      'transparent',  // 0 - transparent
-      '#2D5016',      // 1 - dark green outline
-      '#39FF14',      // 2 - bright alien green
-      '#000000',      // 3 - black eyes
-      '#FFFFFF',      // 4 - white eye highlights
-      '#228B22',      // 5 - medium green
-      '#32CD32',      // 6 - lime green details
-      '#FFD700',      // 7 - golden details
-    ];
-    
-    const scale = 3; // Much larger scale for better visibility
     for (let row = 0; row < spritePixels.length; row++) {
       for (let col = 0; col < spritePixels[row].length; col++) {
         const colorIndex = spritePixels[row][col];
@@ -126,10 +134,6 @@ export class Player {
         }
       }
     }
-    
-    // No visual effects when moving - clean pixel art look
-    
-    ctx.restore();
   }
 
   private getIdleFrame() {

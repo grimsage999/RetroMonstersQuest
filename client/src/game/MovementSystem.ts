@@ -1,17 +1,38 @@
-import { GAME_CONFIG } from './GameConfig';
+interface MovementConfig {
+  baseSpeed: number;
+  maxSpeed: number;
+  acceleration: number;
+  deceleration: number;
+  dashSpeed: number;
+  dashDuration: number;
+  dashCooldown: number;
+}
+
+interface MovementState {
+  velocityX: number;
+  velocityY: number;
+  isDashing: boolean;
+  canDash: boolean;
+  speed: number;
+}
+
+interface MovementUpdate {
+  dx: number;
+  dy: number;
+}
 
 /**
  * Advanced Movement System with acceleration and variable speed
  */
 export class MovementSystem {
-  // Movement parameters - initialized with defaults, can be configured
-  private baseSpeed: number = GAME_CONFIG.MOVEMENT.BASE_SPEED;
-  private maxSpeed: number = GAME_CONFIG.MOVEMENT.MAX_SPEED;
-  private acceleration: number = GAME_CONFIG.MOVEMENT.ACCELERATION;
-  private deceleration: number = GAME_CONFIG.MOVEMENT.DECELERATION;
-  private dashSpeed: number = GAME_CONFIG.MOVEMENT.DASH_SPEED;
-  private dashDuration: number = GAME_CONFIG.MOVEMENT.DASH_DURATION;
-  private dashCooldown: number = GAME_CONFIG.MOVEMENT.DASH_COOLDOWN;
+  // Movement parameters
+  private baseSpeed: number = 4; // Base speed in pixels/frame
+  private maxSpeed: number = 6; // Maximum speed
+  private acceleration: number = 0.3; // How quickly we reach max speed
+  private deceleration: number = 0.2; // How quickly we slow down
+  private dashSpeed: number = 12; // Speed during dash
+  private dashDuration: number = 150; // Dash duration in ms
+  private dashCooldown: number = 500; // Cooldown between dashes in ms
 
   // Current state
   private velocityX: number = 0;
@@ -34,7 +55,7 @@ export class MovementSystem {
     inputY: number, // -1, 0, or 1
     isDashPressed: boolean,
     deltaTime: number
-  ): { dx: number; dy: number } {
+  ): MovementUpdate {
     // Update dash cooldown
     if (this.dashCooldownTimer > 0) {
       this.dashCooldownTimer -= deltaTime;
@@ -141,13 +162,7 @@ export class MovementSystem {
   /**
    * Get current movement state
    */
-  getState(): {
-    velocityX: number;
-    velocityY: number;
-    isDashing: boolean;
-    canDash: boolean;
-    speed: number;
-  } {
+  getState(): MovementState {
     const speed = Math.sqrt(this.velocityX * this.velocityX + this.velocityY * this.velocityY);
     
     return {
@@ -162,15 +177,7 @@ export class MovementSystem {
   /**
    * Configure movement parameters
    */
-  configure(params: {
-    baseSpeed?: number;
-    maxSpeed?: number;
-    acceleration?: number;
-    deceleration?: number;
-    dashSpeed?: number;
-    dashDuration?: number;
-    dashCooldown?: number;
-  }): void {
+  configure(params: Partial<MovementConfig>): void {
     if (params.baseSpeed !== undefined) this.baseSpeed = params.baseSpeed;
     if (params.maxSpeed !== undefined) this.maxSpeed = params.maxSpeed;
     if (params.acceleration !== undefined) this.acceleration = params.acceleration;
