@@ -129,65 +129,54 @@ export const GAME_CONFIG = {
 
 export const LEVEL_CONFIGS = {
   1: {
-    background: '#4A90E2', // Cosmic blue from moodboard
+    background: '#8B4513',
     fbiAgents: 8,
     armyMen: 0,
     radioactiveRats: 0,
     zombies: 0,
     cookies: 8,
-    title: 'Level 1: Cosmic Desert Landing',
-    description: 'Alien crash site with colorful crystal formations and floating space debris',
-    starField: true,
-    cosmicColors: ['#FF6B9D', '#4ECDC4', '#45B7D1']
+    title: 'Level 1: Roswell/Area 51 Desert',
+    description: 'Sandy terrain, UFO wreckage, desert shrubs, military hangars, and alien crash sites'
   },
   2: {
-    background: '#7B68EE', // Purple cosmic city
+    background: '#2F4F4F',
     fbiAgents: 10,
     armyMen: 8,
     radioactiveRats: 0,
     zombies: 0,
     cookies: 12,
-    title: 'Level 2: Neon Space Station',
-    description: 'Futuristic city with holographic signs and alien technology',
-    starField: true,
-    cosmicColors: ['#FF69B4', '#00CED1', '#9370DB']
+    title: 'Level 2: Dystopian City',
+    description: 'Cracked pavement, crumbling skyscrapers, flickering neon signs, surveillance cameras'
   },
   3: {
-    background: '#2E8B57', // Green mushroom forest inspired
+    background: '#1C1C1C',
     fbiAgents: 8,
     armyMen: 4,
     radioactiveRats: 6,
     zombies: 0,
     cookies: 12,
-    title: 'Level 3: Underground Mushroom Caverns',
-    description: 'Glowing fungi and bioluminescent creatures in cosmic caves',
-    starField: false,
-    cosmicColors: ['#98FB98', '#FF6347', '#40E0D0']
+    title: 'Level 3: Abandoned Subway',
+    description: 'Underground tunnels, graffiti, flickering lights'
   },
   4: {
-    background: '#8A2BE2', // Deep purple space
+    background: '#2F2F2F',
     fbiAgents: 6,
     armyMen: 0,
     radioactiveRats: 8,
     zombies: 4,
     cookies: 14,
-    title: 'Level 4: Haunted Nebula',
-    description: 'Spooky space graveyard with floating ghost ships and cosmic storms',
-    starField: true,
-    cosmicColors: ['#DA70D6', '#FFB6C1', '#87CEEB']
+    title: 'Level 4: Graveyard',
+    description: 'Crooked tombstones, mist, dead trees'
   },
   5: {
-    background: '#191970', // Midnight blue for final cosmic battle
+    background: '#1C1C1C',
     fbiAgents: 6,
     armyMen: 4,
     radioactiveRats: 8,
     zombies: 6,
     cookies: 18,
-    title: 'Level 5: The Cosmic Core',
-    description: 'Heart of the universe where cookies were first created',
-    starField: true,
-    cosmicColors: ['#FFD700', '#FF1493', '#00FF7F'],
-    finalLevel: true
+    title: 'Level 5: Government Lab + Boss Cathedral',
+    description: 'Sterile laboratory with dark secrets, then gothic cathedral boss arena'
   }
 } as const;
 
