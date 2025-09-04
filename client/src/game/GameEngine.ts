@@ -63,7 +63,7 @@ export class GameEngine {
   private transitionManager: LevelTransitionManager;
   private damageSystem: DamageSystem;
   private uiController: UIStateController;
-  private diagnosticSystem: DiagnosticSystem;
+  // Diagnostic system removed for performance
   private bossStateMachine: BossStateMachine | null = null;
   private commandInputSystem: CommandInputSystem;
 
@@ -100,14 +100,7 @@ export class GameEngine {
     this.damageSystem = new DamageSystem(3);
     this.uiController = new UIStateController();
 
-    // Initialize diagnostic system
-    this.diagnosticSystem = new DiagnosticSystem(
-      this.stateManager,
-      this.uiController,
-      this.transitionManager,
-      this.damageSystem,
-      this.audioManager
-    );
+    // Diagnostic system disabled for performance
 
     // Initialize command input system with proper filtering
     this.commandInputSystem = new CommandInputSystem();
@@ -140,7 +133,7 @@ export class GameEngine {
 
     // Preload all sounds
     this.audioPool.preloadAll().catch(err => {
-      console.warn('Failed to preload some audio:', err);
+      // Failed to preload some audio
     });
   }
 
@@ -196,7 +189,7 @@ export class GameEngine {
 
       // Handle title screen - start the game
       if (this.stateManager.getCurrentPhase() === GamePhase.TITLE) {
-        console.log('GameEngine: Starting gameplay from title screen');
+        // Starting gameplay from title screen
 
         // Initialize the game state for level 1
         this.gameState.level = 1;
@@ -252,7 +245,7 @@ export class GameEngine {
 
   public async start() {
     if (!this.isRunning) {
-      console.log('GameEngine: Starting game...');
+      // Starting game
 
       // Set running flag and start game loop immediately for responsiveness
       this.isRunning = true;
@@ -275,39 +268,16 @@ export class GameEngine {
       this.audioManager.initialize().then(() => {
         this.audioManager.playGameStart();
         this.audioManager.playBackgroundMusic();
-        console.log('GameEngine: Audio initialized successfully');
+        // Audio initialized successfully
       }).catch(error => {
-        console.warn('GameEngine: Audio initialization failed, continuing without audio:', error);
+        // Audio initialization failed, continuing without audio
       });
 
-      console.log('GameEngine: Game started, showing level title card');
+      // Game started, showing level title card
     }
   }
 
-  /**
-   * Run diagnostic check
-   */
-  public runDiagnostic() {
-    const report = this.diagnosticSystem.runDiagnostic(this.gameState, this.currentFPS);
-    this.diagnosticSystem.logDiagnostic(report);
-
-    // Auto-fix critical issues
-    if (report.issues.length > 0) {
-      console.warn('🔧 Attempting auto-fix for critical issues...');
-
-      // Check for overlapping transitions
-      if (report.issues.some(issue => issue.includes('overlapping'))) {
-        console.log('Fixing: Resetting UI controller');
-        this.uiController.forceReset();
-      }
-
-      // Check for invalid states
-      if (report.issues.some(issue => issue.includes('Invalid transition'))) {
-        console.log('Fixing: Resetting state manager');
-        this.stateManager.forceTransitionTo(GamePhase.TITLE);
-      }
-    }
-  }
+  // Diagnostic system removed for performance
 
   public stop() {
     // Set flag first to prevent any new game loop iterations
@@ -328,11 +298,11 @@ export class GameEngine {
     // Clean up command input system to prevent memory leaks
     this.commandInputSystem.cleanup();
 
-    console.log('GameEngine: Stopped all game loops and cleaned up resources');
+    // Stopped all game loops and cleaned up resources
   }
 
   public restart() {
-    console.log('GameEngine: Restarting game to initial state...');
+    // Restarting game to initial state
 
     // Stop current game loop but don't cleanup input system
     this.isRunning = false;
@@ -354,17 +324,10 @@ export class GameEngine {
     this.uiController.forceReset();
     this.transitionManager.reset();
 
-    // Reset optimization systems to prevent state pollution
+    // Reset optimization systems
     this.spatialGrid.clear();
     this.audioPool.stopAll();
     this.spriteBatcher.clear();
-
-    // Reset performance tracking
-    this.frameCount = 0;
-    this.fpsTimer = 0;
-    this.currentFPS = 0;
-    this.drawCallCount = 0;
-    this.entityCount = 0;
 
     // Clear all game objects
     this.bossStateMachine = null;
@@ -402,11 +365,11 @@ export class GameEngine {
     // Update state for React UI
     this.updateState();
 
-    console.log('GameEngine: Complete system reset - all functionality restored');
+    // Complete system reset
   }
 
   private handleLevelComplete() {
-    console.log('GameEngine: Level complete!');
+    // Level complete
 
     // Use UI controller to properly queue the transition with delay
     this.uiController.queueTransition('levelCard', () => {
@@ -415,7 +378,7 @@ export class GameEngine {
   }
 
   private handleGameOver() {
-    console.log('GameEngine: Game over - player health depleted');
+    // Game over - player health depleted
 
     // Clean transition to game over state
     this.gameState.phase = 'gameOver';
@@ -426,7 +389,7 @@ export class GameEngine {
     // Update state immediately to show game over screen
     this.updateState();
 
-    console.log('GameEngine: Game over screen displayed with final score:', this.gameState.score);
+    // Game over screen displayed
   }
 
 
@@ -453,12 +416,12 @@ export class GameEngine {
   }
 
   private showLevelCutscene() {
-    console.log(`GameEngine: Showing cutscene for level ${this.gameState.level}`);
+    // Showing cutscene for level
     const cutsceneData: CutsceneData = this.getCutsceneData(this.gameState.level);
 
     // Create cutscene immediately without UI controller queue to prevent conflicts
     this.currentCutscene = new Cutscene(this.canvas, cutsceneData, () => {
-      console.log('GameEngine: Cutscene complete, transitioning to gameplay');
+      // Cutscene complete, transitioning to gameplay
       this.currentCutscene = null;
 
       // Now set the game phase and initialize level
@@ -466,7 +429,7 @@ export class GameEngine {
       this.initializeLevel();
       this.stateManager.transitionTo(GamePhase.PLAYING);
 
-      console.log('GameEngine: Level initialized and ready for gameplay');
+      // Level initialized and ready for gameplay
     });
 
     this.currentCutscene.start();
@@ -511,7 +474,7 @@ export class GameEngine {
   }
 
   private initializeLevel() {
-    console.log(`GameEngine: Initializing level ${this.gameState.level}`);
+    // Initializing level
 
     // No weapons in simplified game for better performance
 
@@ -522,7 +485,7 @@ export class GameEngine {
     if (this.gameState.level === 5 && this.currentLevel.hasBoss()) {
       this.bossStateMachine = new BossStateMachine();
       this.gameState.bossHealth = 100;
-      console.log('GameEngine: Boss State Machine initialized for Level 5');
+      // Boss State Machine initialized for Level 5
 
       // Start boss intro sequence
       const context = this.createBossContext(16); // Default 16ms for initialization
@@ -537,7 +500,7 @@ export class GameEngine {
     // No bullets in simplified game
     this.updateState();
 
-    console.log(`GameEngine: Level ${this.gameState.level} initialized with ${this.gameState.totalCookies} cookies`);
+    // Level initialized
   }
 
   // Removed fireRayGun for better performance
@@ -552,37 +515,10 @@ export class GameEngine {
     const deltaTime = currentTime - this.lastTime;
     this.lastTime = currentTime;
 
-    // Performance monitoring 
-    this.frameCount++;
-    this.fpsTimer += deltaTime;
-    
-    // PERFORMANCE FIX: Remove artificial frame limiting - let browser handle vsync
-    // The previous frame limiting logic was causing unnecessary function calls
-    // Modern browsers already handle frame rate limiting efficiently
-    
-    if (this.fpsTimer >= 1000) {
-      this.currentFPS = this.frameCount;
-      this.frameCount = 0;
-      this.fpsTimer = 0;
+    // Simplified: No performance monitoring overhead
 
-      // Log performance metrics
-      if (this.currentFPS < 45) { // More lenient threshold
-        console.warn(`Low FPS detected: ${this.currentFPS}`);
-      }
-
-      // Only run diagnostic when FPS drops significantly
-      if (this.currentFPS < 30) {
-        this.runDiagnostic();
-      }
-    }
-
-    // Update damage system
+    // Update only essential systems
     this.damageSystem.update(deltaTime);
-
-    // Update transition manager
-    this.transitionManager.update(deltaTime);
-
-    // Process filtered input events
     this.commandInputSystem.processEventQueue();
 
     // Only update game logic if not in cutscene and playing
@@ -593,7 +529,7 @@ export class GameEngine {
 
       this.render();
     } catch (error) {
-      console.error('GameEngine: Critical error in game loop:', error);
+      // Critical error in game loop
       // Emergency fallback: pause game and transition to safe state
       this.isRunning = false;
       this.stateManager.forceTransitionTo(GamePhase.TITLE);
