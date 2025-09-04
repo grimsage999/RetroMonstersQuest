@@ -1,0 +1,106 @@
+1. Game Identity: Cosmic Playground
+This section defines the core concept, genre, aesthetic, and overarching goals for your game.
+• Core Concept & Genre: Your game is titled Cosmic Playground. It is envisioned as a retro 8/16-bit pixel art platformer featuring Cosmo the Alien. While the game is defined as a platformer, the detailed movement and animation systems previously discussed are designed for 8-directional top-down control, suggesting a potential hybrid approach or a specific character navigation style within the platformer levels.
+• Aesthetic & Tone: The visual style is pixel art with an arcade aesthetic, maintaining 16×16 pixel consistency for all assets. The narrative tone aims for a blend of Invader Zim × Outer Wilds, emphasizing humor, stealth, and a sense of discovery.
+• Core Play Pillars & Objective: The foundational gameplay elements include humor, stealth, dodging, and retro feedback loops. The primary objective for Cosmo is to collect all cookies, avoid CIA agents and other enemies, and reach the finish line in each level. This quest symbolically represents reclaiming joy through resistance.
+2. Technical Foundation & Performance
+This outlines the underlying technical goals and environment for the game.
+• Engine Context & Architecture Goals: The project is understood to be developed within a Unity 2D environment (based on previous script and animation details). The technical architecture aims to prevent technical debt, ensure scalability, and guide implementation.
+• Performance Specifications: Key performance targets include smooth 60fps gameplay, responsive controls (< 50ms input lag), efficient sprite rendering, and consistent frame pacing.
+• Audio System Architecture: The audio system should prioritize zero-latency implementation and synchronization with visual events.
+3. Visuals: Pixel Art Design & Implementation
+This section details the artistic guidelines and principles for your game's pixel art.
+• Global Pixel Art Standards:
+    ◦ Resolution: All assets must maintain a consistent 16×16 pixel standard, reminiscent of classic Nintendo platformers.
+    ◦ Filter Mode: When importing sprites into Unity, set Filter Mode to Point (no filter) and Compression to None for crisp pixel art. Texture filtering should be nearest neighbor.
+    ◦ Color Palette: Utilize a limited 16-color scheme for authenticity. Palettes should offer at least three shades per color for effective shading (base, shadow, highlight). Consider using analogous colors for vivid shading and highlighting (e.g., yellow highlights and purple shadows for orange hair).
+• Line Work & Shape Definition:
+    ◦ "Doubles" (extra pixels) should generally be avoided for cleaner, more readable lines, using features like "pixel perfect" mode in Aseprite. Intentional doubles can create a retro and bold style.
+    ◦ Smooth Curves: Ensure smooth transitions between pixels by repeating segment lengths symmetrically along curves, gradually building or reducing pixels.
+    ◦ Outlines: Outlines do not have to be black; a darker version of the object's base color is often effective (e.g., dark green for plants). Inconsistent outlines can be used strategically to draw player focus, for example, outlining only interactable objects or the player character. Outline size can also vary as a style choice (thick or no outline).
+• Coloring & Shading Principles:
+    ◦ Always establish a light source before shading to avoid "pillow shading" (wrapping shadows around outlines without direction).
+    ◦ For top-down or 3/4 view games, the light source typically comes from the top of the screen, casting forward and down, with the top of objects being most illuminated. Maintain a consistent angle of light across all sprites.
+    ◦ Dithering: Can be used to create the illusion of a third color with patterns (e.g., checkerboard), add texture, or break up large shadow areas.
+    ◦ Anti-aliasing: Optionally, use intermediate colors on corners to subtly smooth lines, creating soft gradients that can give a polished look.
+• Character & Environment Art Directives:
+    ◦ Cosmo: Update to a classic "little green man" archetype with a bulbous head, large black eyes, and a tiny body.
+    ◦ Enemies:
+        ▪ CIA: Dark suits, shades, briefcases, trench coats.
+        ▪ Army: Helmets, camo gear, stern faces.
+        ▪ Radioactive Rats: Glowing eyes, twitchy movements.
+        ▪ Zombies: Spit green acid sludge.
+    ◦ Readability: Ensure characters are highly readable within the environment, potentially by adjusting their lightness or darkness relative to surroundings.
+    ◦ Detail Sizing (Inspiration from Pokémon): Consider object sizing in multiples of an 8x8 tile grid. Convey small details, like buttons, with single pixels. Differentiate object sides (top vs. front) using lighter and darker tones, often with strong black outlines. Using slightly rounded corners can give objects a softer appearance.
+4. Character Movement & Animation (Top-Down Focus)
+This section integrates the specific Unity implementation details for character control and animation.
+• Movement Mechanics (Unity C#):
+    ◦ The player GameObject requires a Rigidbody2D component with gravityScale = 0 and freezeRotation = true.
+    ◦ A PlayerController script (as provided previously) uses a public movementSpeed float.
+    ◦ Input is captured using Input.GetAxisRaw("Horizontal") and Input.GetAxisRaw("Vertical") for immediate, non-accelerated response.
+    ◦ A normalized Vector2 (moveInput) is crucial to prevent faster diagonal movement.
+    ◦ Movement is applied in FixedUpdate by setting rb.velocity = moveInput * movementSpeed.
+    ◦ Sprite Flipping: The character sprite is flipped horizontally (transform.localScale.x *= -1) based on horizontal input to match the direction of movement.
+• Animator Configuration (Unity):
+    ◦ The player GameObject must have an Animator component.
+    ◦ The Animator Controller will primarily use Blend Trees for Idle and Walk/Run states.
+    ◦ These Blend Trees should be configured as 2D Simple Directional.
+    ◦ Parameters:
+        ▪ Float parameters last move X and last move Y will drive the Idle blend tree to determine the last facing direction when stopped.
+        ▪ Float parameters move X and move Y will drive the Walk/Run blend tree for active movement direction.
+        ▪ A Float parameter move magnitude (or a Bool moving) will manage transitions between Idle and Walk/Run states (e.g., move magnitude greater/less than 0.1, or moving true/false).
+    ◦ Animation Clips: Eight directional animation clips (Down, Down-Diagonal, Left, Up-Diagonal, Up, and horizontally flipped versions) are mapped to their respective (X, Y) positions within the Blend Trees. Only five unique sprites are needed, leveraging horizontal flipping for the others.
+    ◦ To prevent animation clipping or jumping, the first frame of an animation clip should be duplicated and placed at the end of the animation sequence.
+• Specific Animation Requirements:
+    ◦ Cosmo: Requires a walk cycle (with SFX), jump animation, dodge animation, idle animation, death animation (dramatic flash + pixel scatter), and a celebration (cookie dance).
+    ◦ Enemies: Will feature walk cycles and death animations (fall, blink out, pixel dissolve).
+5. Audio Design & Implementation
+This covers the sound philosophy, music, and sound effects for Cosmic Playground.
+• Audio Philosophy & Role: The game's audio will feature a retro chiptune aesthetic, matching classic 8-bit platformers. Audio is crucial for gameplay feedback, immersion, and conveying the emotional tone.
+• Music Themes: Each level will have a unique musical theme:
+    ◦ Level 1: Drum & bass with alien tones.
+    ◦ Level 2: Gritty breakbeat.
+    ◦ Level 3: Underground electronic ambient.
+    ◦ Level 4: Spooky but playful drum & bass.
+    ◦ Level 5 (Boss): Epic, glitchy drum & bass boss battle theme.
+    ◦ Title Screen: Cheerful synth melody loop.
+• Sound Effects (SFX):
+    ◦ Global: Game Start jingle, Life Lost (sad tone), Game Over (descending tone), Victory Fanfare.
+    ◦ Core Interactions: Cookie Collection chime (crunchy/pop + brief screen flash), Enemy Defeat (satisfying audio sting), Weapon Fire (audio impact + screen shake + particle effects).
+    ◦ Character & Enemy-specific: SFX tied to Cosmo's footfalls during his walk cycle. Zombie gurgles, footsteps, and groans.
+• Asset Format: Audio assets will be in WAV format.
+6. Gameplay Mechanics & Level Design
+This section outlines the core gameplay loop, interactions, and planned levels.
+• Core Game Loop & Progression: The basic loop involves the player collecting all cookies to unlock the exit. Being hit results in losing a life and a sad_SFX. Defeating a boss triggers a cookie_explosion and advances the narrative. Each of the five planned levels will introduce one new environment, enemy type, or mechanic, maintaining an escalating challenge and humor, and ending with a meaningful payoff.
+• Player Interactions & Feedback:
+    ◦ Input: Players use arrow keys for movement, Spacebar for the Ray Gun, X for The Adjudicator, and Shift key for interacting with objects.
+    ◦ Feedback Loops: Every player action should trigger satisfying feedback, including visual effects, audio, and haptic responses. This includes visual pops, audio crunch, and screen flashes for cookie collection; death animations and audio stings for enemy defeat; and screen shakes, particle effects, and audio impacts for weapon fire.
+• Weapon Systems:
+    ◦ Ray Gun: Unlocked in Level 3 after collecting all cookies. It fires lightning bolts, requires 3 hits to kill most enemies, and is activated with the Spacebar.
+    ◦ The Adjudicator: This is the ultimate weapon, unlocked by finding the "adjudicator_bag" in Level 5. It manifests as a glowing orb above Cosmo, shoots tracking light orbs, provides an instant kill (overriding the Ray Gun's 3-hit rule), and has a 5-second cooldown with glowing aura and sound pulse effects.
+• Level Overview & Unique Elements (5 Levels):
+    ◦ Level 1: Roswell/Area 51 Desert: Sandy terrain, UFO wreckage, CIA agents only, objective: collect cookies and reach a blinking neon "Finish" marker.
+    ◦ Level 2: Dystopian City: Cracked pavement, crumbling skyscrapers, neon signs, features both CIA and Army Men enemies.
+    ◦ Level 3: Abandoned Subway: Underground tunnels, graffiti, flickering lights. Introduces Radioactive Rats as a new enemy and unlocks the Ray Gun.
+    ◦ Level 4: Graveyard: Crooked tombstones, mist, dead trees. Introduces Zombies and features the full enemy roster of CIA, Rats, and Zombies.
+    ◦ Level 5: Government Lab + Boss Cathedral:
+        ▪ Lab Phase: Sterile environment with interactable lab objects (using Shift key) that can reveal lore fragments or unlock "The Adjudicator" ultimate weapon by finding its bag.
+        ▪ Boss Cathedral: Gothic environment, faces The Adjudicator's Guardian (a cybernetic sludge-humanoid). The boss has distinct behaviors and phases triggered by hit counts (e.g., shooting slime blobs, rapid-fire gun, ground pound, turning red/blue, increasing speed, or changing form). Defeating the boss leads to an ending sequence.
+7. Narrative & Worldbuilding
+This describes the story, emotional arc, and design influences for the game's world.
+• Story Arc & Tone: The narrative's core logic posits that cookies represent "encoded joy," and the CIA hoarding these cookies signifies "control." Cosmo's quest is thus to reclaim joy through resistance. The story progresses through a three-act structure: Act I: Escape + collection, Act II: Discovery + weapons, and Act III: Boss + catharsis, concluding with an epilogue that offers Mystery + sequel tease.
+• Exploration & Choice: The game encourages exploration and attention to detail rather than relying on intrusive markers or constant hints (inspired by Elin). Player decisions should genuinely impact the story, with NPCs reacting to actions and the world changing based on choices (inspired by Hero's Adventure).
+8. Game Development Process & Documentation Standards
+This section outlines essential documentation, quality assurance, and coding best practices.
+• Essential Documents & Priority: Comprehensive documentation is crucial for maintaining AAA standards throughout development. The most immediate and critical documents to establish are:
+    1. Technical Design Document (TDD): For technical architecture, engine choices, and performance requirements.
+    2. Code Standards Document: To ensure consistent coding conventions, review processes, and quality standards.
+    3. QA Test Plan Document: To establish systematic testing procedures, bug tracking, and quality gates.
+• Quality Assurance (QA) Framework: All implemented features must undergo functionality, "feel," and audio tests. The QA framework includes a validation checklist for smooth animations (60fps), consistent audio triggers, precise collision detection, UI readability, asset license verification, and correct progression logic.
+• Code & Asset Pipeline Standards:
+    ◦ Code Standards: Define TypeScript coding standards, React/Three.js specific guidelines (if applicable), a structured code review process, Git and version control protocols (branching, commit messages), and testing standards (unit, integration, performance tests).
+    ◦ Asset Pipeline: Establish workflows for sprite creation, audio asset processing, integration procedures (import, validation, version control), optimization protocols (compression, loading strategies), and quality assurance for assets.
+• Performance Monitoring: Implement a framework for monitoring frame rate, memory usage, loading times, and audio latency. Define optimization strategies (e.g., render optimization, asset loading/caching, code splitting), monitoring tools, performance budgets, and emergency protocols for performance degradation.
+
+--------------------------------------------------------------------------------
+This comprehensive overview should equip your Replit assistant with a clear understanding of Cosmic Playground, encompassing its design, technical requirements, artistic vision, and development methodology. It acts like a detailed blueprint for your game project, ensuring consistency and guiding decisions across all aspects of creation.
