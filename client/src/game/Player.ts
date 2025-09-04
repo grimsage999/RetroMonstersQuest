@@ -1,12 +1,13 @@
 import { InputManager } from './InputManager';
 import { MovementSystem } from './MovementSystem';
+import { GAME_CONFIG } from './GameConfig';
 
 export class Player {
   private x: number;
   private y: number;
-  private width: number = 48; // 16 * 3 scale
-  private height: number = 48; // 16 * 3 scale
-  private speed: number = 8; // Increased speed for better gameplay
+  private width: number = GAME_CONFIG.PLAYER.COLLISION_SIZE;
+  private height: number = GAME_CONFIG.PLAYER.COLLISION_SIZE;
+  private speed: number = 8; // Visual animation speed
   private isMoving: boolean = false;
   private direction: string = 'right';
   private animationFrame: number = 0;
@@ -17,15 +18,15 @@ export class Player {
     this.x = x;
     this.y = y;
     this.movementSystem = new MovementSystem();
-    // Configure for smoother gameplay
+    // Configure movement with game settings
     this.movementSystem.configure({
-      baseSpeed: 4,
-      maxSpeed: 6,
-      acceleration: 0.25,
-      deceleration: 0.15,
-      dashSpeed: 10,
-      dashDuration: 200,
-      dashCooldown: 800
+      baseSpeed: GAME_CONFIG.MOVEMENT.BASE_SPEED,
+      maxSpeed: GAME_CONFIG.MOVEMENT.MAX_SPEED,
+      acceleration: GAME_CONFIG.MOVEMENT.ACCELERATION,
+      deceleration: GAME_CONFIG.MOVEMENT.DECELERATION,
+      dashSpeed: GAME_CONFIG.MOVEMENT.DASH_SPEED,
+      dashDuration: GAME_CONFIG.MOVEMENT.DASH_DURATION,
+      dashCooldown: GAME_CONFIG.MOVEMENT.DASH_COOLDOWN
     });
   }
 

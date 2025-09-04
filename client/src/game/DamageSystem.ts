@@ -1,3 +1,5 @@
+import { GAME_CONFIG } from './GameConfig';
+
 /**
  * Damage System with invincibility frames
  * Prevents multiple damage instances from a single collision
@@ -13,13 +15,13 @@ export interface DamageEvent {
 export class DamageSystem {
   private health: number;
   private maxHealth: number;
-  private invincibilityDuration: number = 1500; // 1.5 seconds of invincibility after hit
+  private invincibilityDuration: number = GAME_CONFIG.DAMAGE.INVINCIBILITY_DURATION;
   private invincibilityTimer: number = 0;
   public isInvincible: boolean = false;
   private lastDamageEvent: DamageEvent | null = null;
   private damageHistory: DamageEvent[] = [];
   private flashTimer: number = 0;
-  private flashDuration: number = 100; // Visual feedback duration
+  private flashDuration: number = GAME_CONFIG.DAMAGE.FLASH_DURATION;
   private onDamage: ((health: number, maxHealth: number) => void) | null = null;
   private onDeath: (() => void) | null = null;
 
@@ -34,7 +36,6 @@ export class DamageSystem {
   takeDamage(source: string, amount: number = 1, position?: { x: number; y: number }): boolean {
     // Check if player is invincible
     if (this.isInvincible) {
-      console.log(`Damage blocked by invincibility: ${source}`);
       return false;
     }
 

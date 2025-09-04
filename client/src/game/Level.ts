@@ -1,4 +1,5 @@
 import { Enemy, EnemyType } from './Enemy';
+import { LEVEL_CONFIGS } from './GameConfig';
 
 interface Cookie {
   x: number;
@@ -29,65 +30,14 @@ export class Level {
   private finishLine: { x: number; y: number; width: number; height: number; } | null = null;
   private config: LevelConfig;
 
-  private levelConfigs: { [key: number]: LevelConfig } = {
-    1: {
-      background: '#8B4513',
-      fbiAgents: 8,
-      armyMen: 0,
-      radioactiveRats: 0,
-      zombies: 0,
-      cookies: 8,
-      title: 'Level 1: Roswell/Area 51 Desert',
-      description: 'Sandy terrain, UFO wreckage, desert shrubs, military hangars, and alien crash sites'
-    },
-    2: {
-      background: '#2F4F4F',
-      fbiAgents: 10,
-      armyMen: 8,
-      radioactiveRats: 0,
-      zombies: 0,
-      cookies: 12,
-      title: 'Level 2: Dystopian City',
-      description: 'Cracked pavement, crumbling skyscrapers, flickering neon signs, surveillance cameras'
-    },
-    3: {
-      background: '#1C1C1C',
-      fbiAgents: 8,
-      armyMen: 4,
-      radioactiveRats: 6,
-      zombies: 0,
-      cookies: 12,
-      title: 'Level 3: Abandoned Subway',
-      description: 'Underground tunnels, graffiti, flickering lights'
-    },
-    4: {
-      background: '#2F2F2F',
-      fbiAgents: 6,
-      armyMen: 0,
-      radioactiveRats: 8,
-      zombies: 4,
-      cookies: 14,
-      title: 'Level 4: Graveyard',
-      description: 'Crooked tombstones, mist, dead trees'
-    },
-    5: {
-      background: '#1C1C1C',
-      fbiAgents: 6,
-      armyMen: 4,
-      radioactiveRats: 8,
-      zombies: 6,
-      cookies: 18,
-      title: 'Level 5: Government Lab + Boss Cathedral',
-      description: 'Sterile laboratory with dark secrets, then gothic cathedral boss arena'
-    }
-  };
+  private levelConfigs = LEVEL_CONFIGS;
 
   constructor(levelNumber: number, canvasWidth: number, canvasHeight: number) {
     this.levelNumber = levelNumber;
     // Validate canvas dimensions to prevent edge cases
     this.canvasWidth = Math.max(canvasWidth, 800);
     this.canvasHeight = Math.max(canvasHeight, 600);
-    this.config = this.levelConfigs[levelNumber] || this.levelConfigs[1];
+    this.config = this.levelConfigs[levelNumber as keyof typeof LEVEL_CONFIGS] || this.levelConfigs[1];
     
     this.initializeLevel();
   }

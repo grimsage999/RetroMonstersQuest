@@ -1,3 +1,5 @@
+import { GAME_CONFIG } from './GameConfig';
+
 export class AudioManager {
   private backgroundMusic: HTMLAudioElement | null = null;
   private hitSound: HTMLAudioElement | null = null;
@@ -21,10 +23,9 @@ export class AudioManager {
       this.loadSounds(); // Don't await - let it load in background
       this.isInitialized = true;
     } catch (error) {
-      console.log('Audio initialization failed:', error);
-      // Set flag to prevent further audio operations that would fail
+      // Audio initialization failed - set flag to prevent further operations
       this.isInitialized = false;
-      throw error; // Re-throw to let caller handle
+      throw error;
     }
   }
 
@@ -33,14 +34,14 @@ export class AudioManager {
       // Use existing sound files
       this.backgroundMusic = new Audio('/sounds/background.mp3');
       this.backgroundMusic.loop = true;
-      this.backgroundMusic.volume = 0.3;
+      this.backgroundMusic.volume = GAME_CONFIG.AUDIO.BACKGROUND_MUSIC_VOLUME;
       
       // Load sound effects
       this.hitSound = new Audio('/sounds/hit.mp3');
-      this.hitSound.volume = 0.5;
+      this.hitSound.volume = GAME_CONFIG.AUDIO.HIT_SOUND_VOLUME;
       
       this.successSound = new Audio('/sounds/success.mp3');
-      this.successSound.volume = 0.7;
+      this.successSound.volume = GAME_CONFIG.AUDIO.SUCCESS_SOUND_VOLUME;
       
       // Load sounds asynchronously without blocking
       const loadPromises = [
@@ -60,13 +61,13 @@ export class AudioManager {
       
       // Don't await - let them load in background
       Promise.all(loadPromises).then(() => {
-        console.log('AudioManager: All sounds loaded successfully');
+        // All sounds loaded successfully
       }).catch(error => {
         console.warn('AudioManager: Some sounds failed to load:', error);
       });
       
     } catch (error) {
-      console.log('Audio loading failed:', error);
+      // Audio loading failed - continue without audio
     }
   }
   
