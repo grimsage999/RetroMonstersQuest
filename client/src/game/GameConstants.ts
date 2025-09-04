@@ -6,6 +6,14 @@ export const GAME_CONFIG = {
     BACKGROUND_COLOR: '#000011'
   },
   
+  GBA_AUTHENTIC: {
+    MAX_COLORS_PER_SPRITE: 16,
+    MAX_SPRITES_PER_SCANLINE: 128,
+    SCREEN_RESOLUTION: { width: 240, height: 160 },
+    COLOR_DEPTH: 15, // 32,768 colors (5 bits per RGB channel)
+    AUDIO_CHANNELS: 4
+  },
+  
   PLAYER: {
     DEFAULT_SPEED: 8,
     SIZE: 48,

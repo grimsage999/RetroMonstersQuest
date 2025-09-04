@@ -498,7 +498,7 @@ export class GameEngine {
       2: {
         levelNumber: 2,
         title: "Level 2: Dystopian City",
-        description: "Government forces mobilize across crumbling streets.\nCracked pavement, neon signs, and surveillance everywhere.\nAmbient citizens watch from windows as you flee."
+        description: "Government forces mobilize across crumbling streets.\nCracked pavement, neon signs, and surveillance everywhere.\nAmbient citizens watch from windows as you flee.\n\n⚠️ TIP: Enemies move faster here - time your movements carefully!"
       },
       3: {
         levelNumber: 3,
@@ -686,8 +686,8 @@ export class GameEngine {
             // Check if this is the boss
             const boss = this.currentLevel.getBoss();
             if (boss && typedEnemy === boss) {
-              // BOSS DAMAGE SYSTEM: Reduce boss health instead of instant kill
-              const damageAmount = this.gameState.hasAdjudicator ? 25 : 10; // Adjudicator does more damage
+              // BOSS DAMAGE SYSTEM: More balanced weapon progression
+              const damageAmount = this.gameState.hasAdjudicator ? 15 : 8; // Reduced Adjudicator advantage
               this.gameState.bossHealth = Math.max(0, this.gameState.bossHealth - damageAmount);
 
               console.log(`Boss hit! Health: ${this.gameState.bossHealth}/100 (${damageAmount} damage)`);
@@ -741,16 +741,22 @@ export class GameEngine {
     const deltaTime = currentTime - this.lastTime;
     this.lastTime = currentTime;
 
-    // Performance monitoring
+    // Performance monitoring with frame limiting
     this.frameCount++;
     this.fpsTimer += deltaTime;
+    
+    // Limit to 60fps for consistency (GBA was 59.7fps)
+    if (deltaTime < 16.67) {
+      return; // Skip frame if running too fast
+    }
+    
     if (this.fpsTimer >= 1000) {
       this.currentFPS = this.frameCount;
       this.frameCount = 0;
       this.fpsTimer = 0;
 
       // Log performance metrics
-      if (this.currentFPS < 30) {
+      if (this.currentFPS < 45) { // More lenient threshold
         console.warn(`Low FPS detected: ${this.currentFPS}`);
       }
 
@@ -866,10 +872,18 @@ export class GameEngine {
         this.audioManager.playSuccess();
       }
 
-      // Screen flash effect for visual feedback
+      // Enhanced screen flash effect for better visual feedback
       this.ctx.save();
-      this.ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+      this.ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
       this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+      
+      // Add sparkle effect for extra satisfaction
+      for (let i = 0; i < 8; i++) {
+        const sparkleX = playerBounds.x + Math.random() * playerBounds.width;
+        const sparkleY = playerBounds.y + Math.random() * playerBounds.height;
+        this.ctx.fillStyle = '#FFD700';
+        this.ctx.fillRect(sparkleX, sparkleY, 2, 2);
+      }
       this.ctx.restore();
 
       // Joy reclamation narrative: Each cookie = encoded happiness freed from CIA control
@@ -906,7 +920,8 @@ export class GameEngine {
   }
 
   private render() {
-    // Clear canvas
+    // Optimized canvas clearing for better performance
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     this.ctx.fillStyle = '#000011';
     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 

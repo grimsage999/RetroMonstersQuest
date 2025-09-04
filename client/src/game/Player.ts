@@ -30,6 +30,8 @@ export class Player {
   private animationFrame: number = 0;
   private animationTimer: number = 0;
   private movementSystem: MovementSystem;
+  private screenShakeX: number = 0;
+  private screenShakeY: number = 0;
 
   constructor(x: number, y: number) {
     this.x = x;
