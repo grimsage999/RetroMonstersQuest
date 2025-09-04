@@ -23,7 +23,7 @@ export class Confetti {
   private createParticles() {
     const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#F7DC6F'];
     
-    for (let i = 0; i < 50; i++) {
+    for (let i = 0; i < 10; i++) { // Reduced from 50 to 10 for performance
       this.particles.push({
         x: Math.random() * this.canvas.width,
         y: -10,

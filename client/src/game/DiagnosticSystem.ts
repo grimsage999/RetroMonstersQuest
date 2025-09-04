@@ -259,8 +259,8 @@ export class DiagnosticSystem {
   
   private checkForPerformanceIssues(fps: number): void {
     if (fps < 30) {
-      this.recommendations.push('Consider reducing particle effects or enemy count');
-      this.recommendations.push('Check for memory leaks in bullet system');
+      this.recommendations.push('Consider reducing background effects or enemy count');
+      this.recommendations.push('Check for memory leaks in rendering pipeline');
     }
   }
   

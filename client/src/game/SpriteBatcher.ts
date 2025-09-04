@@ -71,9 +71,7 @@ export class SpriteBatcher {
         case 'cookie':
           this.renderCookieBatch(sprites);
           break;
-        case 'bullet':
-          this.renderBulletBatch(sprites);
-          break;
+        // Bullet rendering removed for performance
         default:
           this.renderGenericBatch(sprites);
       }
@@ -118,19 +116,7 @@ export class SpriteBatcher {
     this.ctx.fill();
   }
 
-  /**
-   * Render a batch of bullet sprites
-   */
-  private renderBulletBatch(sprites: Sprite[]): void {
-    // Bullets are small rectangles, batch them
-    this.ctx.beginPath();
-    
-    sprites.forEach(sprite => {
-      this.ctx.rect(sprite.x, sprite.y, sprite.width, sprite.height);
-    });
-    
-    this.ctx.fill();
-  }
+  // Bullet rendering method removed for performance
 
   /**
    * Generic batch rendering for other sprite types

@@ -32,6 +32,13 @@ export class Player {
   private movementSystem: MovementSystem;
   private screenShakeX: number = 0;
   private screenShakeY: number = 0;
+  
+  // Enhanced animation properties for squash & stretch
+  private scaleX: number = 1;
+  private scaleY: number = 1;
+  private animationState: 'idle' | 'walking' | 'dashing' | 'starting' | 'stopping' = 'idle';
+  private stateTimer: number = 0;
+  private previousSpeed: number = 0;
 
   constructor(x: number, y: number) {
     this.x = x;
@@ -83,42 +90,64 @@ export class Player {
     this.x = Math.max(0, Math.min(canvasWidth - this.width, this.x));
     this.y = Math.max(0, Math.min(canvasHeight - this.height, this.y));
     
-    // Update movement state for animation
+    // Enhanced animation system with squash & stretch
     const state = this.movementSystem.getState();
     this.isMoving = state.speed > 0.5;
     
-    // Update animation - smoother timing
-    if (this.isMoving) {
-      // Speed up animation when dashing
-      const animSpeed = state.isDashing ? 150 : 300;
-      this.animationTimer += deltaTime;
-      if (this.animationTimer > animSpeed) {
-        this.animationFrame = (this.animationFrame + 1) % 2; // Simple 2-frame walk cycle
-        this.animationTimer = 0;
-      }
-    } else {
-      this.animationFrame = 0;
-    }
+    // Update animation state and timer
+    this.stateTimer += deltaTime;
+    this.updateAnimationState(state, deltaTime);
+    this.updateSquashAndStretch(state, deltaTime);
+    
+    // Update animation frames based on state
+    this.updateAnimationFrames(state, deltaTime);
+    
+    this.previousSpeed = state.speed;
   }
 
   public render(ctx: CanvasRenderingContext2D) {
     ctx.save();
     ctx.imageSmoothingEnabled = false;
     
+    // Apply squash & stretch transformation
+    const centerX = this.x + this.width / 2;
+    const centerY = this.y + this.height / 2;
+    
+    ctx.translate(centerX, centerY);
+    ctx.scale(this.scaleX, this.scaleY);
+    
+    // Flip sprite for left direction
+    if (this.direction === 'left') {
+      ctx.scale(-1, 1);
+    }
+    
+    ctx.translate(-this.width / 2, -this.height / 2);
+    
     const spritePixels = this.getCurrentSpriteFrame();
-    this.renderSprite(ctx, spritePixels);
+    this.renderSpriteTransformed(ctx, spritePixels);
     
     ctx.restore();
   }
 
   private getCurrentSpriteFrame(): number[][] {
-    if (this.isMoving) {
-      return this.animationFrame === 0 ? this.getWalkFrame1() : this.getWalkFrame2();
+    switch (this.animationState) {
+      case 'idle':
+      case 'stopping':
+        return this.getIdleFrame();
+      case 'starting':
+        return this.getStartFrame();
+      case 'walking':
+      case 'dashing':
+        // Enhanced 3-frame walk cycle
+        if (this.animationFrame === 0) return this.getWalkFrame1();
+        if (this.animationFrame === 1) return this.getWalkFrame2();
+        return this.getWalkFrame3();
+      default:
+        return this.getIdleFrame();
     }
-    return this.getIdleFrame();
   }
 
-  private renderSprite(ctx: CanvasRenderingContext2D, spritePixels: number[][]) {
+  private renderSpriteTransformed(ctx: CanvasRenderingContext2D, spritePixels: number[][]) {
     const colors = PlayerSpriteColors.COSMO_PALETTE;
     const scale = PlayerSpriteColors.SPRITE_SCALE;
     
@@ -128,14 +157,100 @@ export class Player {
         if (colorIndex > 0) {
           ctx.fillStyle = colors[colorIndex];
           ctx.fillRect(
-            this.x + col * scale, 
-            this.y + row * scale, 
+            col * scale, 
+            row * scale, 
             scale, 
             scale
           );
         }
       }
     }
+  }
+  
+  private updateAnimationState(state: any, deltaTime: number) {
+    const wasMoving = this.previousSpeed > 0.5;
+    const isMoving = state.speed > 0.5;
+    
+    // State transitions
+    if (!wasMoving && isMoving) {
+      this.animationState = 'starting';
+      this.stateTimer = 0;
+    } else if (wasMoving && !isMoving) {
+      this.animationState = 'stopping';
+      this.stateTimer = 0;
+    } else if (state.isDashing) {
+      this.animationState = 'dashing';
+    } else if (isMoving) {
+      if (this.animationState === 'starting' && this.stateTimer > 200) {
+        this.animationState = 'walking';
+      } else if (this.animationState !== 'starting') {
+        this.animationState = 'walking';
+      }
+    } else {
+      if (this.animationState === 'stopping' && this.stateTimer > 300) {
+        this.animationState = 'idle';
+      } else if (this.animationState !== 'stopping') {
+        this.animationState = 'idle';
+      }
+    }
+  }
+  
+  private updateSquashAndStretch(state: any, deltaTime: number) {
+    // Squash & stretch based on animation state
+    const targetScaleX = 1;
+    let targetScaleY = 1;
+    
+    switch (this.animationState) {
+      case 'starting':
+        // Squash down when starting movement
+        targetScaleY = 0.8;
+        break;
+      case 'dashing':
+        // Stretch horizontally when dashing
+        const stretchX = 1.2;
+        const stretchY = 0.9;
+        this.scaleX = this.lerp(this.scaleX, stretchX, deltaTime * 0.01);
+        this.scaleY = this.lerp(this.scaleY, stretchY, deltaTime * 0.01);
+        return;
+      case 'stopping':
+        // Stretch up when stopping
+        targetScaleY = 1.1;
+        break;
+      case 'walking':
+        // Slight bob effect while walking
+        const bobAmount = Math.sin(this.animationTimer * 0.01) * 0.05;
+        targetScaleY = 1 + bobAmount;
+        break;
+      case 'idle':
+      default:
+        // Return to normal
+        targetScaleY = 1;
+        break;
+    }
+    
+    // Smooth interpolation to target scale
+    const lerpSpeed = deltaTime * 0.008;
+    this.scaleX = this.lerp(this.scaleX, targetScaleX, lerpSpeed);
+    this.scaleY = this.lerp(this.scaleY, targetScaleY, lerpSpeed);
+  }
+  
+  private updateAnimationFrames(state: any, deltaTime: number) {
+    if (this.animationState === 'walking' || this.animationState === 'dashing') {
+      // Speed up animation when dashing
+      const animSpeed = this.animationState === 'dashing' ? 120 : 250;
+      this.animationTimer += deltaTime;
+      if (this.animationTimer > animSpeed) {
+        this.animationFrame = (this.animationFrame + 1) % 3; // 3-frame cycle for more fluid movement
+        this.animationTimer = 0;
+      }
+    } else {
+      this.animationFrame = 0;
+      this.animationTimer = 0;
+    }
+  }
+  
+  private lerp(start: number, end: number, factor: number): number {
+    return start + (end - start) * Math.min(factor, 1);
   }
 
   private getIdleFrame() {
@@ -203,6 +318,50 @@ export class Player {
       [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], // Row 15
     ];
   }
+  
+  private getStartFrame() {
+    // Cosmo starting movement - squashed pose for anticipation
+    return [
+      [0,0,0,0,2,2,2,2,2,2,0,0,0,0,0,0], // Row 0 - head
+      [0,0,2,2,2,2,2,2,2,2,2,2,0,0,0,0], // Row 1
+      [0,2,2,2,2,2,2,2,2,2,2,2,2,0,0,0], // Row 2
+      [2,2,2,3,3,2,2,2,2,3,3,2,2,2,0,0], // Row 3 - focused eyes
+      [2,2,3,4,4,3,2,2,3,4,4,3,2,2,0,0], // Row 4
+      [2,2,2,3,3,2,2,2,2,3,3,2,2,2,0,0], // Row 5
+      [2,2,2,2,2,2,1,1,2,2,2,2,2,2,0,0], // Row 6
+      [0,2,2,2,2,2,2,2,2,2,2,2,2,0,0,0], // Row 7
+      [0,0,2,2,2,2,2,2,2,2,2,2,0,0,0,0], // Row 8
+      [0,0,0,5,5,5,5,5,5,5,5,0,0,0,0,0], // Row 9 - body compressed
+      [0,0,5,5,5,5,5,5,5,5,5,5,0,0,0,0], // Row 10
+      [0,0,5,5,5,5,5,5,5,5,5,5,0,0,0,0], // Row 11
+      [0,0,5,5,5,5,5,5,5,5,5,5,0,0,0,0], // Row 12 - wider for squash effect
+      [0,0,0,2,2,0,0,0,2,2,0,0,0,0,0,0], // Row 13 - legs ready
+      [0,0,2,2,2,2,0,2,2,2,2,0,0,0,0,0], // Row 14
+      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], // Row 15
+    ];
+  }
+  
+  private getWalkFrame3() {
+    // Cosmo walk frame 3 - mid-stride dynamic pose
+    return [
+      [0,0,0,0,2,2,2,2,2,2,0,0,0,0,0,0], // Row 0
+      [0,0,2,2,2,2,2,2,2,2,2,2,0,0,0,0], // Row 1
+      [0,2,2,2,2,2,2,2,2,2,2,2,2,0,0,0], // Row 2
+      [2,2,2,3,3,2,2,2,2,3,3,2,2,2,0,0], // Row 3
+      [2,2,3,4,4,3,2,2,3,4,4,3,2,2,0,0], // Row 4
+      [2,2,2,3,3,2,2,2,2,3,3,2,2,2,0,0], // Row 5
+      [2,2,2,2,2,2,1,1,2,2,2,2,2,2,0,0], // Row 6
+      [0,2,2,2,2,2,2,2,2,2,2,2,2,0,0,0], // Row 7
+      [0,0,2,2,2,2,2,2,2,2,2,2,0,0,0,0], // Row 8
+      [0,0,0,5,5,5,5,5,5,5,5,0,0,0,0,0], // Row 9
+      [0,0,5,5,5,5,5,5,5,5,5,5,0,0,0,0], // Row 10
+      [0,0,5,5,5,5,5,5,5,5,5,5,0,0,0,0], // Row 11
+      [0,0,0,5,5,5,5,5,5,5,5,0,0,0,0,0], // Row 12
+      [0,0,0,0,2,2,2,2,2,0,0,0,0,0,0,0], // Row 13 - both legs center
+      [0,0,0,2,2,2,2,2,2,2,0,0,0,0,0,0], // Row 14
+      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], // Row 15
+    ];
+  }
 
   public getBounds() {
     return {
@@ -221,6 +380,13 @@ export class Player {
     this.animationTimer = 0;
     this.direction = 'right';
     this.movementSystem.reset();
+    
+    // Reset enhanced animation properties
+    this.scaleX = 1;
+    this.scaleY = 1;
+    this.animationState = 'idle';
+    this.stateTimer = 0;
+    this.previousSpeed = 0;
   }
 
   public resetMovementSystem() {

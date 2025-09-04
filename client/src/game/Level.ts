@@ -296,23 +296,7 @@ export class Level {
       }
     }
     
-    // Add warm ambient lighting effects
-    const ambientLights = [
-      { x: this.canvasWidth * 0.2, color: '#FFD700' },
-      { x: this.canvasWidth * 0.5, color: '#FF6347' },
-      { x: this.canvasWidth * 0.8, color: '#32CD32' }
-    ];
-    
-    ambientLights.forEach(light => {
-      const lightGradient = ctx.createRadialGradient(
-        light.x, this.canvasHeight * 0.1, 0,
-        light.x, this.canvasHeight * 0.1, 120
-      );
-      lightGradient.addColorStop(0, `${light.color}40`); // 25% opacity
-      lightGradient.addColorStop(1, 'transparent');
-      ctx.fillStyle = lightGradient;
-      ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
-    });
+    // Simplified lighting for better performance
   }
 
   private renderGraveyardBackground(ctx: CanvasRenderingContext2D) {
@@ -324,23 +308,13 @@ export class Level {
     ctx.fillStyle = skyGradient;
     ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
     
-    // Add eerie moon
+    // Simplified moon for performance
     ctx.fillStyle = '#F5F5DC';
-    ctx.shadowColor = '#F5F5DC';
-    ctx.shadowBlur = 15;
     ctx.beginPath();
     ctx.arc(this.canvasWidth * 0.8, this.canvasHeight * 0.2, 28, 0, 2 * Math.PI);
     ctx.fill();
-    ctx.shadowBlur = 0;
     
-    // Add mist effect
-    ctx.globalAlpha = 0.3;
-    ctx.fillStyle = '#DCDCDC';
-    for (let x = 0; x < this.canvasWidth; x += 16) {
-      const mistHeight = Math.sin(x * 0.02 + Date.now() * 0.001) * 8 + 12;
-      ctx.fillRect(x, this.canvasHeight - mistHeight, 16, mistHeight);
-    }
-    ctx.globalAlpha = 1;
+    // Simplified background for performance
   }
 
   private renderLabBackground(ctx: CanvasRenderingContext2D) {
@@ -357,11 +331,7 @@ export class Level {
     ctx.fillStyle = '#FFFFFF';
     for (let x = 100; x < this.canvasWidth; x += 200) {
       ctx.fillRect(x, 20, 80, 8);
-      // Add glow effect
-      ctx.shadowColor = '#FFFFFF';
-      ctx.shadowBlur = 10;
-      ctx.fillRect(x, 20, 80, 8);
-      ctx.shadowBlur = 0;
+      // Simplified for performance
     }
     
     // Add grid floor pattern
@@ -386,13 +356,12 @@ export class Level {
     ctx.fillStyle = '#000011';
     ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
     
-    // Add stars
+    // Simplified stars for performance
     ctx.fillStyle = '#FFFFFF';
-    for (let i = 0; i < 100; i++) {
-      const x = Math.random() * this.canvasWidth;
-      const y = Math.random() * this.canvasHeight;
-      const size = Math.random() * 2;
-      ctx.fillRect(x, y, size, size);
+    for (let i = 0; i < 20; i++) {
+      const x = (i * 37) % this.canvasWidth;
+      const y = (i * 73) % this.canvasHeight;
+      ctx.fillRect(x, y, 1, 1);
     }
   }
 
@@ -689,11 +658,7 @@ export class Level {
     if (this.levelNumber === 5) {
       ctx.fillStyle = '#FFD700'; // Gold
       ctx.fillRect(320, this.canvasHeight - 88, 12, 8);
-      // Glow effect
-      ctx.shadowColor = '#FFD700';
-      ctx.shadowBlur = 8;
-      ctx.fillRect(320, this.canvasHeight - 88, 12, 8);
-      ctx.shadowBlur = 0;
+      // Simplified rendering for performance
     }
   }
 
