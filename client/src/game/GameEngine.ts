@@ -12,6 +12,7 @@ import { LevelTransitionManager } from './LevelTransitionManager';
 import { DamageSystem } from './DamageSystem';
 import { UIStateController } from './UIStateController';
 import { PerformanceProfiler } from './PerformanceProfiler';
+import { WeaponSystem } from './WeaponSystem';
 import { BossStateMachine, GameContext } from './BossStateMachine';
 import { CommandInputSystem, GameCommand, InputCommand } from './CommandInputSystem';
 import { GameUtils } from './GameUtils'; // Assuming GameUtils contains createBounds
@@ -64,6 +65,7 @@ export class GameEngine {
   private damageSystem: DamageSystem;
   private uiController: UIStateController;
   private performanceProfiler: PerformanceProfiler;
+  private weaponSystem: WeaponSystem;
   private bossStateMachine: BossStateMachine | null = null;
   private commandInputSystem: CommandInputSystem;
 
@@ -102,6 +104,9 @@ export class GameEngine {
 
     // Initialize performance profiler for critical monitoring
     this.performanceProfiler = new PerformanceProfiler();
+    
+    // CRITICAL: Initialize weapon system as requested
+    this.weaponSystem = new WeaponSystem();
 
     // Initialize command input system with proper filtering
     this.commandInputSystem = new CommandInputSystem();
@@ -561,6 +566,26 @@ export class GameEngine {
 
     // Update level (enemies, etc.)
     this.currentLevel.update(deltaTime);
+    
+    // CRITICAL: Update weapon system
+    const playerBounds = this.player.getBounds();
+    this.weaponSystem.update(deltaTime, this.inputManager, playerBounds.x, playerBounds.y, playerBounds.width, playerBounds.height);
+    
+    // Check weapon unlocks
+    const weaponUnlock = this.weaponSystem.checkWeaponUnlocks(this.gameState.level, this.gameState.cookiesCollected);
+    if (weaponUnlock) {
+      // Weapon unlocked notification would go here
+    }
+    
+    // Handle weapon collisions with enemies
+    const enemies = this.currentLevel.getEnemies();
+    const weaponHits = this.weaponSystem.checkProjectileCollisions(enemies);
+    weaponHits.forEach(hit => {
+      if (hit.hit) {
+        // Apply damage to enemy
+        enemies[hit.enemyIndex].takeDamage(hit.damage);
+      }
+    });
 
     // Update boss state machine if active
     if (this.bossStateMachine) {
@@ -747,7 +772,8 @@ export class GameEngine {
         this.ctx.restore();
       }
 
-      // No weapon rendering in simplified game for better performance
+      // CRITICAL: Render weapons as requested
+      this.weaponSystem.render(this.ctx);
     }
   }
 

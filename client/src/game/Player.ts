@@ -30,6 +30,15 @@ export class Player {
   private direction: string = 'right';
   private animationFrame: number = 0;
   private animationTimer: number = 0;
+  
+  // CRITICAL: Jump/Dodge mechanics as requested
+  private jumpVelocity: number = 0;
+  private isJumping: boolean = false;
+  private groundY: number = 0;
+  private canDodge: boolean = true;
+  private dodgeTimer: number = 0;
+  private isInvincible: boolean = false;
+  private invincibilityTimer: number = 0;
   private movementSystem: MovementSystem;
   private screenShakeX: number = 0;
   private screenShakeY: number = 0;
@@ -44,6 +53,7 @@ export class Player {
   constructor(x: number, y: number) {
     this.x = x;
     this.y = y;
+    this.groundY = y; // Store ground position for jumping
     this.movementSystem = new MovementSystem();
     // Configure for smoother gameplay
     this.movementSystem.configure({
@@ -73,7 +83,16 @@ export class Player {
       this.direction = 'right';
     }
     
-    // Check for dash input (Shift key)
+    // CRITICAL: Jump mechanics (Spacebar)
+    if (inputManager.isKeyPressed(' ') && !this.isJumping) {
+      this.jump();
+    }
+    
+    // CRITICAL: Dodge mechanics (Shift key)
+    if (inputManager.isKeyPressed('Shift') && this.canDodge) {
+      this.dodge();
+    }
+    
     const isDashPressed = inputManager.isKeyPressed('Shift');
     
     // Get movement from movement system
@@ -87,9 +106,21 @@ export class Player {
     this.x += safeDx;
     this.y += safeDy;
     
+    // CRITICAL: Update jump physics
+    this.updateJumpPhysics(deltaTime);
+    
+    // Update dodge timer
+    this.updateDodgeTimer(deltaTime);
+    
+    // Update invincibility timer
+    this.updateInvincibilityTimer(deltaTime);
+    
     // Keep player within bounds
     this.x = Math.max(0, Math.min(canvasWidth - this.width, this.x));
-    this.y = Math.max(0, Math.min(canvasHeight - this.height, this.y));
+    // For Y, respect ground level when not jumping
+    if (!this.isJumping) {
+      this.y = Math.max(0, Math.min(canvasHeight - this.height, this.y));
+    }
     
     // Simple animation system
     const state = this.movementSystem.getState();
@@ -164,6 +195,83 @@ export class Player {
       }
     }
     return `player_${hash}_${this.direction}_${this.simpleWalkCycle}`;
+  }
+
+  /**
+   * CRITICAL: Jump mechanics implementation
+   */
+  private jump() {
+    this.jumpVelocity = -300; // Pixels per second upward
+    this.isJumping = true;
+  }
+
+  /**
+   * CRITICAL: Dodge mechanics implementation
+   */
+  private dodge() {
+    this.canDodge = false;
+    this.dodgeTimer = 500; // 500ms cooldown
+    this.isInvincible = true;
+    this.invincibilityTimer = 300; // 300ms invincibility
+  }
+
+  /**
+   * CRITICAL: Jump physics update
+   */
+  private updateJumpPhysics(deltaTime: number) {
+    if (this.isJumping) {
+      this.y += this.jumpVelocity * (deltaTime / 1000);
+      this.jumpVelocity += 800 * (deltaTime / 1000); // Gravity
+
+      // Land when reaching ground
+      if (this.y >= this.groundY) {
+        this.y = this.groundY;
+        this.isJumping = false;
+        this.jumpVelocity = 0;
+      }
+    }
+  }
+
+  /**
+   * Update dodge cooldown timer
+   */
+  private updateDodgeTimer(deltaTime: number) {
+    if (!this.canDodge) {
+      this.dodgeTimer -= deltaTime;
+      if (this.dodgeTimer <= 0) {
+        this.canDodge = true;
+      }
+    }
+  }
+
+  /**
+   * Update invincibility timer
+   */
+  private updateInvincibilityTimer(deltaTime: number) {
+    if (this.isInvincible) {
+      this.invincibilityTimer -= deltaTime;
+      if (this.invincibilityTimer <= 0) {
+        this.isInvincible = false;
+      }
+    }
+  }
+
+  /**
+   * Check if player is currently invincible
+   */
+  public isPlayerInvincible(): boolean {
+    return this.isInvincible;
+  }
+
+  /**
+   * Get jump state for external systems
+   */
+  public getJumpState() {
+    return {
+      isJumping: this.isJumping,
+      canDodge: this.canDodge,
+      isInvincible: this.isInvincible
+    };
   }
 
   private getIdleFrame() {
