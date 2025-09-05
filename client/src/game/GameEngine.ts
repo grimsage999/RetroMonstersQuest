@@ -3,7 +3,7 @@ import { Enemy } from './Enemy';
 import { Level } from './Level';
 import { AudioManager } from './AudioManager';
 import { InputManager } from './InputManager';
-import { Cutscene } from './Cutscene';
+import { Cutscene, CutsceneData } from './Cutscene';
 import { SpatialGrid } from './SpatialGrid';
 import { SpriteBatcher } from './SpriteBatcher';
 import { AudioPool } from './AudioPool';
@@ -11,10 +11,10 @@ import { GameStateManager, GamePhase } from './GameStateManager';
 import { LevelTransitionManager } from './LevelTransitionManager';
 import { DamageSystem } from './DamageSystem';
 import { UIStateController } from './UIStateController';
-import { PerformanceProfiler } from './PerformanceProfiler';
+import { DiagnosticSystem } from './DiagnosticSystem';
 import { BossStateMachine, GameContext } from './BossStateMachine';
 import { CommandInputSystem, GameCommand, InputCommand } from './CommandInputSystem';
-import { GameUtils } from './GameUtils';
+import { GameUtils } from './GameUtils'; // Assuming GameUtils contains createBounds
 import { COLLISION_CONFIG } from './GameConstants';
 
 export interface GameState {
@@ -38,15 +38,18 @@ export class GameEngine {
   private audioManager: AudioManager;
   private inputManager: InputManager;
 
-  // No weapons system
+  // Removed bullets and weapon cooldowns for performance
   private currentCutscene: Cutscene | null = null;
 
   private animationId: number = 0;
   private lastTime: number = 0;
   private isRunning: boolean = false;
 
-  // Core metrics
+  // Performance metrics
+  private drawCallCount: number = 0;
+  private entityCount: number = 0;
   private frameCount: number = 0;
+  private fpsTimer: number = 0;
   private currentFPS: number = 0;
 
   // Optimization systems
@@ -55,12 +58,12 @@ export class GameEngine {
   private audioPool: AudioPool;
   private activeTimeouts: Set<number> = new Set();
 
-  // Core systems
+  // Bug fix systems
   private stateManager: GameStateManager;
   private transitionManager: LevelTransitionManager;
   private damageSystem: DamageSystem;
   private uiController: UIStateController;
-  private performanceProfiler: PerformanceProfiler;
+  private diagnosticSystem: DiagnosticSystem;
   private bossStateMachine: BossStateMachine | null = null;
   private commandInputSystem: CommandInputSystem;
 
@@ -97,8 +100,14 @@ export class GameEngine {
     this.damageSystem = new DamageSystem(3);
     this.uiController = new UIStateController();
 
-    // Initialize performance profiler for critical monitoring
-    this.performanceProfiler = new PerformanceProfiler();
+    // Initialize diagnostic system
+    this.diagnosticSystem = new DiagnosticSystem(
+      this.stateManager,
+      this.uiController,
+      this.transitionManager,
+      this.damageSystem,
+      this.audioManager
+    );
 
     // Initialize command input system with proper filtering
     this.commandInputSystem = new CommandInputSystem();
@@ -131,7 +140,7 @@ export class GameEngine {
 
     // Preload all sounds
     this.audioPool.preloadAll().catch(err => {
-      // Failed to preload some audio
+      console.warn('Failed to preload some audio:', err);
     });
   }
 
@@ -146,7 +155,8 @@ export class GameEngine {
       throw new Error('GameEngine: Unable to get player bounds for boss context');
     }
 
-
+    // No weapons in simplified game
+    const weapons: string[] = [];
 
     return {
       playerPosition: { x: playerBounds.x, y: playerBounds.y },
@@ -155,7 +165,7 @@ export class GameEngine {
       deltaTime: Math.max(1, deltaTime), // Use actual deltaTime, minimum 1ms
       canvasWidth: this.canvas.width,
       canvasHeight: this.canvas.height,
-      currentWeapons: [] // No weapons in movement-based gameplay
+      currentWeapons: weapons
     };
   }
 
@@ -186,7 +196,7 @@ export class GameEngine {
 
       // Handle title screen - start the game
       if (this.stateManager.getCurrentPhase() === GamePhase.TITLE) {
-        // Starting gameplay from title screen
+        console.log('GameEngine: Starting gameplay from title screen');
 
         // Initialize the game state for level 1
         this.gameState.level = 1;
@@ -204,13 +214,13 @@ export class GameEngine {
       } else if (this.gameState.phase === 'levelComplete') {
         this.nextLevel();
       }
-
+      // No weapon firing in simplified game
     });
 
     this.commandInputSystem.registerCommandExecutor(GameCommand.FIRE_SECONDARY, (cmd: InputCommand) => {
       if (!cmd.pressed) return; // Only on key press, not release
 
-
+      // No secondary weapon in simplified game
     });
 
     this.commandInputSystem.registerCommandExecutor(GameCommand.SKIP_CUTSCENE, (cmd: InputCommand) => {
@@ -220,7 +230,7 @@ export class GameEngine {
 
     this.commandInputSystem.registerCommandExecutor(GameCommand.DEBUG_DIAGNOSTIC, (cmd: InputCommand) => {
       if (!cmd.pressed) return;
-      // Performance diagnostic removed for production
+      this.runDiagnostic();
     });
   }
 
@@ -242,9 +252,7 @@ export class GameEngine {
 
   public async start() {
     if (!this.isRunning) {
-      // Starting game
-
-      // Diagnostic analysis removed for production
+      console.log('GameEngine: Starting game...');
 
       // Set running flag and start game loop immediately for responsiveness
       this.isRunning = true;
@@ -267,16 +275,39 @@ export class GameEngine {
       this.audioManager.initialize().then(() => {
         this.audioManager.playGameStart();
         this.audioManager.playBackgroundMusic();
-        // Audio initialized successfully
+        console.log('GameEngine: Audio initialized successfully');
       }).catch(error => {
-        // Audio initialization failed, continuing without audio
+        console.warn('GameEngine: Audio initialization failed, continuing without audio:', error);
       });
 
-      // Game started, showing level title card
+      console.log('GameEngine: Game started, showing level title card');
     }
   }
 
-  // Diagnostic system removed for performance
+  /**
+   * Run diagnostic check
+   */
+  public runDiagnostic() {
+    const report = this.diagnosticSystem.runDiagnostic(this.gameState, this.currentFPS);
+    this.diagnosticSystem.logDiagnostic(report);
+
+    // Auto-fix critical issues
+    if (report.issues.length > 0) {
+      console.warn('🔧 Attempting auto-fix for critical issues...');
+
+      // Check for overlapping transitions
+      if (report.issues.some(issue => issue.includes('overlapping'))) {
+        console.log('Fixing: Resetting UI controller');
+        this.uiController.forceReset();
+      }
+
+      // Check for invalid states
+      if (report.issues.some(issue => issue.includes('Invalid transition'))) {
+        console.log('Fixing: Resetting state manager');
+        this.stateManager.forceTransitionTo(GamePhase.TITLE);
+      }
+    }
+  }
 
   public stop() {
     // Set flag first to prevent any new game loop iterations
@@ -297,11 +328,11 @@ export class GameEngine {
     // Clean up command input system to prevent memory leaks
     this.commandInputSystem.cleanup();
 
-    // Stopped all game loops and cleaned up resources
+    console.log('GameEngine: Stopped all game loops and cleaned up resources');
   }
 
   public restart() {
-    // Restarting game to initial state
+    console.log('GameEngine: Restarting game to initial state...');
 
     // Stop current game loop but don't cleanup input system
     this.isRunning = false;
@@ -323,10 +354,17 @@ export class GameEngine {
     this.uiController.forceReset();
     this.transitionManager.reset();
 
-    // Reset optimization systems
+    // Reset optimization systems to prevent state pollution
     this.spatialGrid.clear();
     this.audioPool.stopAll();
     this.spriteBatcher.clear();
+
+    // Reset performance tracking
+    this.frameCount = 0;
+    this.fpsTimer = 0;
+    this.currentFPS = 0;
+    this.drawCallCount = 0;
+    this.entityCount = 0;
 
     // Clear all game objects
     this.bossStateMachine = null;
@@ -364,11 +402,11 @@ export class GameEngine {
     // Update state for React UI
     this.updateState();
 
-    // Complete system reset
+    console.log('GameEngine: Complete system reset - all functionality restored');
   }
 
   private handleLevelComplete() {
-    // Level complete
+    console.log('GameEngine: Level complete!');
 
     // Use UI controller to properly queue the transition with delay
     this.uiController.queueTransition('levelCard', () => {
@@ -377,10 +415,7 @@ export class GameEngine {
   }
 
   private handleGameOver() {
-    // CRITICAL BUG FIX: Prevent multiple game over calls
-    if (this.gameState.phase === 'gameOver') {
-      return; // Already handled
-    }
+    console.log('GameEngine: Game over - player health depleted');
 
     // Clean transition to game over state
     this.gameState.phase = 'gameOver';
@@ -391,7 +426,7 @@ export class GameEngine {
     // Update state immediately to show game over screen
     this.updateState();
 
-    // Game over screen displayed
+    console.log('GameEngine: Game over screen displayed with final score:', this.gameState.score);
   }
 
 
@@ -407,7 +442,7 @@ export class GameEngine {
     this.transitionManager.startTransition(currentLevel, nextLevel, () => {
       this.gameState.level = nextLevel;
       this.gameState.cookiesCollected = 0;
-
+      // No bullets in simplified game
 
       // Initialize new level immediately to prevent null reference issues
       this.initializeLevel();
@@ -418,12 +453,12 @@ export class GameEngine {
   }
 
   private showLevelCutscene() {
-    // Showing cutscene for level
-    const cutsceneData: any = this.getCutsceneData(this.gameState.level);
+    console.log(`GameEngine: Showing cutscene for level ${this.gameState.level}`);
+    const cutsceneData: CutsceneData = this.getCutsceneData(this.gameState.level);
 
     // Create cutscene immediately without UI controller queue to prevent conflicts
     this.currentCutscene = new Cutscene(this.canvas, cutsceneData, () => {
-      // Cutscene complete, transitioning to gameplay
+      console.log('GameEngine: Cutscene complete, transitioning to gameplay');
       this.currentCutscene = null;
 
       // Now set the game phase and initialize level
@@ -431,14 +466,14 @@ export class GameEngine {
       this.initializeLevel();
       this.stateManager.transitionTo(GamePhase.PLAYING);
 
-      // Level initialized and ready for gameplay
+      console.log('GameEngine: Level initialized and ready for gameplay');
     });
 
     this.currentCutscene.start();
   }
 
-  private getCutsceneData(level: number): any {
-    const cutscenes: { [key: number]: any } = {
+  private getCutsceneData(level: number): CutsceneData {
+    const cutscenes: { [key: number]: CutsceneData } = {
       1: {
         levelNumber: 1,
         title: "👽 COSMIC PLAYGROUND 🛸",
@@ -452,19 +487,19 @@ export class GameEngine {
       3: {
         levelNumber: 3,
         title: "Level 3: Abandoned Subway",
-        description: "Underground tunnels echo with danger.\nRadioactive rats emerge from dark corners.\nNavigate through the abandoned transit system...",
-        weaponUnlocked: ""
+        description: "Underground tunnels echo with danger.\nRadioactive rats emerge from dark corners.\nIn the debris, you discover alien technology...",
+        weaponUnlocked: "⚡ RAY GUN ACQUIRED ⚡\nPress SPACE to fire lightning bolts!\n(3 hits to defeat enemies)"
       },
       4: {
         levelNumber: 4,
-        title: "Level 4: Graveyard of the Fallen",
+        title: "Level 4: Graveyard of the Fallen", 
         description: "Government experiments created unholy abominations.\nZombies shamble between crooked tombstones.\nMist swirls as the undead hunt for fresh victims."
       },
       5: {
         levelNumber: 5,
         title: "Level 5: Government Lab",
-        description: "The sterile facility hides dark secrets.\nInteract with lab equipment to uncover fragments.\nNavigate carefully through the final challenge...",
-        weaponUnlocked: ""
+        description: "The sterile facility hides dark secrets.\nInteract with lab equipment to uncover fragments.\nSomewhere here lies The Adjudicator...",
+        weaponUnlocked: "🔮 THE ADJUDICATOR 🔮\nPress X for instant death rays!\nGlowing orb grants ultimate power!"
       }
     };
 
@@ -476,9 +511,9 @@ export class GameEngine {
   }
 
   private initializeLevel() {
-    // Initializing level
+    console.log(`GameEngine: Initializing level ${this.gameState.level}`);
 
-    // Level optimization handled by game engine
+    // No weapons in simplified game for better performance
 
     this.player.reset(this.canvas.width / 2, this.canvas.height - 50);
     this.currentLevel = new Level(this.gameState.level, this.canvas.width, this.canvas.height);
@@ -487,7 +522,7 @@ export class GameEngine {
     if (this.gameState.level === 5 && this.currentLevel.hasBoss()) {
       this.bossStateMachine = new BossStateMachine();
       this.gameState.bossHealth = 100;
-      // Boss State Machine initialized for Level 5
+      console.log('GameEngine: Boss State Machine initialized for Level 5');
 
       // Start boss intro sequence
       const context = this.createBossContext(16); // Default 16ms for initialization
@@ -499,71 +534,71 @@ export class GameEngine {
 
     this.gameState.totalCookies = this.currentLevel.getTotalCookies();
     this.gameState.phase = 'playing';
-
+    // No bullets in simplified game
     this.updateState();
 
-    // Level initialized
+    console.log(`GameEngine: Level ${this.gameState.level} initialized with ${this.gameState.totalCookies} cookies`);
   }
 
+  // Removed fireRayGun for better performance
 
-
-
+  // Removed fireAdjudicator for better performance
 
   // Removed updateBullets for better performance
 
   private gameLoop(currentTime: number) {
     if (!this.isRunning) return;
 
-    // Start frame profiling
-    this.performanceProfiler.startFrame();
-
     const deltaTime = currentTime - this.lastTime;
+    this.lastTime = currentTime;
 
-    // CRITICAL BUG FIX: Ensure minimum deltaTime for consistent speeds
-    if (deltaTime < 1) { // Prevent zero or negative deltaTime
-      this.animationId = requestAnimationFrame((time) => this.gameLoop(time));
-      return;
-    }
+    // Performance monitoring 
+    this.frameCount++;
+    this.fpsTimer += deltaTime;
     
-    // Cap deltaTime to prevent jumps during lag spikes - allow normal 60fps
-    const cappedDeltaTime = Math.min(deltaTime, 50); // Cap at 20fps minimum, allows normal 60fps (16.67ms)
+    // PERFORMANCE FIX: Remove artificial frame limiting - let browser handle vsync
+    // The previous frame limiting logic was causing unnecessary function calls
+    // Modern browsers already handle frame rate limiting efficiently
+    
+    if (this.fpsTimer >= 1000) {
+      this.currentFPS = this.frameCount;
+      this.frameCount = 0;
+      this.fpsTimer = 0;
 
-    this.lastTime = currentTime; // Renamed variable
+      // Log performance metrics
+      if (this.currentFPS < 45) { // More lenient threshold
+        console.warn(`Low FPS detected: ${this.currentFPS}`);
+      }
 
-    // Profile update operations
-    this.performanceProfiler.startUpdate();
+      // Only run diagnostic when FPS drops significantly
+      if (this.currentFPS < 30) {
+        this.runDiagnostic();
+      }
+    }
 
-    // Update only essential systems with capped deltaTime
-    this.damageSystem.update(cappedDeltaTime); // Use the capped deltaTime
+    // Update damage system
+    this.damageSystem.update(deltaTime);
+
+    // Update transition manager
+    this.transitionManager.update(deltaTime);
+
+    // Process filtered input events
     this.commandInputSystem.processEventQueue();
 
     // Only update game logic if not in cutscene and playing
     try {
-      // Always update transition manager first for smooth transitions
-      this.transitionManager.update(cappedDeltaTime); // Use the capped deltaTime
-
-      // Only update game logic during active gameplay
-      if (this.shouldUpdateGameLogic()) {
-        this.update(cappedDeltaTime); // Use the capped deltaTime
+      if (this.gameState.phase === 'playing' && !this.currentCutscene && !this.transitionManager.isInTransition()) {
+        this.update(deltaTime);
       }
 
-      this.performanceProfiler.endUpdate();
-
-      // Profile render operations
-      this.performanceProfiler.startRender();
-
       this.render();
-
-      this.performanceProfiler.endRender();
-
     } catch (error) {
       console.error('GameEngine: Critical error in game loop:', error);
       // Emergency fallback: pause game and transition to safe state
-      this.emergencyStop();
+      this.isRunning = false;
+      this.stateManager.forceTransitionTo(GamePhase.TITLE);
+      this.uiController.forceReset();
     }
-
-    // End frame profiling
-    this.performanceProfiler.endFrame();
 
     this.animationId = requestAnimationFrame((time) => this.gameLoop(time));
   }
@@ -593,7 +628,7 @@ export class GameEngine {
       }
     }
 
-
+    // No weapon updates in simplified game for better performance
 
     // Check collisions
     this.checkCollisions();
@@ -603,7 +638,12 @@ export class GameEngine {
       const finishLine = this.currentLevel.getFinishLine();
       if (this.checkCollision(this.player.getBounds(), finishLine)) {
         if (this.gameState.level >= 5) {
-          // FIXED: Level 5 completion - cookies collection wins, no boss defeat required for movement-only game
+          // Level 5: Must also defeat boss to win
+          if (this.bossStateMachine && this.gameState.bossHealth > 0) {
+            // Boss still alive - cannot finish level
+            return;
+          }
+          // Final victory: Cosmic resistance successful, joy reclaimed
           this.gameState.phase = 'victory';
           this.audioManager.playVictoryFanfare();
           this.showVictorySequence();
@@ -640,7 +680,7 @@ export class GameEngine {
       this.ctx.save();
       this.ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
       this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-
+      
       // Add sparkle effect for extra satisfaction
       for (let i = 0; i < 8; i++) {
         const sparkleX = playerBounds.x + Math.random() * playerBounds.width;
@@ -684,8 +724,10 @@ export class GameEngine {
   }
 
   private render() {
-    // Clear canvas - let level handle background rendering
+    // Optimized canvas clearing for better performance
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.ctx.fillStyle = '#000011';
+    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
     // Don't render game content if we're still in TITLE phase (React overlay handles it)
     const currentPhase = this.stateManager.getCurrentPhase();
@@ -752,31 +794,14 @@ export class GameEngine {
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         this.ctx.restore();
       }
+
+      // No weapon rendering in simplified game for better performance
     }
   }
 
-  /**
-   * Check if game logic should be updated
-   */
-  private shouldUpdateGameLogic(): boolean {
-    return this.gameState.phase === 'playing' &&
-           !this.currentCutscene &&
-           !this.transitionManager.isInTransition();
-  }
+  // Removed renderBullets for better performance
 
-  /**
-   * Emergency stop for critical errors
-   */
-  private emergencyStop(): void {
-    this.isRunning = false;
-    try {
-      this.stateManager.forceTransitionTo(GamePhase.TITLE);
-      this.uiController.forceReset();
-      this.transitionManager.reset();
-    } catch (recoveryError) {
-      console.error('GameEngine: Failed to recover from critical error:', recoveryError);
-    }
-  }
+  // Removed renderWeaponUI for better performance
 
   private showVictorySequence() {
     console.log('GameEngine: Victory!');
@@ -784,7 +809,7 @@ export class GameEngine {
     // Use UI controller to properly queue the victory screen
     this.uiController.queueTransition('victory', () => {
       // Epilogue: Mystery + sequel tease as specified in design doc
-      const epilogueData = {
+      const epilogueData: CutsceneData = {
         levelNumber: 6,
         title: "🎃 COSMIC PLAYGROUND EPILOGUE 🎃",
         description: "Cosmo escapes through the facility doors...\nAmbience drops to empty hallway echoes.\nA white room appears...\n\n\"what?\"\n\nCosmic Playground will be back on Halloween!"

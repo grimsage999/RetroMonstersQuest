@@ -39,7 +39,7 @@ export abstract class BossState {
    */
   public onEnter(context: GameContext): void {
     this.entryTime = performance.now();
-    // Boss state transition
+    console.log(`Boss State: Entering ${this.name}`);
   }
   
   /**
@@ -51,7 +51,7 @@ export abstract class BossState {
    * Called when leaving this state
    */
   public onExit(context: GameContext): void {
-    // Boss state exit
+    console.log(`Boss State: Exiting ${this.name}`);
     this.stateData.clear();
   }
   
@@ -132,27 +132,23 @@ export class BossPhase1State extends BossState {
   }
   
   execute(context: GameContext): BehaviorResult {
+    const timeInState = this.getTimeInState();
     const attackTimer = this.getData('attackTimer', 0) + context.deltaTime;
     const attacksLaunched = this.getData('attacksLaunched', 0);
     
-    // OPTIMIZED: Simplified movement pattern (less calculations)
+    // Movement pattern: Horizontal back and forth
     const movePattern = this.getData('movePattern');
     if (movePattern === 'horizontal') {
-      // Simple oscillation without complex math
-      const progress = (Date.now() % 4000) / 4000; // 4 second cycle
-      const targetX = context.canvasWidth * 0.3 + (progress * context.canvasWidth * 0.4);
-      this.setData('targetX', targetX);
-      this.setData('targetY', 100);
+      const oscillation = Math.sin(timeInState * 0.002) * context.canvasWidth * 0.3;
+      this.setData('targetX', context.canvasWidth / 2 + oscillation);
+      this.setData('targetY', 100); // Stay near top
     }
     
-    // OPTIMIZED: Simplified attack pattern with randomness
+    // Attack pattern: Projectiles every 2 seconds
     if (attackTimer >= 2000) {
-      // 70% chance to attack (matches user's pattern)
-      if (Math.random() > 0.3) {
-        this.launchProjectileAttack(context);
-        this.setData('attacksLaunched', attacksLaunched + 1);
-      }
+      this.launchProjectileAttack(context);
       this.setData('attackTimer', 0);
+      this.setData('attacksLaunched', attacksLaunched + 1);
     } else {
       this.setData('attackTimer', attackTimer);
     }
@@ -171,9 +167,9 @@ export class BossPhase1State extends BossState {
   }
   
   private launchProjectileAttack(context: GameContext): void {
-    // OPTIMIZED: Simplified projectile creation (no complex targeting)
-    // Boss Phase 1: Projectile attack
-    // Reduced complexity projectile implementation
+    // This would create projectiles aimed at player
+    console.log('Boss Phase 1: Launching projectile attack');
+    // Implementation would add projectiles to game world
   }
 }
 
@@ -187,7 +183,7 @@ export class BossPhase1To2Transition extends BossState {
   
   onEnter(context: GameContext): void {
     super.onEnter(context);
-    // Boss entering vulnerable phase
+    console.log('Boss: Entering vulnerable transition phase');
   }
   
   execute(context: GameContext): BehaviorResult {
@@ -223,7 +219,7 @@ export class BossPhase2State extends BossState {
     super.onEnter(context);
     this.setData('chargeTimer', 0);
     this.setData('isCharging', false);
-    // Boss Phase 2: Aggressive mode
+    console.log('Boss Phase 2: More aggressive behavior activated');
   }
   
   execute(context: GameContext): BehaviorResult {
@@ -242,7 +238,7 @@ export class BossPhase2State extends BossState {
         this.setData('chargeTimer', 0);
         this.setData('chargeStartX', this.getData('targetX'));
         this.setData('chargeStartY', this.getData('targetY'));
-        // Boss Phase 2: Charge attack
+        console.log('Boss Phase 2: Initiating charge attack');
       } else {
         this.setData('chargeTimer', chargeTimer);
       }
@@ -287,7 +283,7 @@ export class BossFinalPhase extends BossState {
     super.onEnter(context);
     this.setData('attackFrequency', 500); // Very fast attacks
     this.setData('lastAttackTime', 0);
-    // Boss Final Phase: Assault mode
+    console.log('Boss Final Phase: All-out assault mode');
   }
   
   execute(context: GameContext): BehaviorResult {
@@ -321,7 +317,7 @@ export class BossFinalPhase extends BossState {
   }
   
   private launchDesperateAttack(context: GameContext): void {
-    // Boss Final Phase: Desperate attack
+    console.log('Boss Final Phase: Desperate attack launched');
     // Implementation would create multiple projectiles or area effects
   }
 }
@@ -362,11 +358,6 @@ export class BossStateMachine {
   private stateHistory: string[] = [];
   private maxHistorySize = 20;
   
-  // OPTIMIZATION: Boss AI throttling
-  private aiUpdateTimer: number = 0;
-  private aiUpdateInterval: number = 150; // Update boss AI every 150ms instead of every frame
-  private lastBehaviorResult: BehaviorResult | null = null;
-  
   constructor() {
     // Register all boss states
     this.registerState(new BossIntroState());
@@ -392,32 +383,21 @@ export class BossStateMachine {
   }
   
   /**
-   * Update the current state (OPTIMIZED with AI throttling)
+   * Update the current state
    */
   public update(context: GameContext): BehaviorResult | null {
     if (!this.currentState) {
       return null;
     }
     
-    // OPTIMIZATION: Throttle AI updates to reduce CPU overhead
-    this.aiUpdateTimer += context.deltaTime;
+    const result = this.currentState.execute(context);
     
-    if (this.aiUpdateTimer >= this.aiUpdateInterval) {
-      // Execute full AI logic at reduced frequency
-      const result = this.currentState.execute(context);
-      this.lastBehaviorResult = result;
-      this.aiUpdateTimer = 0;
-      
-      // Handle state transitions
-      if (result.shouldTransition && result.nextState) {
-        this.transitionTo(result.nextState, context);
-      }
-      
-      return result;
-    } else {
-      // Return cached result for smooth rendering while AI is throttled
-      return this.lastBehaviorResult;
+    // Handle state transitions
+    if (result.shouldTransition && result.nextState) {
+      this.transitionTo(result.nextState, context);
     }
+    
+    return result;
   }
   
   /**

@@ -69,27 +69,39 @@ body {
 }
 
 .cosmic-text {
-  font-family: "Comic Sans MS", cursive;
-  font-weight: bold;
-  color: #FFFF00;
+  color: #FFD700;
   text-shadow: 
-    -2px -2px 0 #000000,
-    2px -2px 0 #000000,
-    -2px 2px 0 #000000,
-    2px 2px 0 #000000,
-    0 0 8px #FFD700;
+    -2px -2px 0 #8A2BE2,
+    2px -2px 0 #8A2BE2,
+    -2px 2px 0 #8A2BE2,
+    2px 2px 0 #8A2BE2,
+    0 0 10px #00FFFF,
+    0 0 20px #FF1493;
+  filter: drop-shadow(4px 4px 0 rgba(255, 20, 147, 0.8));
+  animation: cosmic-pulse 2s ease-in-out infinite;
 }
 
-.green-graffiti-text {
-  font-family: "Comic Sans MS", cursive;
-  font-weight: bold;
-  color: #39FF14;
-  text-shadow: 
-    -2px -2px 0 #000000,
-    2px -2px 0 #000000,
-    -2px 2px 0 #000000,
-    2px 2px 0 #000000,
-    0 0 8px #39FF14;
+@keyframes cosmic-pulse {
+  0%, 100% {
+    transform: scale(1);
+    text-shadow: 
+      -2px -2px 0 #8A2BE2,
+      2px -2px 0 #8A2BE2,
+      -2px 2px 0 #8A2BE2,
+      2px 2px 0 #8A2BE2,
+      0 0 10px #00FFFF,
+      0 0 20px #FF1493;
+  }
+  50% {
+    transform: scale(1.05);
+    text-shadow: 
+      -3px -3px 0 #8A2BE2,
+      3px -3px 0 #8A2BE2,
+      -3px 3px 0 #8A2BE2,
+      3px 3px 0 #8A2BE2,
+      0 0 15px #00FFFF,
+      0 0 30px #FF1493;
+  }
 }
 
 .mobile-controls {
@@ -147,67 +159,47 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    color: #FFFF00;
-    font-family: "Comic Sans MS", cursive;
-    font-weight: bold;
-    font-size: 28px;
-    text-shadow: 
-        -2px -2px 0 #000000,
-        2px -2px 0 #000000,
-        -2px 2px 0 #000000,
-        2px 2px 0 #000000,
-        0 0 10px #FFD700;
+    color: #00ff00;
+    font-size: 24px;
     z-index: 100;
 }
 
 .restart-btn {
-    background: rgba(255, 255, 0, 0.3);
-    border: 3px solid #FFD700;
-    border-radius: 15px;
-    color: #FFD700;
-    font-size: 20px;
+    background: rgba(0, 255, 0, 0.3);
+    border: 2px solid #00ff00;
+    border-radius: 10px;
+    color: #00ff00;
+    font-size: 18px;
     font-weight: bold;
-    padding: 15px 30px;
+    padding: 10px 20px;
     margin-top: 20px;
     cursor: pointer;
-    transition: all 0.3s ease;
-    font-family: "Comic Sans MS", cursive;
-    text-shadow: 
-        -1px -1px 0 #000000,
-        1px -1px 0 #000000,
-        -1px 1px 0 #000000,
-        1px 1px 0 #000000;
+    font-family: 'Courier New', monospace;
 }
 
 .restart-btn:hover {
-    background: rgba(255, 255, 0, 0.5);
-    transform: scale(1.05);
-    box-shadow: 0 0 15px #FFD700;
-}
-
-.victory-screen {
-    color: #39FF14;
-}
-
-.victory-screen .restart-btn {
-    border-color: #39FF14;
-    color: #39FF14;
-    background: rgba(57, 255, 20, 0.3);
-}
-
-.victory-screen .restart-btn:hover {
-    background: rgba(57, 255, 20, 0.5);
-    box-shadow: 0 0 15px #39FF14;
+    background: rgba(0, 255, 0, 0.6);
 }
 
 @media (max-width: 768px) {
     .mobile-controls {
         display: block;
-        opacity: 1;
-        pointer-events: all;
     }
-    
+
     .game-canvas {
-        max-height: 70vh;
+        width: 100%;
+        max-width: 100vw;
+        height: auto;
+    }
+}
+
+@media (max-width: 480px) {
+    .control-pad {
+        width: 120px;
+        height: 120px;
+    }
+
+    .control-btn {
+        font-size: 16px;
     }
 }

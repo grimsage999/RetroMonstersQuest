@@ -3,25 +3,18 @@
  * Handles smooth level transitions without lag or resets
  */
 
-import { EasingFunctions, type EasingFunction } from './utils/EasingFunctions';
-
 export interface LevelTransitionConfig {
   fadeOutDuration: number;
   fadeInDuration: number;
   loadingDuration: number;
   showLoadingScreen: boolean;
-  fadeOutEasing: EasingFunction;
-  fadeInEasing: EasingFunction;
-  progressEasing: EasingFunction;
 }
-
-type TransitionPhase = 'fadeOut' | 'loading' | 'fadeIn' | 'complete';
 
 export class LevelTransitionManager {
   private canvas: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D;
   private isTransitioning: boolean = false;
-  private transitionPhase: TransitionPhase = 'complete';
+  private transitionPhase: 'fadeOut' | 'loading' | 'fadeIn' | 'complete' = 'complete';
   private transitionTimer: number = 0;
   private config: LevelTransitionConfig;
   private onComplete: (() => void) | null = null;
@@ -37,13 +30,10 @@ export class LevelTransitionManager {
     }
     this.ctx = context;
     this.config = {
-      fadeOutDuration: 800,  // SLOWER for readability
-      fadeInDuration: 1000,  // SLOWER transition
-      loadingDuration: 2000, // MUCH SLOWER loading for reading
-      showLoadingScreen: true,
-      fadeOutEasing: EasingFunctions.easeInQuad,
-      fadeInEasing: EasingFunctions.easeOutQuad,
-      progressEasing: EasingFunctions.easeInOutQuad
+      fadeOutDuration: 500,
+      fadeInDuration: 500,
+      loadingDuration: 1000,
+      showLoadingScreen: true
     };
   }
 
@@ -80,64 +70,37 @@ export class LevelTransitionManager {
    * Preload assets for the next level
    */
   private async preloadLevelAssets(level: number): Promise<void> {
-    // Define assets per level (removing problematic assets)
+    // Define assets per level
     const levelAssets: { [key: number]: string[] } = {
       1: ['/sounds/level1_music.mp3'],
-      2: ['/sounds/level2_music.mp3'],
-      3: ['/sounds/level3_music.mp3'],
-      4: ['/sounds/level4_music.mp3'], // No graveyard_bg.png - using generated background
-      5: ['/sounds/level5_music.mp3']  // No lab_bg.png - using generated background
+      2: ['/sounds/level2_music.mp3', '/textures/city_bg.png'],
+      3: ['/sounds/level3_music.mp3', '/textures/subway_bg.png', '/sounds/raygun.mp3'],
+      4: ['/sounds/level4_music.mp3', '/textures/graveyard_bg.png'],
+      5: ['/sounds/level5_music.mp3', '/textures/lab_bg.png', '/sounds/adjudicator.mp3']
     };
 
     this.assetsToPreload = levelAssets[level] || [];
     
-    // Fast parallel loading with timeout
+    // Simulate asset loading (with error handling)
     const promises = this.assetsToPreload.map(asset => 
-      this.loadAsset(asset)
+      this.loadAsset(asset).catch(error => {
+        console.warn(`Failed to load asset ${asset}:`, error);
+        return Promise.resolve(); // Continue despite individual failures
+      })
     );
-    
-    // Don't block transitions for more than 300ms total
-    const timeoutPromise = new Promise<void>(resolve => setTimeout(resolve, 300));
-    await Promise.race([Promise.all(promises), timeoutPromise]);
+    await Promise.all(promises);
   }
 
   /**
-   * Load a single asset with timeout and graceful fallback
+   * Load a single asset
    */
   private async loadAsset(assetPath: string): Promise<void> {
     return new Promise((resolve) => {
-      // Always resolve after timeout to prevent blocking transitions
-      const timeout = setTimeout(() => resolve(), 200);
-      
-      if (assetPath.endsWith('.mp3') || assetPath.endsWith('.wav')) {
-        // Audio loading with graceful fallback
-        const audio = new Audio(assetPath);
-        audio.addEventListener('canplaythrough', () => {
-          clearTimeout(timeout);
-          resolve();
-        }, { once: true });
-        audio.addEventListener('error', () => {
-          clearTimeout(timeout);
-          resolve(); // Continue despite audio failure
-        }, { once: true });
-        audio.load();
-      } else if (assetPath.endsWith('.png') || assetPath.endsWith('.jpg')) {
-        // Image loading with graceful fallback
-        const img = new Image();
-        img.onload = () => {
-          clearTimeout(timeout);
-          resolve();
-        };
-        img.onerror = () => {
-          clearTimeout(timeout);
-          resolve(); // Continue despite image failure
-        };
-        img.src = assetPath;
-      } else {
-        // Fallback for other asset types
-        clearTimeout(timeout);
-        setTimeout(() => resolve(), 50);
-      }
+      // Simulate loading delay
+      setTimeout(() => {
+        console.log(`Loaded asset: ${assetPath}`);
+        resolve();
+      }, 100);
     });
   }
 
@@ -147,9 +110,7 @@ export class LevelTransitionManager {
   update(deltaTime: number): void {
     if (!this.isTransitioning) return;
 
-    // Cap deltaTime to prevent large jumps during lag spikes
-    const cappedDeltaTime = Math.min(deltaTime, 1000/30); // Max 30fps equivalent
-    this.transitionTimer += cappedDeltaTime;
+    this.transitionTimer += deltaTime;
 
     switch (this.transitionPhase) {
       case 'fadeOut':
@@ -200,10 +161,10 @@ export class LevelTransitionManager {
 
     switch (this.transitionPhase) {
       case 'fadeOut':
-        this.renderFadeOverlay(
-          this.transitionTimer / this.config.fadeOutDuration,
-          this.config.fadeOutEasing
-        );
+        // Fade to black
+        const fadeOutAlpha = Math.min(1, this.transitionTimer / this.config.fadeOutDuration);
+        this.ctx.fillStyle = `rgba(0, 0, 0, ${fadeOutAlpha})`;
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         break;
 
       case 'loading':
@@ -214,10 +175,10 @@ export class LevelTransitionManager {
         break;
 
       case 'fadeIn':
-        this.renderFadeOverlay(
-          1 - (this.transitionTimer / this.config.fadeInDuration),
-          this.config.fadeInEasing
-        );
+        // Fade from black
+        const fadeInAlpha = Math.max(0, 1 - (this.transitionTimer / this.config.fadeInDuration));
+        this.ctx.fillStyle = `rgba(0, 0, 0, ${fadeInAlpha})`;
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         break;
     }
 
@@ -243,38 +204,29 @@ export class LevelTransitionManager {
       this.canvas.height / 2 - 50
     );
 
-    // Smooth progress bar with easing
-    const rawProgress = this.transitionTimer / this.config.loadingDuration;
-    const progress = EasingFunctions.apply(this.config.progressEasing, rawProgress);
+    // Progress bar
+    const progress = this.transitionTimer / this.config.loadingDuration;
     const barWidth = 300;
     const barHeight = 20;
     const barX = (this.canvas.width - barWidth) / 2;
     const barY = this.canvas.height / 2;
 
-    // Bar background with glow effect
+    // Bar background
     this.ctx.strokeStyle = '#00ffff';
     this.ctx.lineWidth = 2;
-    this.ctx.shadowColor = '#00ffff';
-    this.ctx.shadowBlur = 5;
     this.ctx.strokeRect(barX, barY, barWidth, barHeight);
 
-    // Smooth bar fill with gradient
-    const gradient = this.ctx.createLinearGradient(barX, barY, barX + barWidth, barY);
-    gradient.addColorStop(0, '#00ccff');
-    gradient.addColorStop(1, '#00ffff');
-    this.ctx.fillStyle = gradient;
+    // Bar fill
+    this.ctx.fillStyle = '#00ffff';
     this.ctx.fillRect(barX, barY, barWidth * progress, barHeight);
-    
-    // Reset shadow
-    this.ctx.shadowBlur = 0;
 
     // Loading tips
     const tips = [
       'Tip: Press Shift to dash!',
       'Tip: Collect all cookies to proceed',
-      'Tip: Watch out for radioactive rats in the subway!',
+      'Tip: Ray Gun unlocks at Level 3',
       'Tip: Watch out for enemy patterns',
-      'Tip: The final lab holds the greatest challenge!'
+      'Tip: The Adjudicator awaits in Level 5'
     ];
     
     const tipIndex = Math.floor(this.nextLevel - 1) % tips.length;
@@ -291,8 +243,14 @@ export class LevelTransitionManager {
    * Clean up resources from previous level
    */
   private cleanupPreviousLevel(): void {
+    // Force garbage collection by nullifying references
     console.log(`Cleaning up level ${this.currentLevel} resources`);
-    // Cleanup is handled by the game engine when setting new level
+    
+    // This would be called by the game engine to clean up:
+    // - Enemy arrays
+    // - Bullet arrays
+    // - Particle effects
+    // - Unused textures
   }
 
   /**
@@ -313,15 +271,6 @@ export class LevelTransitionManager {
     this.currentLevel = 1;
     this.nextLevel = 1;
     this.assetsToPreload = [];
-  }
-
-  /**
-   * Render fade overlay with easing
-   */
-  private renderFadeOverlay(progress: number, easingFn: EasingFunction): void {
-    const alpha = EasingFunctions.apply(easingFn, progress);
-    this.ctx.fillStyle = `rgba(0, 0, 0, ${alpha})`;
-    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
   }
 
   /**

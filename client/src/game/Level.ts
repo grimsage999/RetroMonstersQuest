@@ -1,6 +1,5 @@
 import { Enemy, EnemyType } from './Enemy';
 import { LEVEL_CONFIGS } from './GameConfig';
-// Simplified background rendering without cache
 
 interface Cookie {
   x: number;
@@ -30,8 +29,6 @@ export class Level {
   private boss: Enemy | null = null;
   private finishLine: { x: number; y: number; width: number; height: number; } | null = null;
   private config: LevelConfig;
-  
-  // Simplified background rendering
 
   private levelConfigs = LEVEL_CONFIGS;
 
@@ -115,35 +112,20 @@ export class Level {
     }
   }
 
-  // OPTIMIZATION: Batched enemy processing
-  private enemyUpdateBatch: number = 0;
-  private batchSize: number = 3; // Update 3 enemies per frame to spread CPU load
-
   public update(deltaTime: number) {
-    // OPTIMIZED: Batch enemy updates instead of all at once
-    const startIndex = this.enemyUpdateBatch * this.batchSize;
-    const endIndex = Math.min(startIndex + this.batchSize, this.enemies.length);
+    // Update all enemies at original speed
+    this.enemies.forEach(enemy => {
+      enemy.update(deltaTime, this.canvasWidth, this.canvasHeight);
+    });
     
-    for (let i = startIndex; i < endIndex; i++) {
-      if (this.enemies[i]) {
-        this.enemies[i].update(deltaTime, this.canvasWidth, this.canvasHeight);
-      }
-    }
-    
-    // Cycle through batches
-    this.enemyUpdateBatch++;
-    if (this.enemyUpdateBatch * this.batchSize >= this.enemies.length) {
-      this.enemyUpdateBatch = 0;
-    }
-    
-    // Update boss if it exists (always update boss for responsiveness)
+    // Update boss if it exists
     if (this.boss) {
       this.boss.update(deltaTime, this.canvasWidth, this.canvasHeight);
     }
   }
 
   public render(ctx: CanvasRenderingContext2D) {
-    // Simple background rendering
+    // Render background
     this.renderBackground(ctx);
     
     // Render cookies
@@ -195,92 +177,6 @@ export class Level {
     
     // Add environmental details
     this.renderEnvironment(ctx);
-  }
-
-  // Removed complex background caching - using simple rendering
-
-  /**
-   * Render background to cache (called only once)
-   */
-  private renderBackgroundToCache(ctx: CanvasRenderingContext2D) {
-    ctx.save();
-    ctx.imageSmoothingEnabled = false;
-    
-    switch (this.levelNumber) {
-      case 1: // Desert - Area 51
-        this.renderDesertBackgroundCached(ctx);
-        break;
-      case 2: // Dystopian City
-        this.renderCityBackgroundCached(ctx);
-        break;
-      case 3: // Subway
-        this.renderSubwayBackgroundCached(ctx);
-        break;
-      case 4: // Graveyard
-        this.renderGraveyardBackgroundCached(ctx);
-        break;
-      case 5: // Government Lab
-        this.renderLabBackgroundCached(ctx);
-        break;
-      default:
-        this.renderSpaceBackgroundCached(ctx);
-    }
-    
-    ctx.restore();
-  }
-
-  /**
-   * CRITICAL: Cached background methods (optimized versions)
-   */
-  private renderDesertBackgroundCached(ctx: CanvasRenderingContext2D) {
-    // Simplified desert background for caching
-    const skyGradient = ctx.createLinearGradient(0, 0, 0, this.canvasHeight * 0.7);
-    skyGradient.addColorStop(0, '#FF6B35');
-    skyGradient.addColorStop(0.3, '#FF8C42');
-    skyGradient.addColorStop(0.6, '#FFAA44');
-    skyGradient.addColorStop(1, '#F4A460');
-    ctx.fillStyle = skyGradient;
-    ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight * 0.7);
-    
-    // Simple sand (no animation)
-    ctx.fillStyle = '#CD853F';
-    ctx.fillRect(0, this.canvasHeight * 0.7, this.canvasWidth, this.canvasHeight * 0.3);
-  }
-
-  private renderCityBackgroundCached(ctx: CanvasRenderingContext2D) {
-    // Simple city background
-    const skyGradient = ctx.createLinearGradient(0, 0, 0, this.canvasHeight * 0.7);
-    skyGradient.addColorStop(0, '#4B0082');
-    skyGradient.addColorStop(1, '#2F4F4F');
-    ctx.fillStyle = skyGradient;
-    ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight * 0.7);
-    
-    ctx.fillStyle = '#483D8B';
-    ctx.fillRect(0, this.canvasHeight * 0.7, this.canvasWidth, this.canvasHeight * 0.3);
-  }
-
-  private renderSubwayBackgroundCached(ctx: CanvasRenderingContext2D) {
-    // Simple subway background
-    ctx.fillStyle = '#2F2F2F';
-    ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
-  }
-
-  private renderGraveyardBackgroundCached(ctx: CanvasRenderingContext2D) {
-    // Simple graveyard background
-    ctx.fillStyle = '#1a1a2e';
-    ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
-  }
-
-  private renderLabBackgroundCached(ctx: CanvasRenderingContext2D) {
-    // Simple lab background
-    ctx.fillStyle = '#E6E6FA';
-    ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
-  }
-
-  private renderSpaceBackgroundCached(ctx: CanvasRenderingContext2D) {
-    // Simple space background
-    ctx.fillStyle = '#000011';
-    ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
   }
 
   private renderDesertBackground(ctx: CanvasRenderingContext2D) {
@@ -374,41 +270,33 @@ export class Level {
   }
 
   private renderSubwayBackground(ctx: CanvasRenderingContext2D) {
-    // OPTIMIZED: Simplified subway background for better performance
-    
-    // Simple wall gradient (cached-friendly)
-    ctx.fillStyle = '#4A4A4A';
+    // Atmospheric underground with warm lighting
+    const wallGradient = ctx.createLinearGradient(0, 0, 0, this.canvasHeight * 0.8);
+    wallGradient.addColorStop(0, '#4A4A4A'); // Medium gray
+    wallGradient.addColorStop(0.5, '#6A5ACD'); // Slate blue
+    wallGradient.addColorStop(1, '#2F2F2F'); // Dark gray
+    ctx.fillStyle = wallGradient;
     ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight * 0.8);
     
-    // OPTIMIZED: Large tile blocks instead of individual tiles with borders
-    const blockSize = 48; // 3x larger blocks for 9x fewer operations
-    const blockColors = ['#4169E1', '#1E90FF', '#00CED1'];
-    
-    ctx.globalAlpha = 0.8;
-    for (let x = 0; x < this.canvasWidth; x += blockSize) {
-      for (let y = this.canvasHeight * 0.8; y < this.canvasHeight; y += blockSize) {
-        const colorIndex = ((x + y) / blockSize) % blockColors.length;
-        ctx.fillStyle = blockColors[colorIndex];
-        ctx.fillRect(x, y, blockSize, blockSize);
+    // Colorful mosaic floor tiles
+    const tileSize = 16;
+    const tileColors = ['#4169E1', '#1E90FF', '#00CED1', '#20B2AA', '#4682B4'];
+    for (let x = 0; x < this.canvasWidth; x += tileSize) {
+      for (let y = this.canvasHeight * 0.8; y < this.canvasHeight; y += tileSize) {
+        const colorIndex = ((x + y) / tileSize) % tileColors.length;
+        ctx.fillStyle = tileColors[colorIndex];
+        ctx.globalAlpha = 0.8;
+        ctx.fillRect(x, y, tileSize, tileSize);
+        
+        // Add tile borders
+        ctx.globalAlpha = 1;
+        ctx.strokeStyle = '#1C1C1C';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(x, y, tileSize, tileSize);
       }
     }
-    ctx.globalAlpha = 1;
     
-    // OPTIMIZED: Single border pass instead of individual strokes
-    ctx.strokeStyle = '#1C1C1C';
-    ctx.lineWidth = 2;
-    for (let x = 0; x < this.canvasWidth; x += blockSize) {
-      ctx.beginPath();
-      ctx.moveTo(x, this.canvasHeight * 0.8);
-      ctx.lineTo(x, this.canvasHeight);
-      ctx.stroke();
-    }
-    for (let y = this.canvasHeight * 0.8; y < this.canvasHeight; y += blockSize) {
-      ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.lineTo(this.canvasWidth, y);
-      ctx.stroke();
-    }
+    // Simplified lighting for better performance
   }
 
   private renderGraveyardBackground(ctx: CanvasRenderingContext2D) {
@@ -430,29 +318,32 @@ export class Level {
   }
 
   private renderLabBackground(ctx: CanvasRenderingContext2D) {
-    // OPTIMIZED: Simplified lab background for better performance
+    // Sterile government lab environment
+    const bgGradient = ctx.createLinearGradient(0, 0, 0, this.canvasHeight);
+    bgGradient.addColorStop(0, '#E0E0E0'); // Light gray ceiling
+    bgGradient.addColorStop(0.3, '#F5F5F5'); // White walls
+    bgGradient.addColorStop(0.7, '#DCDCDC'); // Gray floor transition
+    bgGradient.addColorStop(1, '#C0C0C0'); // Darker floor
+    ctx.fillStyle = bgGradient;
+    ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
     
-    // Simple gradient background
-    ctx.fillStyle = '#E0E0E0';
-    ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight * 0.7);
-    ctx.fillStyle = '#DCDCDC';
-    ctx.fillRect(0, this.canvasHeight * 0.7, this.canvasWidth, this.canvasHeight * 0.3);
-    
-    // OPTIMIZED: Fewer lighting strips
+    // Add fluorescent lighting strips
     ctx.fillStyle = '#FFFFFF';
-    ctx.fillRect(200, 20, 80, 8);
-    ctx.fillRect(500, 20, 80, 8);
+    for (let x = 100; x < this.canvasWidth; x += 200) {
+      ctx.fillRect(x, 20, 80, 8);
+      // Simplified for performance
+    }
     
-    // OPTIMIZED: Simplified grid pattern (64px spacing instead of 32px = 4x fewer operations)
+    // Add grid floor pattern
     ctx.strokeStyle = '#B0B0B0';
     ctx.lineWidth = 1;
-    for (let x = 0; x < this.canvasWidth; x += 64) {
+    for (let x = 0; x < this.canvasWidth; x += 32) {
       ctx.beginPath();
       ctx.moveTo(x, this.canvasHeight * 0.7);
       ctx.lineTo(x, this.canvasHeight);
       ctx.stroke();
     }
-    for (let y = this.canvasHeight * 0.7; y < this.canvasHeight; y += 64) {
+    for (let y = this.canvasHeight * 0.7; y < this.canvasHeight; y += 32) {
       ctx.beginPath();
       ctx.moveTo(0, y);
       ctx.lineTo(this.canvasWidth, y);
@@ -613,15 +504,21 @@ export class Level {
   }
 
   private renderSubwayEnvironment(ctx: CanvasRenderingContext2D) {
-    // OPTIMIZED: Simplified pillars (fewer details)
-    const pillarPositions = [250, 450]; // Reduced from 3 to 2 pillars
+    // Support pillars
+    const pillarPositions = [150, 350, 550];
     pillarPositions.forEach(x => {
       ctx.fillStyle = '#4A4A4A';
       ctx.fillRect(x, 0, 16, this.canvasHeight);
       
-      // Single rust mark instead of loop
+      // Pillar details
+      ctx.fillStyle = '#6A6A6A';
+      ctx.fillRect(x + 2, 0, 12, this.canvasHeight);
+      
+      // Rust/wear marks
       ctx.fillStyle = '#8B4513';
-      ctx.fillRect(x, this.canvasHeight / 2, 16, 8);
+      for (let y = 50; y < this.canvasHeight; y += 100) {
+        ctx.fillRect(x, y, 16, 8);
+      }
     });
 
     // Subway tracks
@@ -629,22 +526,23 @@ export class Level {
     ctx.fillRect(0, this.canvasHeight - 24, this.canvasWidth, 8);
     ctx.fillRect(0, this.canvasHeight - 12, this.canvasWidth, 8);
     
-    // OPTIMIZED: Fewer track ties (every 48px instead of 24px)
+    // Track ties
     ctx.fillStyle = '#654321'; // Dark brown
-    for (let x = 0; x < this.canvasWidth; x += 48) {
+    for (let x = 0; x < this.canvasWidth; x += 24) {
       ctx.fillRect(x, this.canvasHeight - 28, 16, 20);
     }
 
-    // OPTIMIZED: Simplified flickering lights (less frequent, no gradients)
-    const lightPositions = [200, 500]; // Reduced from 4 to 2 lights
+    // Flickering lights (simulated with random brightness)
+    const lightPositions = [100, 300, 500, 700];
     lightPositions.forEach(x => {
-      // Simple flickering without expensive gradients
-      if (Math.random() > 0.7) { // 30% chance of flicker
-        ctx.fillStyle = 'rgba(255, 255, 200, 0.3)';
-        ctx.fillRect(x - 40, 0, 80, 80);
-      }
+      const brightness = Math.random() > 0.8 ? 0.5 : 0.2;
+      const lightGradient = ctx.createRadialGradient(x, 30, 0, x, 30, 60);
+      lightGradient.addColorStop(0, `rgba(255, 255, 255, ${brightness})`);
+      lightGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+      ctx.fillStyle = lightGradient;
+      ctx.fillRect(x - 60, 0, 120, 120);
       
-      // Light fixture (always visible)
+      // Light fixture
       ctx.fillStyle = '#2F2F2F';
       ctx.fillRect(x - 8, 20, 16, 8);
     });
@@ -675,95 +573,92 @@ export class Level {
       { x: 650, y: this.canvasHeight - 130, tilt: -3 }
     ];
 
-    // OPTIMIZED: Simplified tombstones without expensive rotations
     tombstonePositions.forEach(tomb => {
-      // Simple tombstone base (no rotation transforms)
-      ctx.fillStyle = '#696969';
-      ctx.fillRect(tomb.x, tomb.y, 24, 40);
+      ctx.save();
+      ctx.translate(tomb.x + 12, tomb.y + 30);
+      ctx.rotate(tomb.tilt * Math.PI / 180);
       
-      // Tombstone top
-      ctx.fillRect(tomb.x + 4, tomb.y - 5, 16, 10);
+      // Tombstone base
+      ctx.fillStyle = '#696969'; // Dim gray
+      ctx.fillRect(-12, -30, 24, 40);
       
-      // Single moss patch instead of multiple
+      // Tombstone top (rounded)
+      ctx.fillRect(-8, -35, 16, 10);
+      
+      // Moss/weathering
       ctx.fillStyle = '#228B22';
-      ctx.fillRect(tomb.x + 2, tomb.y + 10, 4, 6);
+      ctx.fillRect(-10, -20, 4, 6);
+      ctx.fillRect(6, -25, 3, 8);
+      
+      ctx.restore();
     });
 
-    // OPTIMIZED: Simplified dead trees
-    const treePositions = [200, 450]; // Reduced from 3 to 2 trees
+    // Dead trees
+    const treePositions = [150, 400, 600];
     treePositions.forEach(x => {
       // Tree trunk
       ctx.fillStyle = '#2F2F2F';
       ctx.fillRect(x, this.canvasHeight - 180, 8, 60);
       
-      // OPTIMIZED: Single branch instead of multiple strokes
+      // Bare branches
       ctx.strokeStyle = '#2F2F2F';
       ctx.lineWidth = 2;
       ctx.beginPath();
+      ctx.moveTo(x + 4, this.canvasHeight - 160);
+      ctx.lineTo(x - 10, this.canvasHeight - 170);
       ctx.moveTo(x + 4, this.canvasHeight - 150);
-      ctx.lineTo(x + 15, this.canvasHeight - 165);
+      ctx.lineTo(x + 18, this.canvasHeight - 165);
       ctx.stroke();
     });
-
-    // OPTIMIZED: Minimal atmospheric mist (8 particles maximum)
-    const time = Date.now() * 0.0005;
-    const maxMistParticles = 8;
-    
-    for (let i = 0; i < maxMistParticles; i++) {
-      // Simple particle position calculation
-      const x = (i * 100 + Math.sin(time + i) * 20) % this.canvasWidth;
-      const y = this.canvasHeight * 0.6 + Math.cos(time * 0.7 + i) * 30;
-      
-      // Simple mist rendering
-      const alpha = (Math.sin(time * 2 + i) + 1) * 0.1;
-      ctx.fillStyle = `rgba(200, 200, 255, ${alpha})`;
-      ctx.fillRect(x, y, 3, 3);
-    }
   }
 
   private renderLabEnvironment(ctx: CanvasRenderingContext2D) {
-    // OPTIMIZED: Reduced to 2 tables instead of 3
+    // Lab tables/desks
     const tablePositions = [
-      { x: 200, y: this.canvasHeight - 80 },
-      { x: 450, y: this.canvasHeight - 80 }
+      { x: 100, y: this.canvasHeight - 80 },
+      { x: 300, y: this.canvasHeight - 80 },
+      { x: 500, y: this.canvasHeight - 80 }
     ];
 
     tablePositions.forEach(table => {
-      // Table surface (simplified)
-      ctx.fillStyle = '#D3D3D3';
+      // Table surface
+      ctx.fillStyle = '#D3D3D3'; // Light gray
       ctx.fillRect(table.x, table.y, 80, 16);
       
-      // OPTIMIZED: Single equipment piece per table instead of multiple
-      ctx.fillStyle = '#4169E1'; // Blue beaker
+      // Table legs
+      ctx.fillStyle = '#A9A9A9';
+      ctx.fillRect(table.x + 4, table.y + 16, 4, 20);
+      ctx.fillRect(table.x + 72, table.y + 16, 4, 20);
+      
+      // Lab equipment on tables
+      ctx.fillStyle = '#4169E1'; // Royal blue (beakers)
       ctx.fillRect(table.x + 20, table.y - 8, 6, 8);
-      ctx.fillStyle = '#32CD32'; // Green liquid
+      ctx.fillStyle = '#32CD32'; // Lime green (liquid)
       ctx.fillRect(table.x + 21, table.y - 6, 4, 4);
+      
+      // Computer/monitor
+      ctx.fillStyle = '#2F2F2F';
+      ctx.fillRect(table.x + 40, table.y - 12, 20, 12);
+      ctx.fillStyle = '#00FF00';
+      ctx.fillRect(table.x + 42, table.y - 10, 16, 8);
     });
 
-    // OPTIMIZED: Fewer wall cabinets (3 instead of 6)
+    // Wall cabinets
     ctx.fillStyle = '#F5F5F5';
-    const cabinetPositions = [150, 350, 550];
-    cabinetPositions.forEach(x => {
+    for (let x = 50; x < this.canvasWidth - 50; x += 120) {
       ctx.fillRect(x, 100, 60, 40);
-      // OPTIMIZED: Single cabinet stroke instead of multiple doors
+      // Cabinet doors
       ctx.strokeStyle = '#C0C0C0';
       ctx.lineWidth = 1;
       ctx.strokeRect(x, 100, 60, 40);
-    });
-
-    // OPTIMIZED: Minimal animation - just 2 key elements
-    const time = Date.now() * 0.001;
-    
-    // Blinking screen on first table
-    if (Math.sin(time * 2) > 0.5) {
-      ctx.fillStyle = '#00FF00';
-      ctx.fillRect(220, this.canvasHeight - 92, 16, 8);
+      ctx.strokeRect(x + 30, 100, 30, 40);
     }
-    
-    // Special bag on desk (The Adjudicator) - static
+
+    // Special bag on desk (The Adjudicator)
     if (this.levelNumber === 5) {
-      ctx.fillStyle = '#FFD700';
-      ctx.fillRect(470, this.canvasHeight - 88, 12, 8);
+      ctx.fillStyle = '#FFD700'; // Gold
+      ctx.fillRect(320, this.canvasHeight - 88, 12, 8);
+      // Simplified rendering for performance
     }
   }
 
@@ -870,25 +765,10 @@ export class Level {
     return collected;
   }
 
-  // CRITICAL BUG FIX: Add collision timing protection
-  private lastCollisionCheck: number = 0;
-
   public checkEnemyCollisions(playerBounds: { x: number; y: number; width: number; height: number; }): boolean {
-    // CRITICAL BUG FIX: Prevent rapid collision checks causing double damage
-    const currentTime = Date.now();
-    if (this.lastCollisionCheck && (currentTime - this.lastCollisionCheck) < 100) {
-      return false; // Too soon for another collision check (100ms cooldown)
-    }
-    
-    const hasCollision = this.enemies.some(enemy => 
+    return this.enemies.some(enemy => 
       enemy.isActive() && this.checkCollision(playerBounds, enemy.getBounds())
     );
-    
-    if (hasCollision) {
-      this.lastCollisionCheck = currentTime;
-    }
-    
-    return hasCollision;
   }
 
   private checkCollision(rect1: { x: number; y: number; width: number; height: number; }, rect2: { x: number; y: number; width: number; height: number; }): boolean {

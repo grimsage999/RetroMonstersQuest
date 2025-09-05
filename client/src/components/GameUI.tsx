@@ -16,10 +16,10 @@ interface GameUIProps {
 const GameUI: React.FC<GameUIProps> = ({ gameState }) => {
   return (
     <div className="game-ui cosmic-ui">
-      <div className="cosmic-text" style={{fontSize: '32px'}}>SCORE: {gameState.score}</div>
-      <div className="cosmic-text" style={{fontSize: '32px'}}>LIVES: {'♥'.repeat(gameState.lives)}</div>
-      <div className="cosmic-text" style={{fontSize: '32px'}}>LEVEL: {gameState.level}</div>
-      <div className="cosmic-text" style={{fontSize: '32px'}}>COOKIES: {gameState.cookiesCollected}/{gameState.totalCookies}</div>
+      <div className="cosmic-text">Score: {gameState.score}</div>
+      <div className="cosmic-text">Lives: {'♥'.repeat(gameState.lives)}</div>
+      <div className="cosmic-text">Level: {gameState.level}</div>
+      <div className="cosmic-text">Cookies: {gameState.cookiesCollected}/{gameState.totalCookies}</div>
     </div>
   );
 };

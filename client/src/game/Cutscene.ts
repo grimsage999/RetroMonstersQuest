@@ -1,10 +1,5 @@
-interface CutsceneData {
-  levelNumber: number;
-  title: string;
-  description: string;
-  weaponUnlocked?: string;
-}
-// Simple text rendering without complex effects // Import the new renderer
+import { CutsceneData } from './CutsceneData'; // Assuming CutsceneData is in a separate file
+import { CosmicTextRenderer } from './CosmicTextRenderer'; // Import the new renderer
 
 export class Cutscene {
   private canvas: HTMLCanvasElement;
@@ -15,7 +10,7 @@ export class Cutscene {
   private isActive: boolean = false;
   private skipHandler: ((e: KeyboardEvent) => void) | null = null;
   private autoAdvanceTimeout: number | null = null;
-  // Simple text rendering
+  private cosmicTextRenderer: CosmicTextRenderer; // Added for cosmic text rendering
 
   constructor(canvas: HTMLCanvasElement, data: CutsceneData, onComplete: () => void) {
     this.canvas = canvas;
@@ -26,7 +21,8 @@ export class Cutscene {
     this.ctx = context;
     this.data = data;
     this.onComplete = onComplete;
-    // Simple text rendering initialization
+    // Initialize the CosmicTextRenderer
+    this.cosmicTextRenderer = new CosmicTextRenderer(this.ctx);
   }
 
   public isReady(): boolean {
@@ -34,14 +30,14 @@ export class Cutscene {
   }
 
   public start() {
-    // Starting cutscene
+    console.log('Cutscene: Starting cutscene');
     this.isActive = true;
     this.startTime = Date.now();
 
     // Auto-advance after 4.5 seconds (more time to read) or on spacebar press
     this.skipHandler = (e: KeyboardEvent) => {
       if (e.key === ' ' || e.key === 'Space' || e.key === 'Enter') {
-        // Cutscene skipped by user
+        console.log('Cutscene: Skipped by user');
         this.complete();
       }
     };
@@ -53,22 +49,22 @@ export class Cutscene {
       try {
         this.autoAdvanceTimeout = window.setTimeout(() => {
           if (this.isActive) {
-            // Auto-completing cutscene
+            console.log('Cutscene: Auto-completing after timeout');
             this.complete();
           }
         }, 4500); // 4.5 seconds for comfortable reading
       } catch (error) {
-        // Failed to create auto-advance timeout
+        console.error('Cutscene: Failed to create auto-advance timeout:', error);
         this.complete();
       }
     } catch (error) {
-      // Error setting up event listeners
+      console.error('Cutscene: Error setting up event listeners:', error);
       this.complete();
     }
   }
 
   private complete() {
-    // Completing cutscene
+    console.log('Cutscene: Completing cutscene');
     this.isActive = false;
 
     // Clean up event listeners and timeouts to prevent memory leaks
@@ -76,7 +72,7 @@ export class Cutscene {
       try {
         document.removeEventListener('keydown', this.skipHandler);
       } catch (error) {
-        // Failed to remove keydown listener
+        console.error('Cutscene: Failed to remove keydown listener:', error);
       }
       this.skipHandler = null;
     }

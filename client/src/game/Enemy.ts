@@ -41,17 +41,6 @@ class EnemySpriteData {
     '#1C1C1C',     // 6 - black shadows
     '#FFFFFF'      // 7 - white teeth/eyes
   ];
-
-  static readonly BOSS_COLORS = [
-    'transparent', // 0
-    '#800080',     // 1 - purple outline/shadows
-    '#4B0082',     // 2 - dark purple body
-    '#FFD700',     // 3 - gold accents/crown
-    '#FF00FF',     // 4 - magenta energy
-    '#00FFFF',     // 5 - cyan glow
-    '#FFFFFF',     // 6 - white highlights
-    '#000000'      // 7 - black features
-  ];
 }
 
 
@@ -66,12 +55,6 @@ export class Enemy {
   private animationFrame: number = 0;
   private animationTimer: number = 0;
   private active: boolean = true;
-  
-  // OPTIMIZATION: Universal AI throttling for all enemy types
-  private lastAIUpdate: number = 0;
-  private aiUpdateInterval: number = 250; // Update AI every 250ms for all enemies
-  private lastPathUpdate: number = 0;
-  private pathUpdateInterval: number = 250; // Universal pathfinding throttling
 
   constructor(x: number, y: number, type: EnemyType) {
     this.x = x;
@@ -88,32 +71,32 @@ export class Enemy {
       case 'army':
         this.width = 48; // 16 * 3 scale for visibility
         this.height = 48;
-        this.speedX = (Math.random() - 0.5) * 3.5;
-        this.speedY = (Math.random() - 0.5) * 3.5;
+        this.speedX = (Math.random() - 0.5) * 3;
+        this.speedY = (Math.random() - 0.5) * 3;
         break;
       case 'rat':
         this.width = 36; // 12 * 3 scale for visibility
         this.height = 36;
-        this.speedX = (Math.random() - 0.5) * 4; // BALANCED: Moderate speed radioactive rats
-        this.speedY = (Math.random() - 0.5) * 4;
+        this.speedX = (Math.random() - 0.5) * 5;
+        this.speedY = (Math.random() - 0.5) * 5;
         break;
       case 'zombie':
         this.width = 48; // 16 * 3 scale for visibility
         this.height = 48;
-        this.speedX = (Math.random() - 0.5) * 4; // BALANCED: Moderate speed zombies
-        this.speedY = (Math.random() - 0.5) * 4;
+        this.speedX = (Math.random() - 0.5) * 2.5;
+        this.speedY = (Math.random() - 0.5) * 2.5;
         break;
       case 'boss':
         this.width = 72; // 24 * 3 scale for boss
         this.height = 72;
-        this.speedX = (Math.random() - 0.5) * 3; // BALANCED: Moderate boss movement
-        this.speedY = (Math.random() - 0.5) * 3;
+        this.speedX = (Math.random() - 0.5) * 2;
+        this.speedY = (Math.random() - 0.5) * 2;
         break;
       default:
         this.width = 48;
         this.height = 48;
-        this.speedX = (Math.random() - 0.5) * 3.5;
-        this.speedY = (Math.random() - 0.5) * 3.5;
+        this.speedX = (Math.random() - 0.5) * 3;
+        this.speedY = (Math.random() - 0.5) * 3;
         break;
     }
   }
@@ -121,20 +104,9 @@ export class Enemy {
   public update(deltaTime: number, canvasWidth: number, canvasHeight: number) {
     if (!this.active) return;
     
-    // OPTIMIZATION: Universal AI throttling for all enemy types
-    this.lastAIUpdate += deltaTime;
-    this.lastPathUpdate += deltaTime;
-    
-    // Throttled AI updates for all enemies
-    if (this.lastAIUpdate >= this.aiUpdateInterval) {
-      this.updateUniversalAI(canvasWidth, canvasHeight);
-      this.lastAIUpdate = 0;
-    }
-    
-    // Always update position for smooth movement
-    const normalizedDelta = deltaTime / 16.67;
-    this.x += this.speedX * normalizedDelta;
-    this.y += this.speedY * normalizedDelta;
+    // Restore original movement speed - no deltaTime normalization
+    this.x += this.speedX;
+    this.y += this.speedY;
     
     // Bounce off walls
     if (this.x <= 0 || this.x + this.width >= canvasWidth) {
@@ -192,12 +164,6 @@ export class Enemy {
         return {
           pixels: frame === 1 ? this.getZombieWalkFrame1() : this.getZombieWalkFrame2(),
           colors: EnemySpriteData.ZOMBIE_COLORS
-        };
-      case 'boss':
-        return {
-          pixels: frame === 1 ? this.getBossWalkFrame1() : this.getBossWalkFrame2(),
-          colors: EnemySpriteData.BOSS_COLORS,
-          hasGlow: true // Boss gets glowing effect
         };
       default:
         return {
@@ -551,79 +517,6 @@ export class Enemy {
       [0,0,6,6,6,0,0,0,0,0,6,6,6,0,0,0], // Row 14 - feet
       [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]  // Row 15
     ];
-  }
-
-  private getBossWalkFrame1() {
-    // Boss Frame 1 - Larger 24x24 boss sprite (scaled down to 16x16 for consistency)
-    return [
-      [0,0,0,3,3,3,3,3,3,3,3,3,3,0,0,0], // Row 0 - golden crown
-      [0,0,3,2,2,2,2,2,2,2,2,2,2,3,0,0], // Row 1 - crown base
-      [0,3,2,1,1,1,1,2,2,1,1,1,1,2,3,0], // Row 2 - head outline
-      [0,2,1,5,7,1,1,1,1,1,1,5,7,1,2,0], // Row 3 - glowing eyes
-      [0,2,1,1,1,1,4,1,1,4,1,1,1,1,2,0], // Row 4 - energy marks
-      [0,2,1,1,7,7,7,7,7,7,7,7,1,1,2,0], // Row 5 - menacing mouth
-      [0,2,1,1,1,1,1,1,1,1,1,1,1,1,2,0], // Row 6 - lower face
-      [0,0,2,2,2,2,2,2,2,2,2,2,2,2,0,0], // Row 7 - neck
-      [0,0,1,1,2,2,2,2,2,2,2,2,1,1,0,0], // Row 8 - shoulders
-      [0,0,1,2,4,4,4,4,4,4,4,4,2,1,0,0], // Row 9 - chest energy
-      [0,0,1,2,2,2,2,2,2,2,2,2,2,1,0,0], // Row 10 - body
-      [0,0,1,1,2,2,2,0,0,2,2,2,1,1,0,0], // Row 11 - arms
-      [0,0,1,1,1,2,0,0,0,0,2,1,1,1,0,0], // Row 12 - lower arms
-      [0,0,0,1,1,1,0,0,0,0,1,1,1,0,0,0], // Row 13 - legs
-      [0,0,0,1,1,1,0,0,0,0,1,1,1,0,0,0], // Row 14 - feet
-      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]  // Row 15
-    ];
-  }
-
-  private getBossWalkFrame2() {
-    // Boss Frame 2 - Slightly different pose
-    return [
-      [0,0,0,3,3,3,3,3,3,3,3,3,3,0,0,0], // Row 0 - golden crown
-      [0,0,3,2,2,2,2,2,2,2,2,2,2,3,0,0], // Row 1 - crown base
-      [0,3,2,1,1,1,1,2,2,1,1,1,1,2,3,0], // Row 2 - head outline
-      [0,2,1,5,7,1,1,1,1,1,1,5,7,1,2,0], // Row 3 - glowing eyes
-      [0,2,1,1,4,1,1,4,4,1,1,4,1,1,2,0], // Row 4 - energy marks (different pattern)
-      [0,2,1,1,7,7,7,7,7,7,7,7,1,1,2,0], // Row 5 - menacing mouth
-      [0,2,1,1,1,1,1,1,1,1,1,1,1,1,2,0], // Row 6 - lower face
-      [0,0,2,2,2,2,2,2,2,2,2,2,2,2,0,0], // Row 7 - neck
-      [0,0,1,1,2,2,2,2,2,2,2,2,1,1,0,0], // Row 8 - shoulders
-      [0,0,1,2,4,4,4,4,4,4,4,4,2,1,0,0], // Row 9 - chest energy
-      [0,0,1,2,2,2,2,2,2,2,2,2,2,1,0,0], // Row 10 - body
-      [0,0,0,1,1,2,2,0,0,2,2,1,1,0,0,0], // Row 11 - arms (different position)
-      [0,0,1,1,1,1,2,0,0,2,1,1,1,1,0,0], // Row 12 - lower arms
-      [0,0,1,1,1,0,0,0,0,0,1,1,1,1,0,0], // Row 13 - legs (walking)
-      [0,0,1,1,1,0,0,0,0,0,1,1,1,0,0,0], // Row 14 - feet
-      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]  // Row 15
-    ];
-  }
-
-  private updateUniversalAI(canvasWidth: number, canvasHeight: number) {
-    // OPTIMIZED: Universal simplified AI for all enemy types
-    switch (this.type) {
-      case 'rat':
-        // Randomly change direction occasionally
-        if (Math.random() < 0.1) {
-          this.speedX = (Math.random() - 0.5) * 4;
-          this.speedY = (Math.random() - 0.5) * 4;
-        }
-        break;
-      
-      case 'zombie':
-        // Simple direction change for zombies
-        if (Math.random() < 0.08) {
-          this.speedX = (Math.random() - 0.5) * 4;
-          this.speedY = (Math.random() - 0.5) * 4;
-        }
-        break;
-        
-      default:
-        // CIA agents and army men - basic wandering
-        if (Math.random() < 0.05) {
-          this.speedX = (Math.random() - 0.5) * 4;
-          this.speedY = (Math.random() - 0.5) * 4;
-        }
-        break;
-    }
   }
 
   public destroy() {

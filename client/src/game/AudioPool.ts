@@ -36,7 +36,7 @@ export class AudioPool {
   play(name: string): void {
     const pool = this.pools.get(name);
     if (!pool) {
-      // Sound not found in audio pool
+      console.warn(`Sound '${name}' not found in audio pool`);
       return;
     }
 
@@ -47,7 +47,7 @@ export class AudioPool {
         audio.play().catch(e => {
           // Silently handle autoplay restrictions
           if (e.name !== 'NotAllowedError') {
-            // Error playing sound - handled silently
+            console.error(`Error playing sound '${name}':`, e);
           }
         });
         return;
@@ -60,7 +60,7 @@ export class AudioPool {
     audio.volume = this.volume;
     audio.play().catch(e => {
       if (e.name !== 'NotAllowedError') {
-        // Error playing cloned sound - handled silently
+        console.error(`Error playing cloned sound '${name}':`, e);
       }
     });
   }

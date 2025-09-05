@@ -43,11 +43,11 @@ export const GAME_CONFIG = {
 
   // Timing Configuration
   TIMING: {
-    CUTSCENE_AUTO_ADVANCE: 8000, // 8 seconds - MUCH LONGER
+    CUTSCENE_AUTO_ADVANCE: 4500, // 4.5 seconds
     ADJUDICATOR_COOLDOWN: 5000,
-    LEVEL_COMPLETE_DELAY: 3000, // LONGER delay
-    VICTORY_DELAY: 2000, // LONGER delay
-    GAME_OVER_DELAY: 2000, // LONGER delay
+    LEVEL_COMPLETE_DELAY: 2000,
+    VICTORY_DELAY: 1000,
+    GAME_OVER_DELAY: 1000,
   },
 
   // Audio Configuration
@@ -60,11 +60,11 @@ export const GAME_CONFIG = {
 
   // Movement Configuration
   MOVEMENT: {
-    BASE_SPEED: 2, // REDUCED
-    MAX_SPEED: 3, // REDUCED
-    ACCELERATION: 0.2, // REDUCED
+    BASE_SPEED: 4,
+    MAX_SPEED: 6,
+    ACCELERATION: 0.25,
     DECELERATION: 0.15,
-    DASH_SPEED: 6, // REDUCED
+    DASH_SPEED: 10,
     DASH_DURATION: 200,
     DASH_COOLDOWN: 800,
   },
@@ -85,11 +85,11 @@ export const GAME_CONFIG = {
 
   // Transition Configuration
   TRANSITIONS: {
-    FADE_OUT_DURATION: 1500, // LONGER
-    FADE_IN_DURATION: 1200, // LONGER
-    LOADING_DURATION: 2500, // MUCH LONGER
-    LEVEL_CARD_DURATION: 4000, // LONGER for reading
-    TRANSITION_BUFFER: 800, // LONGER buffer
+    FADE_OUT_DURATION: 1000,
+    FADE_IN_DURATION: 800,
+    LOADING_DURATION: 1000,
+    LEVEL_CARD_DURATION: 2000,
+    TRANSITION_BUFFER: 500,
   },
 
   // Boss State Timings
@@ -129,23 +129,23 @@ export const GAME_CONFIG = {
   // Cosmic Text Styling Configuration
   TEXT_STYLES: {
     TITLE: {
-      FONT_SIZE: 68, // Chunky like COWZ/YOPPI examples
-      OUTLINE_WIDTH: 14, // Ultra-thick black outline like MARGE
+      FONT_SIZE: 48,
+      OUTLINE_WIDTH: 4,
       SHADOW_OFFSET: 6,
       GLOW_INTENSITY: 8,
-      PRIMARY_COLOR: '#FFD700', // Bright yellow like references
-      OUTLINE_COLOR: '#000000', // Clean black outline
-      SHADOW_COLOR: '#FF6B35', // Orange shadow like COWZ
-      GLOW_COLOR: '#FFFF00', // Bright yellow glow
+      PRIMARY_COLOR: '#FFD700', // Cosmic gold
+      OUTLINE_COLOR: '#8A2BE2', // Deep purple
+      SHADOW_COLOR: '#FF1493', // Hot pink
+      GLOW_COLOR: '#00FFFF', // Cyan glow
     },
     LEVEL_CARD: {
-      FONT_SIZE: 48, // Bigger for more presence
-      OUTLINE_WIDTH: 8, // Much thicker outline
-      SHADOW_OFFSET: 6,
-      GLOW_INTENSITY: 8,
+      FONT_SIZE: 36,
+      OUTLINE_WIDTH: 3,
+      SHADOW_OFFSET: 4,
+      GLOW_INTENSITY: 6,
       PRIMARY_COLOR: '#00FF7F', // Spring green
-      OUTLINE_COLOR: '#FF4500', // Orange red outline
-      SHADOW_COLOR: '#4B0082', // Indigo shadow
+      OUTLINE_COLOR: '#FF4500', // Orange red
+      SHADOW_COLOR: '#4B0082', // Indigo
       GLOW_COLOR: '#FFFF00', // Yellow glow
     },
     DESCRIPTION: {
@@ -159,100 +159,14 @@ export const GAME_CONFIG = {
       GLOW_COLOR: '#32CD32', // Lime green
     },
     UI_TEXT: {
-      FONT_SIZE: 36, // Bold like COMIC FESTIVAL examples
-      OUTLINE_WIDTH: 10, // Thick bubble outline like MARGE
-      SHADOW_OFFSET: 4,
-      GLOW_INTENSITY: 6,
-      PRIMARY_COLOR: '#FFFF00', // Bright yellow like references
-      OUTLINE_COLOR: '#000000', // Clean black outline
-      SHADOW_COLOR: '#FF1493', // Hot pink shadow
-      GLOW_COLOR: '#FFD700', // Gold glow
-    },
-    GAME_OVER: {
-      FONT_SIZE: 72, // Massive for maximum impact like graffiti style
-      OUTLINE_WIDTH: 14, // Ultra-thick for dramatic effect
-      SHADOW_OFFSET: 10,
-      GLOW_INTENSITY: 12,
-      PRIMARY_COLOR: '#FF4444', // Bright red
-      OUTLINE_COLOR: '#000000', // Ultra-thick black outline
-      SHADOW_COLOR: '#800080', // Purple shadow
-      GLOW_COLOR: '#FF0000', // Red glow
-    },
-    LEVEL_NAME: {
-      FONT_SIZE: 56, // Bigger level names for more presence
-      OUTLINE_WIDTH: 10, // Ultra-thick outline
-      SHADOW_OFFSET: 7,
-      GLOW_INTENSITY: 9,
-      PRIMARY_COLOR: '#00FFFF', // Cyan
-      OUTLINE_COLOR: '#000000', // Ultra-thick black outline
-      SHADOW_COLOR: '#4B0082', // Indigo shadow
-      GLOW_COLOR: '#00BFFF', // Sky blue glow
-    },
-    // Graffiti style matching COWZ/BOMBER MADMAN aesthetic
-    GRAFFITI_IMPACT: {
-      FONT_SIZE: 84, // Massive like COWZ example
-      OUTLINE_WIDTH: 18, // Ultra-thick like reference
-      SHADOW_OFFSET: 8,
-      GLOW_INTENSITY: 12,
-      PRIMARY_COLOR: '#FF6B35', // Bright orange like YOPPI
-      OUTLINE_COLOR: '#000000', // Clean black outline
-      SHADOW_COLOR: '#FF1493', // Hot pink shadow
-      GLOW_COLOR: '#FFD700', // Gold accent glow
-    },
-    // Clean bubble style matching MARGE/COMIC FESTIVAL
-    BUBBLE_CLEAN: {
-      FONT_SIZE: 72, // Large clean bubbles
-      OUTLINE_WIDTH: 16, // Ultra-thick like MARGE
-      SHADOW_OFFSET: 5,
-      GLOW_INTENSITY: 8,
-      PRIMARY_COLOR: '#FF69B4', // Hot pink like MARGE
-      OUTLINE_COLOR: '#000000', // Clean black outline
-      SHADOW_COLOR: '#4B0082', // Purple shadow
-      GLOW_COLOR: '#FF1493', // Pink glow
-    },
-    // Modern clean style like drip/MEET examples
-    MODERN_BOLD: {
-      FONT_SIZE: 64, // Bold modern sizing
-      OUTLINE_WIDTH: 12, // Clean thick outline
-      SHADOW_OFFSET: 4,
-      GLOW_INTENSITY: 6,
-      PRIMARY_COLOR: '#00FFFF', // Cyan like modern examples
-      OUTLINE_COLOR: '#000000', // Clean black outline
-      SHADOW_COLOR: '#8A2BE2', // Purple shadow
-      GLOW_COLOR: '#00BFFF', // Sky blue glow
-    },
-    // Bright neon style like COSMIC COCKTAIL
-    NEON_BRIGHT: {
-      FONT_SIZE: 76, // Large neon text
-      OUTLINE_WIDTH: 14, // Thick outline
-      SHADOW_OFFSET: 6,
-      GLOW_INTENSITY: 15, // Strong glow for neon effect
-      PRIMARY_COLOR: '#FF1493', // Hot pink like COSMIC COCKTAIL
-      OUTLINE_COLOR: '#000000', // Black outline
-      SHADOW_COLOR: '#8B008B', // Dark magenta shadow
-      GLOW_COLOR: '#FF69B4', // Bright pink glow
-    },
-    // GREEN GRAFFITI STYLE - matching exact reference aesthetic
-    GREEN_GRAFFITI: {
-      FONT_SIZE: 88, // Massive aggressive size
-      OUTLINE_WIDTH: 20, // Ultra-thick aggressive outline
-      SHADOW_OFFSET: 12, // Deep dimensional shadow
-      GLOW_INTENSITY: 18, // Intense electric glow
-      PRIMARY_COLOR: '#39FF14', // Electric lime green (exact match)
-      OUTLINE_COLOR: '#000000', // Heavy black outline
-      SHADOW_COLOR: '#1A1A1A', // Dark charcoal shadow
-      GLOW_COLOR: '#00FF41', // Bright green glow
-    },
-    // SPIKY GRAFFITI - for maximum aggression
-    SPIKY_GRAFFITI: {
-      FONT_SIZE: 92, // Huge spiky text
-      OUTLINE_WIDTH: 22, // Maximum outline thickness  
-      SHADOW_OFFSET: 15, // Extreme shadow depth
-      GLOW_INTENSITY: 20, // Maximum glow intensity
-      PRIMARY_COLOR: '#32CD32', // Lime green variant
-      OUTLINE_COLOR: '#000000', // Black spiky outline
-      SHADOW_COLOR: '#2F4F4F', // Dark slate shadow
-      GLOW_COLOR: '#ADFF2F', // Green yellow glow
+      FONT_SIZE: 24,
+      OUTLINE_WIDTH: 2,
+      SHADOW_OFFSET: 3,
+      GLOW_INTENSITY: 5,
+      PRIMARY_COLOR: '#FF6347', // Tomato
+      OUTLINE_COLOR: '#191970', // Midnight blue
+      SHADOW_COLOR: '#FF1493', // Deep pink
+      GLOW_COLOR: '#00BFFF', // Deep sky blue
     }
   },
 } as const;
@@ -280,31 +194,31 @@ export const LEVEL_CONFIGS = {
   },
   3: {
     background: '#1C1C1C',
-    fbiAgents: 6,
-    armyMen: 2,
-    radioactiveRats: 4,
+    fbiAgents: 8,
+    armyMen: 4,
+    radioactiveRats: 6,
     zombies: 0,
-    cookies: 10,
+    cookies: 12,
     title: 'Level 3: Abandoned Subway',
     description: 'Underground tunnels, graffiti, flickering lights'
   },
   4: {
     background: '#2F2F2F',
-    fbiAgents: 4,
+    fbiAgents: 6,
     armyMen: 0,
-    radioactiveRats: 4,
-    zombies: 3,
-    cookies: 11,
+    radioactiveRats: 8,
+    zombies: 4,
+    cookies: 14,
     title: 'Level 4: Graveyard',
     description: 'Crooked tombstones, mist, dead trees'
   },
   5: {
     background: '#1C1C1C',
-    fbiAgents: 4,
-    armyMen: 2,
-    radioactiveRats: 4,
-    zombies: 3,
-    cookies: 13,
+    fbiAgents: 6,
+    armyMen: 4,
+    radioactiveRats: 8,
+    zombies: 6,
+    cookies: 18,
     title: 'Level 5: Government Lab + Boss Cathedral',
     description: 'Sterile laboratory with dark secrets, then gothic cathedral boss arena'
   }
@@ -324,8 +238,8 @@ export const CUTSCENE_DATA = {
   3: {
     levelNumber: 3,
     title: "Level 3: Abandoned Subway",
-    description: "Underground tunnels echo with danger.\nRadioactive rats emerge from dark corners.\nNavigate through the abandoned transit system...",
-    weaponUnlocked: ""
+    description: "Underground tunnels echo with danger.\nRadioactive rats emerge from dark corners.\nIn the debris, you discover alien technology...",
+    weaponUnlocked: "🚀 ENHANCED AGILITY 🚀\nCosmo's movement becomes more responsive!\nDodge faster and collect more cookies!"
   },
   4: {
     levelNumber: 4,
@@ -335,7 +249,7 @@ export const CUTSCENE_DATA = {
   5: {
     levelNumber: 5,
     title: "Level 5: Government Lab",
-    description: "The sterile facility hides dark secrets.\nInteract with lab equipment to uncover fragments.\nNavigate carefully through the final challenge...",
-    weaponUnlocked: ""
+    description: "The sterile facility hides dark secrets.\nInteract with lab equipment to uncover fragments.\nSomewhere here lies The Adjudicator...",
+    weaponUnlocked: "🌟 COSMIC MASTERY 🌟\nCosmo reaches peak performance!\nUltimate speed and agility unlocked!"
   }
 } as const;

@@ -1,13 +1,13 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { GameEngine } from '../game/GameEngine';
-// Removed diagnostic dashboard
+import { DiagnosticDashboard } from './DiagnosticDashboard';
 import GameUI from './GameUI';
 
 const GameCanvas: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const gameEngineRef = useRef<GameEngine | null>(null);
   const [isStarted, setIsStarted] = useState(false);
-  // Removed diagnostics
+  const [showDiagnostics, setShowDiagnostics] = useState(false);
   const [gameState, setGameState] = useState({
     score: 0,
     lives: 3,
@@ -131,7 +131,7 @@ const GameCanvas: React.FC = () => {
       )}
       
       <GameUI gameState={gameState} />
-      {/* Diagnostic dashboard removed */}
+      <DiagnosticDashboard isVisible={showDiagnostics} gameEngine={gameEngineRef.current} />
       
       {/* Mobile Controls */}
       <div className="mobile-controls">
@@ -178,14 +178,14 @@ const GameCanvas: React.FC = () => {
       {/* Game Over Screen */}
       {gameState.phase === 'gameOver' && (
         <div className="game-over-screen">
-          <div className="green-graffiti-text" style={{fontSize: '92px', marginBottom: '20px'}}>💀 GAME OVER 💀</div>
-          <div className="cosmic-text" style={{ fontSize: '36px', marginTop: '10px' }}>
+          <div>💀 GAME OVER 💀</div>
+          <div style={{ fontSize: '16px', marginTop: '10px', color: '#FFFF00' }}>
             Final Score: {gameState.score}
           </div>
-          <div className="cosmic-text" style={{ fontSize: '24px', marginTop: '15px' }}>
+          <div style={{ fontSize: '14px', marginTop: '15px', color: '#CCCCCC' }}>
             Better luck next time, cosmic traveler!
           </div>
-          <button className="restart-btn cosmic-text" onClick={handleRestart}>
+          <button className="restart-btn" onClick={handleRestart}>
             🔄 Return to Start
           </button>
         </div>
@@ -194,12 +194,12 @@ const GameCanvas: React.FC = () => {
       {/* Victory Screen */}
       {gameState.phase === 'victory' && (
         <div className="victory-screen">
-          <div className="green-graffiti-text" style={{fontSize: '84px', marginBottom: '20px'}}>🎉 VICTORY! 🎉</div>
-          <div className="cosmic-text" style={{ fontSize: '32px', marginTop: '10px' }}>
+          <div>🎉 VICTORY! 🎉</div>
+          <div style={{ fontSize: '16px', marginTop: '10px' }}>
             You saved the galaxy!<br />
             Final Score: {gameState.score}
           </div>
-          <button className="restart-btn cosmic-text" onClick={handleRestart}>
+          <button className="restart-btn" onClick={handleRestart}>
             Press SPACE to Play Again
           </button>
         </div>
@@ -208,12 +208,12 @@ const GameCanvas: React.FC = () => {
       {/* Level Complete Screen */}
       {gameState.phase === 'levelComplete' && (
         <div className="victory-screen">
-          <div className="green-graffiti-text" style={{fontSize: '76px', marginBottom: '20px'}}>🌟 LEVEL COMPLETE! 🌟</div>
-          <div className="cosmic-text" style={{ fontSize: '32px', marginTop: '10px' }}>
+          <div>🌟 LEVEL COMPLETE! 🌟</div>
+          <div style={{ fontSize: '16px', marginTop: '10px' }}>
             Level {gameState.level} Complete!<br />
             Score: {gameState.score}
           </div>
-          <button className="restart-btn cosmic-text" onClick={handleNextLevel}>
+          <button className="restart-btn" onClick={handleNextLevel}>
             Press SPACE for Next Level
           </button>
         </div>
