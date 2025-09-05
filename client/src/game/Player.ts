@@ -390,10 +390,15 @@ export class Player {
   }
 
   public resetMovementSystem() {
-    // Completely reset movement system state
+    // Completely reset movement system state with enhanced animations
     this.movementSystem.reset();
     this.isMoving = false;
     this.animationFrame = 0;
     this.animationTimer = 0;
+    this.scaleX = 1;
+    this.scaleY = 1;
+    this.animationState = 'idle';
+    this.stateTimer = 0;
+    this.previousSpeed = 0;
   }
 }
