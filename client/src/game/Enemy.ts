@@ -66,6 +66,10 @@ export class Enemy {
   private animationFrame: number = 0;
   private animationTimer: number = 0;
   private active: boolean = true;
+  
+  // OPTIMIZATION: Reduce AI update frequency for rats
+  private lastAIUpdate: number = 0;
+  private aiUpdateInterval: number = 100; // Update AI every 100ms instead of every frame
 
   constructor(x: number, y: number, type: EnemyType) {
     this.x = x;
@@ -115,10 +119,24 @@ export class Enemy {
   public update(deltaTime: number, canvasWidth: number, canvasHeight: number) {
     if (!this.active) return;
     
-    // FIXED: Use deltaTime normalization for frame-rate independent movement
-    const normalizedDelta = deltaTime / 16.67; // Normalize to 60fps baseline
-    this.x += this.speedX * normalizedDelta;
-    this.y += this.speedY * normalizedDelta;
+    // OPTIMIZATION: Throttle AI updates for radioactive rats
+    if (this.type === 'rat') {
+      this.lastAIUpdate += deltaTime;
+      if (this.lastAIUpdate >= this.aiUpdateInterval) {
+        // Only update AI logic every 100ms for rats
+        this.updateRatAI(canvasWidth, canvasHeight);
+        this.lastAIUpdate = 0;
+      }
+      // Always update position for smooth movement
+      const normalizedDelta = deltaTime / 16.67;
+      this.x += this.speedX * normalizedDelta;
+      this.y += this.speedY * normalizedDelta;
+    } else {
+      // Normal update for other enemy types
+      const normalizedDelta = deltaTime / 16.67;
+      this.x += this.speedX * normalizedDelta;
+      this.y += this.speedY * normalizedDelta;
+    }
     
     // Bounce off walls
     if (this.x <= 0 || this.x + this.width >= canvasWidth) {
@@ -579,6 +597,15 @@ export class Enemy {
       [0,0,1,1,1,0,0,0,0,0,1,1,1,0,0,0], // Row 14 - feet
       [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]  // Row 15
     ];
+  }
+
+  private updateRatAI(canvasWidth: number, canvasHeight: number) {
+    // OPTIMIZED: Simplified AI logic for radioactive rats
+    // Randomly change direction occasionally instead of complex pathfinding
+    if (Math.random() < 0.1) { // 10% chance to change direction
+      this.speedX = (Math.random() - 0.5) * 4;
+      this.speedY = (Math.random() - 0.5) * 4;
+    }
   }
 
   public destroy() {
