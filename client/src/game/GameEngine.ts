@@ -70,9 +70,9 @@ export class GameEngine {
     this.ctx = canvas.getContext('2d')!;
     this.onStateChange = onStateChange;
     
-    // Set canvas dimensions for fullscreen gameplay
-    this.canvas.width = 1200;
-    this.canvas.height = 800;
+    // Set canvas dimensions optimized for gameplay
+    this.canvas.width = 1000;
+    this.canvas.height = 600;
 
     this.gameState = {
       score: 0,

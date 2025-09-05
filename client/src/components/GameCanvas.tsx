@@ -81,8 +81,8 @@ const GameCanvas: React.FC = () => {
       <div className="fullscreen-canvas-wrapper">
         <canvas
           ref={canvasRef}
-          width={1200}
-          height={800}
+          width={1000}
+          height={600}
           className="game-canvas fullscreen"
         />
         
@@ -99,8 +99,8 @@ const GameCanvas: React.FC = () => {
             position: 'absolute',
             top: 0,
             left: 0,
-            width: 1200,
-            height: 800,
+            width: 1000,
+            height: 600,
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
