@@ -1,6 +1,6 @@
 import { Enemy, EnemyType } from './Enemy';
 import { LEVEL_CONFIGS } from './GameConfig';
-import { BackgroundCache } from './BackgroundCache';
+// Simplified background rendering without cache
 
 interface Cookie {
   x: number;
@@ -31,9 +31,7 @@ export class Level {
   private finishLine: { x: number; y: number; width: number; height: number; } | null = null;
   private config: LevelConfig;
   
-  // CRITICAL: Background cache for performance
-  private static backgroundCache: BackgroundCache = new BackgroundCache();
-  private cachedBackground: HTMLCanvasElement | null = null;
+  // Simplified background rendering
 
   private levelConfigs = LEVEL_CONFIGS;
 
@@ -205,20 +203,10 @@ export class Level {
    */
   private renderBackgroundOptimized(ctx: CanvasRenderingContext2D) {
     // Get or create cached background
-    if (!this.cachedBackground) {
-      this.cachedBackground = Level.backgroundCache.getCachedBackground(
-        `level_${this.levelNumber}`,
-        this.canvasWidth,
-        this.canvasHeight,
-        (cacheCtx) => {
-          // Render background once to cache
-          this.renderBackgroundToCache(cacheCtx);
-        }
-      );
-    }
+    // Direct background rendering
     
-    // CRITICAL: Single drawImage call replaces all expensive background calculations
-    ctx.drawImage(this.cachedBackground, 0, 0);
+    // Simple background rendering
+    this.renderBackground(ctx);
     
     // Add any dynamic environmental details (if needed)
     this.renderEnvironment(ctx);

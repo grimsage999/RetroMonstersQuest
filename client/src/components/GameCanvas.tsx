@@ -1,13 +1,13 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { GameEngine } from '../game/GameEngine';
-import { DiagnosticDashboard } from './DiagnosticDashboard';
+// Removed diagnostic dashboard
 import GameUI from './GameUI';
 
 const GameCanvas: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const gameEngineRef = useRef<GameEngine | null>(null);
   const [isStarted, setIsStarted] = useState(false);
-  const [showDiagnostics, setShowDiagnostics] = useState(false);
+  // Removed diagnostics
   const [gameState, setGameState] = useState({
     score: 0,
     lives: 3,
@@ -131,7 +131,7 @@ const GameCanvas: React.FC = () => {
       )}
       
       <GameUI gameState={gameState} />
-      <DiagnosticDashboard isVisible={showDiagnostics} gameEngine={gameEngineRef.current} />
+      {/* Diagnostic dashboard removed */}
       
       {/* Mobile Controls */}
       <div className="mobile-controls">

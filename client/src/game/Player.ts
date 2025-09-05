@@ -17,8 +17,8 @@ class PlayerSpriteColors {
 
 
 import { InputManager } from './InputManager';
-import { MovementSystem } from './MovementSystem';
-import { OptimizedSpriteRenderer } from './OptimizedSpriteRenderer';
+// Simplified movement without complex system
+// Simplified sprite rendering
 
 export class Player {
   private x: number;
@@ -39,32 +39,20 @@ export class Player {
   private dodgeTimer: number = 0;
   private isInvincible: boolean = false;
   private invincibilityTimer: number = 0;
-  private movementSystem: MovementSystem;
+  // Simple movement properties
   private screenShakeX: number = 0;
   private screenShakeY: number = 0;
   
   // Simplified animation properties
   private simpleWalkCycle: boolean = false;
   
-  // CRITICAL: Optimized sprite renderer for performance
-  private static spriteRenderer: OptimizedSpriteRenderer = new OptimizedSpriteRenderer();
-  private cachedSprites: { [key: string]: ImageData } = {};
+  // Simple rendering without complex optimization
 
   constructor(x: number, y: number) {
     this.x = x;
     this.y = y;
     this.groundY = y; // Store ground position for jumping
-    this.movementSystem = new MovementSystem();
-    // Configure for smoother gameplay
-    this.movementSystem.configure({
-      baseSpeed: 4,
-      maxSpeed: 6,
-      acceleration: 0.25,
-      deceleration: 0.15,
-      dashSpeed: 10,
-      dashDuration: 200,
-      dashCooldown: 800
-    });
+    // Simple movement initialization
   }
 
   public update(inputManager: InputManager, deltaTime: number, canvasWidth: number, canvasHeight: number) {
@@ -95,8 +83,8 @@ export class Player {
     
     const isDashPressed = false; // Removed weapon system, dodge separate from dash
     
-    // Get movement from movement system
-    const movement = this.movementSystem.update(inputX, inputY, isDashPressed, deltaTime);
+    // Simple movement calculation
+    const movement = { dx: inputX * this.speed, dy: inputY * this.speed };
     
     // Apply movement
     // Sanitize movement to prevent NaN/Infinity crashes
@@ -122,9 +110,8 @@ export class Player {
       this.y = Math.max(0, Math.min(canvasHeight - this.height, this.y));
     }
     
-    // Simple animation system
-    const state = this.movementSystem.getState();
-    this.isMoving = state.speed > 0.5;
+    // Simple animation system  
+    this.isMoving = movement.dx !== 0 || movement.dy !== 0;
     
     // Simple 2-frame walk cycle
     if (this.isMoving) {
@@ -145,8 +132,8 @@ export class Player {
     
     const spritePixels = this.getCurrentSpriteFrame();
     
-    // CRITICAL PERFORMANCE FIX: Use optimized sprite rendering
-    this.renderSpriteOptimized(ctx, spritePixels);
+    // Simple sprite rendering
+    this.renderSpriteSimple(ctx, spritePixels, PlayerSpriteColors.COSMO_PALETTE, PlayerSpriteColors.SPRITE_SCALE);
     
     ctx.restore();
   }
@@ -159,28 +146,23 @@ export class Player {
   }
 
   /**
-   * CRITICAL PERFORMANCE FIX: Optimized sprite rendering
-   * Replaces 256+ individual fillRect calls with cached ImageData rendering
+   * Simple sprite rendering method
    */
-  private renderSpriteOptimized(ctx: CanvasRenderingContext2D, spritePixels: number[][]) {
-    const colors = PlayerSpriteColors.COSMO_PALETTE;
-    const scale = PlayerSpriteColors.SPRITE_SCALE;
-    
-    // Create sprite ID for caching
-    const spriteId = this.getSpriteId(spritePixels);
-    
-    // Get or create cached sprite
-    if (!this.cachedSprites[spriteId]) {
-      this.cachedSprites[spriteId] = Player.spriteRenderer.preRenderSprite(
-        spritePixels, 
-        colors, 
-        scale, 
-        spriteId
-      );
+  private renderSpriteSimple(ctx: CanvasRenderingContext2D, spritePixels: number[][], colors: string[], scale: number) {
+    for (let row = 0; row < spritePixels.length; row++) {
+      for (let col = 0; col < spritePixels[row].length; col++) {
+        const colorIndex = spritePixels[row][col];
+        if (colorIndex > 0 && colors[colorIndex]) {
+          ctx.fillStyle = colors[colorIndex];
+          ctx.fillRect(
+            this.x + col * scale,
+            this.y + row * scale,
+            scale,
+            scale
+          );
+        }
+      }
     }
-    
-    // Render with single optimized call (replaces 256+ fillRect calls)
-    Player.spriteRenderer.renderSprite(ctx, this.cachedSprites[spriteId], this.x, this.y);
   }
   
   /**
@@ -357,15 +339,15 @@ export class Player {
     this.animationFrame = 0;
     this.animationTimer = 0;
     this.direction = 'right';
-    this.movementSystem.reset();
+    // Simple movement reset
     
     // Reset simple animation properties
     this.simpleWalkCycle = false;
   }
 
-  public resetMovementSystem() {
+  public resetMovement() {
     // Completely reset movement system state
-    this.movementSystem.reset();
+    // Simple movement reset
     this.isMoving = false;
     this.animationFrame = 0;
     this.animationTimer = 0;

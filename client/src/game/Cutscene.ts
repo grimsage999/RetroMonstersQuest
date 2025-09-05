@@ -4,7 +4,7 @@ interface CutsceneData {
   description: string;
   weaponUnlocked?: string;
 }
-import { CosmicTextRenderer } from './CosmicTextRenderer'; // Import the new renderer
+// Simple text rendering without complex effects // Import the new renderer
 
 export class Cutscene {
   private canvas: HTMLCanvasElement;
@@ -15,7 +15,7 @@ export class Cutscene {
   private isActive: boolean = false;
   private skipHandler: ((e: KeyboardEvent) => void) | null = null;
   private autoAdvanceTimeout: number | null = null;
-  private cosmicTextRenderer: CosmicTextRenderer; // Added for cosmic text rendering
+  // Simple text rendering
 
   constructor(canvas: HTMLCanvasElement, data: CutsceneData, onComplete: () => void) {
     this.canvas = canvas;
@@ -26,8 +26,7 @@ export class Cutscene {
     this.ctx = context;
     this.data = data;
     this.onComplete = onComplete;
-    // Initialize the CosmicTextRenderer
-    this.cosmicTextRenderer = new CosmicTextRenderer(this.ctx);
+    // Simple text rendering initialization
   }
 
   public isReady(): boolean {
