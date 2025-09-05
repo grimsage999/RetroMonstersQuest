@@ -41,24 +41,32 @@ export class CosmicTextRenderer {
     // Save context
     ctx.save();
 
-    // Set bubble font with rounded, chunky weight
+    // Set ultra-chunky bubble font with maximum weight
     ctx.font = `900 ${style.FONT_SIZE}px "Comic Sans MS", "Marker Felt", "Chalkduster", cursive`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
 
-    // Create pulsing effect
-    const pulseFactor = 1 + Math.sin(pulsePhase) * 0.1;
+    // Create pulsing effect for extra impact
+    const pulseFactor = 1 + Math.sin(pulsePhase) * 0.15; // More pronounced pulse
     const adjustedFontSize = style.FONT_SIZE * pulseFactor;
     ctx.font = `900 ${adjustedFontSize}px "Comic Sans MS", "Marker Felt", "Chalkduster", cursive`;
 
-    // 1. Render outer glow (multiple passes for intensity)
+    // 1. Render deep 3D dimensional shadow layers (like COWZ/YOPPI examples)
+    const shadowDepth = 8; // Deep dimensional shadow
+    for (let depth = shadowDepth; depth > 0; depth--) {
+      ctx.globalAlpha = 0.7 - (depth * 0.06); // Gradual fade
+      ctx.fillStyle = this.darkenColor(style.SHADOW_COLOR, depth * 0.1);
+      ctx.fillText(text, x + depth, y + depth);
+    }
+
+    // 2. Render bright outer glow for pop
     for (let i = 0; i < style.GLOW_INTENSITY; i++) {
       ctx.shadowColor = style.GLOW_COLOR;
-      ctx.shadowBlur = style.GLOW_INTENSITY + i * 2;
+      ctx.shadowBlur = style.GLOW_INTENSITY + i * 3;
       ctx.shadowOffsetX = 0;
       ctx.shadowOffsetY = 0;
       ctx.fillStyle = style.GLOW_COLOR;
-      ctx.globalAlpha = 0.1;
+      ctx.globalAlpha = 0.15;
       ctx.fillText(text, x, y);
     }
 
@@ -66,31 +74,33 @@ export class CosmicTextRenderer {
     ctx.shadowBlur = 0;
     ctx.shadowColor = 'transparent';
 
-    // 2. Render drop shadow
-    ctx.globalAlpha = 0.8;
-    ctx.fillStyle = style.SHADOW_COLOR;
-    ctx.fillText(text, x + style.SHADOW_OFFSET, y + style.SHADOW_OFFSET);
-
-    // 3. Render thick outline (multiple passes for boldness)
+    // 3. Render ultra-thick outline for maximum chunkiness
     ctx.globalAlpha = 1;
     ctx.strokeStyle = style.OUTLINE_COLOR;
-    ctx.lineWidth = style.OUTLINE_WIDTH;
+    ctx.lineWidth = style.OUTLINE_WIDTH * 1.8; // Much thicker base
     ctx.lineJoin = 'round';
     ctx.lineCap = 'round';
     
-    // Multiple outline passes for chunky bubble effect
-    for (let i = 0; i < 4; i++) {
+    // Multiple aggressive outline passes for chunky dimensional effect
+    for (let i = 0; i < 6; i++) {
+      ctx.lineWidth = style.OUTLINE_WIDTH * (1.8 - i * 0.2);
       ctx.strokeText(text, x, y);
     }
 
-    // 4. Render main text fill
+    // 4. Render vibrant main text fill
+    ctx.globalAlpha = 1;
     ctx.fillStyle = style.PRIMARY_COLOR;
     ctx.fillText(text, x, y);
 
-    // 5. Add inner highlight for 3D effect
-    ctx.fillStyle = this.lightenColor(style.PRIMARY_COLOR, 0.3);
-    ctx.globalAlpha = 0.6;
-    ctx.fillText(text, x, y - 2);
+    // 5. Add bright inner highlight for strong 3D bubble effect
+    ctx.fillStyle = this.lightenColor(style.PRIMARY_COLOR, 0.4);
+    ctx.globalAlpha = 0.8;
+    ctx.fillText(text, x - 1, y - 3); // More pronounced highlight
+
+    // 6. Add inner core glow for extra vibrancy
+    ctx.fillStyle = this.lightenColor(style.PRIMARY_COLOR, 0.6);
+    ctx.globalAlpha = 0.4;
+    ctx.fillText(text, x, y - 1);
 
     // Restore context
     ctx.restore();
@@ -197,6 +207,20 @@ export class CosmicTextRenderer {
     return "#" + (0x1000000 + (R < 255 ? R < 1 ? 0 : R : 255) * 0x10000 +
       (G < 255 ? G < 1 ? 0 : G : 255) * 0x100 +
       (B < 255 ? B < 1 ? 0 : B : 255))
+      .toString(16).slice(1);
+  }
+
+  /**
+   * Darken a hex color by a percentage for dimensional shadows
+   */
+  private darkenColor(color: string, percent: number): string {
+    const num = parseInt(color.replace("#", ""), 16);
+    const amt = Math.round(2.55 * percent * 100);
+    const R = Math.max(0, (num >> 16) - amt);
+    const G = Math.max(0, (num >> 8 & 0x00FF) - amt);
+    const B = Math.max(0, (num & 0x0000FF) - amt);
+    
+    return "#" + (0x1000000 + R * 0x10000 + G * 0x100 + B)
       .toString(16).slice(1);
   }
 }

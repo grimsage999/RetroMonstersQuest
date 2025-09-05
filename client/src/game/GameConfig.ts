@@ -129,23 +129,23 @@ export const GAME_CONFIG = {
   // Cosmic Text Styling Configuration
   TEXT_STYLES: {
     TITLE: {
-      FONT_SIZE: 48,
-      OUTLINE_WIDTH: 6, // Thicker for bubble effect
-      SHADOW_OFFSET: 6,
-      GLOW_INTENSITY: 8,
+      FONT_SIZE: 64, // Much bigger and chunkier like COWZ
+      OUTLINE_WIDTH: 12, // Ultra-thick outline for maximum impact
+      SHADOW_OFFSET: 8,
+      GLOW_INTENSITY: 10,
       PRIMARY_COLOR: '#FFD700', // Cosmic gold
-      OUTLINE_COLOR: '#000000', // Black outline for readability
-      SHADOW_COLOR: '#FF1493', // Hot pink
+      OUTLINE_COLOR: '#000000', // Thick black outline
+      SHADOW_COLOR: '#FF1493', // Hot pink shadow
       GLOW_COLOR: '#00FFFF', // Cyan glow
     },
     LEVEL_CARD: {
-      FONT_SIZE: 36,
-      OUTLINE_WIDTH: 3,
-      SHADOW_OFFSET: 4,
-      GLOW_INTENSITY: 6,
+      FONT_SIZE: 48, // Bigger for more presence
+      OUTLINE_WIDTH: 8, // Much thicker outline
+      SHADOW_OFFSET: 6,
+      GLOW_INTENSITY: 8,
       PRIMARY_COLOR: '#00FF7F', // Spring green
-      OUTLINE_COLOR: '#FF4500', // Orange red
-      SHADOW_COLOR: '#4B0082', // Indigo
+      OUTLINE_COLOR: '#FF4500', // Orange red outline
+      SHADOW_COLOR: '#4B0082', // Indigo shadow
       GLOW_COLOR: '#FFFF00', // Yellow glow
     },
     DESCRIPTION: {
@@ -159,34 +159,67 @@ export const GAME_CONFIG = {
       GLOW_COLOR: '#32CD32', // Lime green
     },
     UI_TEXT: {
-      FONT_SIZE: 24,
-      OUTLINE_WIDTH: 4, // Thicker outline for bubble effect
-      SHADOW_OFFSET: 3,
-      GLOW_INTENSITY: 5,
+      FONT_SIZE: 32, // Bigger UI text for more impact
+      OUTLINE_WIDTH: 8, // Much thicker for chunky bubble effect
+      SHADOW_OFFSET: 5,
+      GLOW_INTENSITY: 7,
       PRIMARY_COLOR: '#FFFF00', // Bright yellow for UI
-      OUTLINE_COLOR: '#000000', // Thick black outline
-      SHADOW_COLOR: '#FF1493', // Deep pink
+      OUTLINE_COLOR: '#000000', // Ultra-thick black outline
+      SHADOW_COLOR: '#FF1493', // Deep pink shadow
       GLOW_COLOR: '#FFD700', // Gold glow
     },
     GAME_OVER: {
-      FONT_SIZE: 48,
-      OUTLINE_WIDTH: 6, // Extra thick for impact
-      SHADOW_OFFSET: 5,
-      GLOW_INTENSITY: 8,
+      FONT_SIZE: 72, // Massive for maximum impact like graffiti style
+      OUTLINE_WIDTH: 14, // Ultra-thick for dramatic effect
+      SHADOW_OFFSET: 10,
+      GLOW_INTENSITY: 12,
       PRIMARY_COLOR: '#FF4444', // Bright red
-      OUTLINE_COLOR: '#000000', // Thick black outline
+      OUTLINE_COLOR: '#000000', // Ultra-thick black outline
       SHADOW_COLOR: '#800080', // Purple shadow
       GLOW_COLOR: '#FF0000', // Red glow
     },
     LEVEL_NAME: {
-      FONT_SIZE: 42,
-      OUTLINE_WIDTH: 5,
-      SHADOW_OFFSET: 4,
-      GLOW_INTENSITY: 7,
+      FONT_SIZE: 56, // Bigger level names for more presence
+      OUTLINE_WIDTH: 10, // Ultra-thick outline
+      SHADOW_OFFSET: 7,
+      GLOW_INTENSITY: 9,
       PRIMARY_COLOR: '#00FFFF', // Cyan
-      OUTLINE_COLOR: '#000000', // Thick black outline
+      OUTLINE_COLOR: '#000000', // Ultra-thick black outline
       SHADOW_COLOR: '#4B0082', // Indigo shadow
       GLOW_COLOR: '#00BFFF', // Sky blue glow
+    },
+    // New graffiti-style for impact moments (like COWZ/YOPPI examples)
+    GRAFFITI_IMPACT: {
+      FONT_SIZE: 80, // Massive graffiti-style text
+      OUTLINE_WIDTH: 16, // Ultra-aggressive outline
+      SHADOW_OFFSET: 12,
+      GLOW_INTENSITY: 15,
+      PRIMARY_COLOR: '#39FF14', // Electric lime green
+      OUTLINE_COLOR: '#000000', // Thick black outline
+      SHADOW_COLOR: '#8B008B', // Dark magenta shadow
+      GLOW_COLOR: '#00FF7F', // Spring green glow
+    },
+    // Vibrant bubble style (like YOPPI example)
+    BUBBLE_VIBRANT: {
+      FONT_SIZE: 68, // Large bubble text
+      OUTLINE_WIDTH: 14, // Extra thick for bubble effect
+      SHADOW_OFFSET: 9,
+      GLOW_INTENSITY: 12,
+      PRIMARY_COLOR: '#FF6B35', // Bright orange
+      OUTLINE_COLOR: '#000000', // Black outline
+      SHADOW_COLOR: '#FF1493', // Deep pink shadow
+      GLOW_COLOR: '#FFD700', // Gold glow
+    },
+    // Cosmic rainbow style (inspired by multicolor references)
+    COSMIC_RAINBOW: {
+      FONT_SIZE: 76, // Big cosmic text
+      OUTLINE_WIDTH: 15, // Ultra-thick outline
+      SHADOW_OFFSET: 10,
+      GLOW_INTENSITY: 14,
+      PRIMARY_COLOR: '#FF00FF', // Magenta base
+      OUTLINE_COLOR: '#000000', // Black outline
+      SHADOW_COLOR: '#4B0082', // Indigo shadow
+      GLOW_COLOR: '#00FFFF', // Cyan glow
     }
   },
 } as const;

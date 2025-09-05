@@ -73,13 +73,18 @@ body {
   font-weight: 900 !important;
   color: #FFFF00 !important; /* Bright yellow for UI */
   text-shadow: 
-    -3px -3px 0 #000000, /* Thick black outline */
-    3px -3px 0 #000000,
-    -3px 3px 0 #000000,
-    3px 3px 0 #000000,
-    0 0 8px #FFD700, /* Gold glow */
-    0 0 16px #FFD700;
-  filter: drop-shadow(2px 2px 0 rgba(0, 0, 0, 0.8));
+    -6px -6px 0 #000000, /* Ultra-thick black outline */
+    6px -6px 0 #000000,
+    -6px 6px 0 #000000,
+    6px 6px 0 #000000,
+    -4px -4px 0 #000000, /* Additional outline layer */
+    4px -4px 0 #000000,
+    -4px 4px 0 #000000,
+    4px 4px 0 #000000,
+    0 0 12px #FFD700, /* Stronger gold glow */
+    0 0 24px #FFD700,
+    0 0 36px #FFD700;
+  filter: drop-shadow(4px 4px 0 rgba(0, 0, 0, 0.9)) drop-shadow(8px 8px 0 rgba(0, 0, 0, 0.6));
   animation: bubble-bounce 1.5s ease-in-out infinite;
 }
 
@@ -87,22 +92,32 @@ body {
   0%, 100% {
     transform: scale(1);
     text-shadow: 
-      -3px -3px 0 #000000,
-      3px -3px 0 #000000,
-      -3px 3px 0 #000000,
-      3px 3px 0 #000000,
-      0 0 8px #FFD700,
-      0 0 16px #FFD700;
-  }
-  50% {
-    transform: scale(1.08);
-    text-shadow: 
+      -6px -6px 0 #000000,
+      6px -6px 0 #000000,
+      -6px 6px 0 #000000,
+      6px 6px 0 #000000,
       -4px -4px 0 #000000,
       4px -4px 0 #000000,
       -4px 4px 0 #000000,
       4px 4px 0 #000000,
       0 0 12px #FFD700,
-      0 0 24px #FFD700;
+      0 0 24px #FFD700,
+      0 0 36px #FFD700;
+  }
+  50% {
+    transform: scale(1.12); /* More pronounced bounce */
+    text-shadow: 
+      -8px -8px 0 #000000, /* Even thicker at peak */
+      8px -8px 0 #000000,
+      -8px 8px 0 #000000,
+      8px 8px 0 #000000,
+      -6px -6px 0 #000000,
+      6px -6px 0 #000000,
+      -6px 6px 0 #000000,
+      6px 6px 0 #000000,
+      0 0 16px #FFD700, /* Stronger glow at peak */
+      0 0 32px #FFD700,
+      0 0 48px #FFD700;
   }
 }
 
