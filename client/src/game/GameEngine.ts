@@ -601,12 +601,7 @@ export class GameEngine {
       const finishLine = this.currentLevel.getFinishLine();
       if (this.checkCollision(this.player.getBounds(), finishLine)) {
         if (this.gameState.level >= 5) {
-          // Level 5: Must also defeat boss to win
-          if (this.bossStateMachine && this.gameState.bossHealth > 0) {
-            // Boss still alive - cannot finish level
-            return;
-          }
-          // Final victory: Cosmic resistance successful, joy reclaimed
+          // FIXED: Level 5 completion - cookies collection wins, no boss defeat required for movement-only game
           this.gameState.phase = 'victory';
           this.audioManager.playVictoryFanfare();
           this.showVictorySequence();
