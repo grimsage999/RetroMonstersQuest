@@ -545,8 +545,8 @@ export class GameEngine {
       return;
     }
     
-    // Cap deltaTime to prevent jumps during lag spikes
-    const cappedDeltaTime = Math.min(deltaTime, 33.33); // Cap at 30fps minimum
+    // Cap deltaTime to prevent jumps during lag spikes - allow normal 60fps
+    const cappedDeltaTime = Math.min(deltaTime, 50); // Cap at 20fps minimum, allows normal 60fps (16.67ms)
 
     this.lastTime = currentTime; // Renamed variable
 

@@ -101,7 +101,8 @@ body {
           
   /* Scale up for maximum impact */
   transform: scale(1.1);
-  animation: inflated-bounce 2s ease-in-out infinite;
+  animation: inflated-bounce 3s ease-in-out infinite;
+  will-change: transform; /* Optimize for animations */
 }
 
 /* Inflated balloon bounce animation */
@@ -178,7 +179,8 @@ body {
   
   /* Ultra-inflated balloon transform */
   transform: scale(1.15);
-  animation: toxic-balloon-bounce 1.8s ease-in-out infinite;
+  animation: toxic-balloon-bounce 2.5s ease-in-out infinite;
+  will-change: transform; /* Optimize for GPU acceleration */
 }
 
 @keyframes toxic-balloon-bounce {
