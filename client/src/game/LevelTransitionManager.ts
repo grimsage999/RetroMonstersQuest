@@ -30,9 +30,9 @@ export class LevelTransitionManager {
     }
     this.ctx = context;
     this.config = {
-      fadeOutDuration: 500,
-      fadeInDuration: 500,
-      loadingDuration: 1000,
+      fadeOutDuration: 300,   // Faster, smoother fade out
+      fadeInDuration: 400,    // Slightly longer fade in for smoothness
+      loadingDuration: 800,   // Reduced loading time
       showLoadingScreen: true
     };
   }
@@ -110,7 +110,9 @@ export class LevelTransitionManager {
   update(deltaTime: number): void {
     if (!this.isTransitioning) return;
 
-    this.transitionTimer += deltaTime;
+    // Cap deltaTime to prevent large jumps during lag spikes
+    const cappedDeltaTime = Math.min(deltaTime, 1000/30); // Max 30fps equivalent
+    this.transitionTimer += cappedDeltaTime;
 
     switch (this.transitionPhase) {
       case 'fadeOut':
@@ -161,8 +163,9 @@ export class LevelTransitionManager {
 
     switch (this.transitionPhase) {
       case 'fadeOut':
-        // Fade to black
-        const fadeOutAlpha = Math.min(1, this.transitionTimer / this.config.fadeOutDuration);
+        // Smooth ease-in fade to black
+        const fadeOutProgress = Math.min(1, this.transitionTimer / this.config.fadeOutDuration);
+        const fadeOutAlpha = this.easeInQuad(fadeOutProgress);
         this.ctx.fillStyle = `rgba(0, 0, 0, ${fadeOutAlpha})`;
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         break;
@@ -175,8 +178,9 @@ export class LevelTransitionManager {
         break;
 
       case 'fadeIn':
-        // Fade from black
-        const fadeInAlpha = Math.max(0, 1 - (this.transitionTimer / this.config.fadeInDuration));
+        // Smooth ease-out fade from black
+        const fadeInProgress = Math.min(1, this.transitionTimer / this.config.fadeInDuration);
+        const fadeInAlpha = 1 - this.easeOutQuad(fadeInProgress);
         this.ctx.fillStyle = `rgba(0, 0, 0, ${fadeInAlpha})`;
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         break;
@@ -204,21 +208,30 @@ export class LevelTransitionManager {
       this.canvas.height / 2 - 50
     );
 
-    // Progress bar
-    const progress = this.transitionTimer / this.config.loadingDuration;
+    // Smooth progress bar with easing
+    const rawProgress = this.transitionTimer / this.config.loadingDuration;
+    const progress = this.easeInOutQuad(rawProgress);
     const barWidth = 300;
     const barHeight = 20;
     const barX = (this.canvas.width - barWidth) / 2;
     const barY = this.canvas.height / 2;
 
-    // Bar background
+    // Bar background with glow effect
     this.ctx.strokeStyle = '#00ffff';
     this.ctx.lineWidth = 2;
+    this.ctx.shadowColor = '#00ffff';
+    this.ctx.shadowBlur = 5;
     this.ctx.strokeRect(barX, barY, barWidth, barHeight);
 
-    // Bar fill
-    this.ctx.fillStyle = '#00ffff';
+    // Smooth bar fill with gradient
+    const gradient = this.ctx.createLinearGradient(barX, barY, barX + barWidth, barY);
+    gradient.addColorStop(0, '#00ccff');
+    gradient.addColorStop(1, '#00ffff');
+    this.ctx.fillStyle = gradient;
     this.ctx.fillRect(barX, barY, barWidth * progress, barHeight);
+    
+    // Reset shadow
+    this.ctx.shadowBlur = 0;
 
     // Loading tips
     const tips = [
@@ -271,6 +284,21 @@ export class LevelTransitionManager {
     this.currentLevel = 1;
     this.nextLevel = 1;
     this.assetsToPreload = [];
+  }
+
+  /**
+   * Smooth easing functions for fluid transitions
+   */
+  private easeInQuad(t: number): number {
+    return t * t;
+  }
+
+  private easeOutQuad(t: number): number {
+    return 1 - (1 - t) * (1 - t);
+  }
+
+  private easeInOutQuad(t: number): number {
+    return t < 0.5 ? 2 * t * t : 1 - 2 * (1 - t) * (1 - t);
   }
 
   /**

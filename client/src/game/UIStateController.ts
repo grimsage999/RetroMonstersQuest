@@ -22,11 +22,11 @@ export class UIStateController {
   
   constructor() {
     this.config = {
-      gameOverDelay: 1500,      // 1.5 seconds to see death before game over
-      levelCardDuration: 2000,   // 2 seconds for level card
-      transitionBuffer: 500,     // 0.5 second buffer between states
-      cutsceneDuration: 3000,    // 3 seconds for cutscenes
-      victoryDelay: 1000         // 1 second before victory screen
+      gameOverDelay: 1200,      // Slightly faster response to death
+      levelCardDuration: 1800,   // Optimized level card timing
+      transitionBuffer: 200,     // Reduced buffer for smoother flow
+      cutsceneDuration: 2500,    // Slightly faster cutscenes
+      victoryDelay: 800          // Quicker victory feedback
     };
   }
   

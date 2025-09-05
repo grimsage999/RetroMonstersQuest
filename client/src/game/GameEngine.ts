@@ -527,6 +527,9 @@ export class GameEngine {
 
     // Only update game logic if not in cutscene and playing
     try {
+      // Update transition manager for smooth transitions
+      this.transitionManager.update(deltaTime);
+      
       if (this.gameState.phase === 'playing' && !this.currentCutscene && !this.transitionManager.isInTransition()) {
         this.update(deltaTime);
       }
