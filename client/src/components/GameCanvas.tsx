@@ -76,67 +76,73 @@ const GameCanvas: React.FC = () => {
   };
 
   return (
-    <div style={{ position: 'relative' }}>
-      <canvas
-        ref={canvasRef}
-        width={800}
-        height={600}
-        className="game-canvas"
-      />
-      
-      {/* Start button overlay */}
-      {!isStarted && (
-        <div style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: 800,
-          height: 600,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          backgroundColor: 'rgba(0, 0, 0, 0.8)',
-          color: 'white',
-          fontFamily: 'monospace'
-        }}>
-          <h1 style={{ fontSize: '48px', marginBottom: '20px', textShadow: '0 0 10px #00ffff' }}>
-            Cosmic Playground
-          </h1>
-          <p style={{ fontSize: '18px', marginBottom: '30px' }}>
-            Alien Cookie Quest
-          </p>
-          <button
-            onClick={handleStart}
-            style={{
-              padding: '15px 40px',
-              fontSize: '24px',
-              fontFamily: 'monospace',
-              backgroundColor: '#00ffff',
-              border: 'none',
-              borderRadius: '5px',
-              cursor: 'pointer',
-              boxShadow: '0 0 20px #00ffff',
-              transition: 'all 0.3s'
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
-            onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-          >
-            START GAME
-          </button>
-          <p style={{ fontSize: '14px', marginTop: '20px', color: '#888' }}>
-            Use arrow keys to move • Collect all cookies • Reach the finish line
-          </p>
-        </div>
-      )}
-      
-      <GameUI gameState={gameState} />
-      <DiagnosticDashboard isVisible={showDiagnostics} gameEngine={gameEngineRef.current} />
-      
-      {/* Mobile Controls */}
-      <div className="mobile-controls">
-        <div className="control-pad">
-          <button 
+    <div className="game-layout">
+      {/* Stats Panel - Clean UI area outside the canvas */}
+      <div className="stats-panel">
+        {isStarted && <GameUI gameState={gameState} />}
+      </div>
+
+      {/* Main Game Canvas Area */}
+      <div className="canvas-wrapper">
+        <canvas
+          ref={canvasRef}
+          width={800}
+          height={600}
+          className="game-canvas"
+        />
+        
+        {/* Start button overlay */}
+        {!isStarted && (
+          <div style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: 800,
+            height: 600,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+            color: 'white',
+            fontFamily: 'monospace'
+          }}>
+            <h1 style={{ fontSize: '48px', marginBottom: '20px', textShadow: '0 0 10px #00ffff' }}>
+              Cosmic Playground
+            </h1>
+            <p style={{ fontSize: '18px', marginBottom: '30px' }}>
+              Alien Cookie Quest
+            </p>
+            <button
+              onClick={handleStart}
+              style={{
+                padding: '15px 40px',
+                fontSize: '24px',
+                fontFamily: 'monospace',
+                backgroundColor: '#00ffff',
+                border: 'none',
+                borderRadius: '5px',
+                cursor: 'pointer',
+                boxShadow: '0 0 20px #00ffff',
+                transition: 'all 0.3s'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+              onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+            >
+              START GAME
+            </button>
+            <p style={{ fontSize: '14px', marginTop: '20px', color: '#888' }}>
+              Use arrow keys to move • Collect all cookies • Reach the finish line
+            </p>
+          </div>
+        )}
+        
+        <DiagnosticDashboard isVisible={showDiagnostics} gameEngine={gameEngineRef.current} />
+        
+        {/* Mobile Controls */}
+        <div className="mobile-controls">
+          <div className="control-pad">
+            <button 
             className="control-btn up"
             onTouchStart={() => handleMobileControl('ArrowUp', true)}
             onTouchEnd={() => handleMobileControl('ArrowUp', false)}
@@ -171,11 +177,11 @@ const GameCanvas: React.FC = () => {
             onMouseUp={() => handleMobileControl('ArrowDown', false)}
           >
             ↓
-          </button>
+            </button>
+          </div>
         </div>
-      </div>
-
-      {/* Game Over Screen */}
+        
+        {/* Game Over Screen */}
       {gameState.phase === 'gameOver' && (
         <div className="game-over-screen">
           <div>💀 GAME OVER 💀</div>
@@ -205,19 +211,20 @@ const GameCanvas: React.FC = () => {
         </div>
       )}
 
-      {/* Level Complete Screen */}
-      {gameState.phase === 'levelComplete' && (
-        <div className="victory-screen">
-          <div>🌟 LEVEL COMPLETE! 🌟</div>
-          <div style={{ fontSize: '16px', marginTop: '10px' }}>
-            Level {gameState.level} Complete!<br />
-            Score: {gameState.score}
+        {/* Level Complete Screen */}
+        {gameState.phase === 'levelComplete' && (
+          <div className="victory-screen">
+            <div>🌟 LEVEL COMPLETE! 🌟</div>
+            <div style={{ fontSize: '16px', marginTop: '10px' }}>
+              Level {gameState.level} Complete!<br />
+              Score: {gameState.score}
+            </div>
+            <button className="restart-btn" onClick={handleNextLevel}>
+              Press SPACE for Next Level
+            </button>
           </div>
-          <button className="restart-btn" onClick={handleNextLevel}>
-            Press SPACE for Next Level
-          </button>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };

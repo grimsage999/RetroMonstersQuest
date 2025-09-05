@@ -30,6 +30,67 @@ body {
     position: relative;
 }
 
+/* New layout for separated canvas and stats */
+.game-layout {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 30px;
+    width: 100%;
+    height: 100%;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+/* Responsive design for smaller screens */
+@media (max-width: 1200px) {
+    .game-layout {
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+    }
+    
+    .stats-panel {
+        order: 2;
+        min-width: 200px;
+        max-width: 800px;
+        width: 100%;
+    }
+    
+    .canvas-wrapper {
+        order: 1;
+    }
+}
+
+.stats-panel {
+    min-width: 250px;
+    max-width: 300px;
+    background: rgba(0, 0, 0, 0.9);
+    border: 3px solid #00ff00;
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 0 30px rgba(0, 255, 0, 0.4);
+    backdrop-filter: blur(5px);
+    height: fit-content;
+}
+
+.stats-panel h3 {
+    color: #00ff00;
+    text-align: center;
+    font-size: 24px;
+    margin-bottom: 15px;
+    text-shadow: 0 0 10px #00ff00;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.canvas-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 .game-title {
     color: #00ff00;
     text-shadow: 0 0 10px #00ff00;
@@ -54,13 +115,12 @@ body {
 }
 
 .game-ui {
-  position: absolute;
-  top: 10px;
-  left: 10px;
   color: white;
   font-family: 'Courier New', monospace;
   font-size: 18px;
-  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .cosmic-ui {
