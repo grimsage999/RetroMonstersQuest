@@ -25,7 +25,7 @@ export class Player {
   private y: number;
   private width: number = 48; // 16 * 3 scale
   private height: number = 48; // 16 * 3 scale
-  private speed: number = 8; // Increased speed for better gameplay
+  private speed: number = 12; // Further increased speed for faster gameplay
   private isMoving: boolean = false;
   private direction: string = 'right';
   private animationFrame: number = 0;

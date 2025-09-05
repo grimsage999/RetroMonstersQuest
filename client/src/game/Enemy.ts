@@ -76,38 +76,38 @@ export class Enemy {
       case 'cia':
         this.width = 48; // 16 * 3 scale for visibility
         this.height = 48;
-        this.speedX = (Math.random() - 0.5) * 4;
-        this.speedY = (Math.random() - 0.5) * 4;
+        this.speedX = (Math.random() - 0.5) * 8;
+        this.speedY = (Math.random() - 0.5) * 8;
         break;
       case 'army':
         this.width = 48; // 16 * 3 scale for visibility
         this.height = 48;
-        this.speedX = (Math.random() - 0.5) * 3;
-        this.speedY = (Math.random() - 0.5) * 3;
+        this.speedX = (Math.random() - 0.5) * 7;
+        this.speedY = (Math.random() - 0.5) * 7;
         break;
       case 'rat':
         this.width = 36; // 12 * 3 scale for visibility
         this.height = 36;
-        this.speedX = (Math.random() - 0.5) * 3.5; // FIXED: Match level 1-2 speed
-        this.speedY = (Math.random() - 0.5) * 3.5;
+        this.speedX = (Math.random() - 0.5) * 7.5; // INCREASED: Faster radioactive rats
+        this.speedY = (Math.random() - 0.5) * 7.5;
         break;
       case 'zombie':
         this.width = 48; // 16 * 3 scale for visibility
         this.height = 48;
-        this.speedX = (Math.random() - 0.5) * 3.5; // FIXED: Match level 1-2 speed
-        this.speedY = (Math.random() - 0.5) * 3.5;
+        this.speedX = (Math.random() - 0.5) * 7.5; // INCREASED: Faster zombies
+        this.speedY = (Math.random() - 0.5) * 7.5;
         break;
       case 'boss':
         this.width = 72; // 24 * 3 scale for boss
         this.height = 72;
-        this.speedX = (Math.random() - 0.5) * 3; // FIXED: Match level 1-2 speed
-        this.speedY = (Math.random() - 0.5) * 3;
+        this.speedX = (Math.random() - 0.5) * 6; // INCREASED: Faster boss movement
+        this.speedY = (Math.random() - 0.5) * 6;
         break;
       default:
         this.width = 48;
         this.height = 48;
-        this.speedX = (Math.random() - 0.5) * 3;
-        this.speedY = (Math.random() - 0.5) * 3;
+        this.speedX = (Math.random() - 0.5) * 7;
+        this.speedY = (Math.random() - 0.5) * 7;
         break;
     }
   }
