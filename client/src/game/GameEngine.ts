@@ -378,7 +378,10 @@ export class GameEngine {
   }
 
   private handleGameOver() {
-    // Game over - player health depleted
+    // CRITICAL BUG FIX: Prevent multiple game over calls
+    if (this.gameState.phase === 'gameOver' || this.gameState.phase === 'title') {
+      return; // Already handled
+    }
 
     // Clean transition to game over state
     this.gameState.phase = 'gameOver';
@@ -417,7 +420,7 @@ export class GameEngine {
 
   private showLevelCutscene() {
     // Showing cutscene for level
-    const cutsceneData: CutsceneData = this.getCutsceneData(this.gameState.level);
+    const cutsceneData: any = this.getCutsceneData(this.gameState.level);
 
     // Create cutscene immediately without UI controller queue to prevent conflicts
     this.currentCutscene = new Cutscene(this.canvas, cutsceneData, () => {
@@ -435,8 +438,8 @@ export class GameEngine {
     this.currentCutscene.start();
   }
 
-  private getCutsceneData(level: number): CutsceneData {
-    const cutscenes: { [key: number]: CutsceneData } = {
+  private getCutsceneData(level: number): any {
+    const cutscenes: { [key: number]: any } = {
       1: {
         levelNumber: 1,
         title: "👽 COSMIC PLAYGROUND 🛸",
@@ -518,21 +521,24 @@ export class GameEngine {
     const deltaTime = currentTime - this.lastTime;
     this.lastTime = currentTime;
 
+    // CRITICAL BUG FIX: Cap deltaTime to prevent timing issues at very high framerates
+    const cappedDeltaTime = Math.min(deltaTime, 1000/60); // Cap to 60 FPS equivalent for stable timing
+
     // Profile update operations
     this.performanceProfiler.startUpdate();
 
-    // Update only essential systems
-    this.damageSystem.update(deltaTime);
+    // Update only essential systems with capped deltaTime
+    this.damageSystem.update(cappedDeltaTime);
     this.commandInputSystem.processEventQueue();
 
     // Only update game logic if not in cutscene and playing
     try {
       // Always update transition manager first for smooth transitions
-      this.transitionManager.update(deltaTime);
+      this.transitionManager.update(cappedDeltaTime);
       
       // Only update game logic during active gameplay
       if (this.shouldUpdateGameLogic()) {
-        this.update(deltaTime);
+        this.update(cappedDeltaTime);
       }
 
       this.performanceProfiler.endUpdate();

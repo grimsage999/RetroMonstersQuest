@@ -879,10 +879,25 @@ export class Level {
     return collected;
   }
 
+  // CRITICAL BUG FIX: Add collision timing protection
+  private lastCollisionCheck: number = 0;
+
   public checkEnemyCollisions(playerBounds: { x: number; y: number; width: number; height: number; }): boolean {
-    return this.enemies.some(enemy => 
+    // CRITICAL BUG FIX: Prevent rapid collision checks causing double damage
+    const currentTime = Date.now();
+    if (this.lastCollisionCheck && (currentTime - this.lastCollisionCheck) < 100) {
+      return false; // Too soon for another collision check (100ms cooldown)
+    }
+    
+    const hasCollision = this.enemies.some(enemy => 
       enemy.isActive() && this.checkCollision(playerBounds, enemy.getBounds())
     );
+    
+    if (hasCollision) {
+      this.lastCollisionCheck = currentTime;
+    }
+    
+    return hasCollision;
   }
 
   private checkCollision(rect1: { x: number; y: number; width: number; height: number; }, rect2: { x: number; y: number; width: number; height: number; }): boolean {

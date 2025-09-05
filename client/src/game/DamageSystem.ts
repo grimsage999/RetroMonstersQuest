@@ -34,9 +34,17 @@ export class DamageSystem {
    * Apply damage to the player with invincibility check
    */
   takeDamage(source: string, amount: number = 1, position?: { x: number; y: number }): boolean {
-    // Check if player is invincible
+    // CRITICAL BUG FIX: Check if player is invincible
     if (this.isInvincible) {
       return false;
+    }
+
+    // CRITICAL BUG FIX: Prevent multiple damage from same source in short time window
+    const currentTime = Date.now();
+    if (this.lastDamageEvent && 
+        this.lastDamageEvent.source === source && 
+        (currentTime - this.lastDamageEvent.timestamp) < 100) {
+      return false; // Too soon for another hit from same source
     }
 
     // Validate damage amount
