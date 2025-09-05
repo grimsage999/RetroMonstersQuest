@@ -117,13 +117,28 @@ export class Level {
     }
   }
 
+  // OPTIMIZATION: Batched enemy processing
+  private enemyUpdateBatch: number = 0;
+  private batchSize: number = 3; // Update 3 enemies per frame to spread CPU load
+
   public update(deltaTime: number) {
-    // Update all enemies at original speed
-    this.enemies.forEach(enemy => {
-      enemy.update(deltaTime, this.canvasWidth, this.canvasHeight);
-    });
+    // OPTIMIZED: Batch enemy updates instead of all at once
+    const startIndex = this.enemyUpdateBatch * this.batchSize;
+    const endIndex = Math.min(startIndex + this.batchSize, this.enemies.length);
     
-    // Update boss if it exists
+    for (let i = startIndex; i < endIndex; i++) {
+      if (this.enemies[i]) {
+        this.enemies[i].update(deltaTime, this.canvasWidth, this.canvasHeight);
+      }
+    }
+    
+    // Cycle through batches
+    this.enemyUpdateBatch++;
+    if (this.enemyUpdateBatch * this.batchSize >= this.enemies.length) {
+      this.enemyUpdateBatch = 0;
+    }
+    
+    // Update boss if it exists (always update boss for responsiveness)
     if (this.boss) {
       this.boss.update(deltaTime, this.canvasWidth, this.canvasHeight);
     }

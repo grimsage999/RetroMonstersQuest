@@ -67,9 +67,11 @@ export class Enemy {
   private animationTimer: number = 0;
   private active: boolean = true;
   
-  // OPTIMIZATION: Reduce AI update frequency for rats
+  // OPTIMIZATION: Universal AI throttling for all enemy types
   private lastAIUpdate: number = 0;
-  private aiUpdateInterval: number = 100; // Update AI every 100ms instead of every frame
+  private aiUpdateInterval: number = 250; // Update AI every 250ms for all enemies
+  private lastPathUpdate: number = 0;
+  private pathUpdateInterval: number = 250; // Universal pathfinding throttling
 
   constructor(x: number, y: number, type: EnemyType) {
     this.x = x;
@@ -119,24 +121,20 @@ export class Enemy {
   public update(deltaTime: number, canvasWidth: number, canvasHeight: number) {
     if (!this.active) return;
     
-    // OPTIMIZATION: Throttle AI updates for radioactive rats
-    if (this.type === 'rat') {
-      this.lastAIUpdate += deltaTime;
-      if (this.lastAIUpdate >= this.aiUpdateInterval) {
-        // Only update AI logic every 100ms for rats
-        this.updateRatAI(canvasWidth, canvasHeight);
-        this.lastAIUpdate = 0;
-      }
-      // Always update position for smooth movement
-      const normalizedDelta = deltaTime / 16.67;
-      this.x += this.speedX * normalizedDelta;
-      this.y += this.speedY * normalizedDelta;
-    } else {
-      // Normal update for other enemy types
-      const normalizedDelta = deltaTime / 16.67;
-      this.x += this.speedX * normalizedDelta;
-      this.y += this.speedY * normalizedDelta;
+    // OPTIMIZATION: Universal AI throttling for all enemy types
+    this.lastAIUpdate += deltaTime;
+    this.lastPathUpdate += deltaTime;
+    
+    // Throttled AI updates for all enemies
+    if (this.lastAIUpdate >= this.aiUpdateInterval) {
+      this.updateUniversalAI(canvasWidth, canvasHeight);
+      this.lastAIUpdate = 0;
     }
+    
+    // Always update position for smooth movement
+    const normalizedDelta = deltaTime / 16.67;
+    this.x += this.speedX * normalizedDelta;
+    this.y += this.speedY * normalizedDelta;
     
     // Bounce off walls
     if (this.x <= 0 || this.x + this.width >= canvasWidth) {
@@ -599,12 +597,32 @@ export class Enemy {
     ];
   }
 
-  private updateRatAI(canvasWidth: number, canvasHeight: number) {
-    // OPTIMIZED: Simplified AI logic for radioactive rats
-    // Randomly change direction occasionally instead of complex pathfinding
-    if (Math.random() < 0.1) { // 10% chance to change direction
-      this.speedX = (Math.random() - 0.5) * 4;
-      this.speedY = (Math.random() - 0.5) * 4;
+  private updateUniversalAI(canvasWidth: number, canvasHeight: number) {
+    // OPTIMIZED: Universal simplified AI for all enemy types
+    switch (this.type) {
+      case 'rat':
+        // Randomly change direction occasionally
+        if (Math.random() < 0.1) {
+          this.speedX = (Math.random() - 0.5) * 4;
+          this.speedY = (Math.random() - 0.5) * 4;
+        }
+        break;
+      
+      case 'zombie':
+        // Simple direction change for zombies
+        if (Math.random() < 0.08) {
+          this.speedX = (Math.random() - 0.5) * 4;
+          this.speedY = (Math.random() - 0.5) * 4;
+        }
+        break;
+        
+      default:
+        // CIA agents and army men - basic wandering
+        if (Math.random() < 0.05) {
+          this.speedX = (Math.random() - 0.5) * 4;
+          this.speedY = (Math.random() - 0.5) * 4;
+        }
+        break;
     }
   }
 
