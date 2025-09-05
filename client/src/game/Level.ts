@@ -667,13 +667,42 @@ export class Level {
     ctx.save();
     ctx.imageSmoothingEnabled = false;
     
-    // PERFORMANCE OPTIMIZATION: Use pre-rendered sprite instead of nested loops
-    const cookieSprite = SpriteCache.getInstance().createCookieSprite();
+    // Original detailed cookie pixel art - preserving the beloved aesthetic
+    const cookiePixels = [
+      [0,0,1,1,1,1,0,0], // Row 0
+      [0,1,2,2,2,2,1,0], // Row 1
+      [1,2,3,2,2,3,2,1], // Row 2 - chocolate chips
+      [1,2,2,2,2,2,2,1], // Row 3
+      [1,2,2,3,3,2,2,1], // Row 4 - chocolate chips
+      [1,2,2,2,2,2,2,1], // Row 5
+      [0,1,2,2,2,2,1,0], // Row 6
+      [0,0,1,1,1,1,0,0], // Row 7
+    ];
     
-    // Single drawImage call instead of 64 fillRect calls - massive performance gain
-    ctx.drawImage(cookieSprite, cookie.x, cookie.y);
+    const colors = [
+      'transparent', // 0
+      '#CD853F',     // 1 - cookie outline (Peru)
+      '#DEB887',     // 2 - cookie base (BurlyWood)
+      '#8B4513',     // 3 - chocolate chips (SaddleBrown)
+    ];
     
-    // Add subtle glow (optimized)
+    const scale = 4; // Much bigger cookies to match character scale
+    for (let row = 0; row < cookiePixels.length; row++) {
+      for (let col = 0; col < cookiePixels[row].length; col++) {
+        const colorIndex = cookiePixels[row][col];
+        if (colorIndex > 0) {
+          ctx.fillStyle = colors[colorIndex];
+          ctx.fillRect(
+            cookie.x + col * scale, 
+            cookie.y + row * scale, 
+            scale, 
+            scale
+          );
+        }
+      }
+    }
+    
+    // Add subtle glow for that satisfying cookie appeal
     ctx.shadowColor = '#DAA520';
     ctx.shadowBlur = 3;
     ctx.strokeStyle = '#DAA520';
