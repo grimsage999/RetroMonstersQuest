@@ -30,65 +30,44 @@ body {
     position: relative;
 }
 
-/* New layout for separated canvas and stats */
-.game-layout {
+/* Fullscreen game layout */
+.fullscreen-game-container {
+    width: 100vw;
+    height: 100vh;
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: center;
-    gap: 30px;
-    width: 100%;
-    height: 100%;
-    padding: 20px;
-    box-sizing: border-box;
+    background: #000;
+    position: relative;
 }
 
-/* Responsive design for smaller screens */
-@media (max-width: 1200px) {
-    .game-layout {
-        flex-direction: column;
-        align-items: center;
-        gap: 20px;
-    }
-    
-    .stats-panel {
-        order: 2;
-        min-width: 200px;
-        max-width: 800px;
-        width: 100%;
-    }
-    
-    .canvas-wrapper {
-        order: 1;
-    }
-}
-
-.stats-panel {
-    min-width: 250px;
-    max-width: 300px;
-    background: rgba(0, 0, 0, 0.9);
-    border: 3px solid #00ff00;
-    border-radius: 15px;
-    padding: 20px;
-    box-shadow: 0 0 30px rgba(0, 255, 0, 0.4);
-    backdrop-filter: blur(5px);
-    height: fit-content;
-}
-
-.stats-panel h3 {
-    color: #00ff00;
-    text-align: center;
-    font-size: 24px;
-    margin-bottom: 15px;
-    text-shadow: 0 0 10px #00ff00;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-}
-
-.canvas-wrapper {
+.fullscreen-canvas-wrapper {
     position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+/* Compact stats overlay in corner */
+.stats-overlay {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: rgba(0, 0, 0, 0.85);
+    border: 2px solid #00ff00;
+    border-radius: 10px;
+    padding: 12px 15px;
+    box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+    backdrop-filter: blur(8px);
+    z-index: 100;
+    min-width: 150px;
+}
+
+/* Make canvas fullscreen-friendly */
+.game-canvas.fullscreen {
+    border: 3px solid #00ff00;
+    border-radius: 8px;
+    box-shadow: 0 0 30px rgba(0, 255, 0, 0.3);
 }
 
 .game-title {
@@ -121,6 +100,20 @@ body {
   display: flex;
   flex-direction: column;
   gap: 10px;
+}
+
+.compact-stats {
+  font-size: 16px;
+  gap: 6px;
+}
+
+.stat-line {
+  color: #00ff00;
+  text-shadow: 0 0 5px #00ff00;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 5px;
 }
 
 .cosmic-ui {

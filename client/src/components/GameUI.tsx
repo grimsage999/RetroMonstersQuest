@@ -15,12 +15,11 @@ interface GameUIProps {
 
 const GameUI: React.FC<GameUIProps> = ({ gameState }) => {
   return (
-    <div className="game-ui cosmic-ui">
-      <h3>🛸 COSMIC STATS 🛸</h3>
-      <div className="cosmic-text">SCORE: {gameState.score}</div>
-      <div className="cosmic-text">LIVES: {'♥'.repeat(gameState.lives)}</div>
-      <div className="cosmic-text">LEVEL: {gameState.level}</div>
-      <div className="cosmic-text">COOKIES: {gameState.cookiesCollected}/{gameState.totalCookies}</div>
+    <div className="game-ui compact-stats">
+      <div className="stat-line">⭐ {gameState.score}</div>
+      <div className="stat-line">♥ {gameState.lives}</div>
+      <div className="stat-line">🌍 {gameState.level}</div>
+      <div className="stat-line">🍪 {gameState.cookiesCollected}/{gameState.totalCookies}</div>
     </div>
   );
 };

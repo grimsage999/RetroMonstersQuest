@@ -76,20 +76,22 @@ const GameCanvas: React.FC = () => {
   };
 
   return (
-    <div className="game-layout">
-      {/* Stats Panel - Clean UI area outside the canvas */}
-      <div className="stats-panel">
-        {isStarted && <GameUI gameState={gameState} />}
-      </div>
-
-      {/* Main Game Canvas Area */}
-      <div className="canvas-wrapper">
+    <div className="fullscreen-game-container">
+      {/* Main Game Canvas Area - Full Screen */}
+      <div className="fullscreen-canvas-wrapper">
         <canvas
           ref={canvasRef}
-          width={800}
-          height={600}
-          className="game-canvas"
+          width={1200}
+          height={800}
+          className="game-canvas fullscreen"
         />
+        
+        {/* Compact Stats Overlay */}
+        {isStarted && (
+          <div className="stats-overlay">
+            <GameUI gameState={gameState} />
+          </div>
+        )}
         
         {/* Start button overlay */}
         {!isStarted && (
@@ -97,8 +99,8 @@ const GameCanvas: React.FC = () => {
             position: 'absolute',
             top: 0,
             left: 0,
-            width: 800,
-            height: 600,
+            width: 1200,
+            height: 800,
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
