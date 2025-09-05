@@ -440,32 +440,29 @@ export class Level {
   }
 
   private renderLabBackground(ctx: CanvasRenderingContext2D) {
-    // Sterile government lab environment
-    const bgGradient = ctx.createLinearGradient(0, 0, 0, this.canvasHeight);
-    bgGradient.addColorStop(0, '#E0E0E0'); // Light gray ceiling
-    bgGradient.addColorStop(0.3, '#F5F5F5'); // White walls
-    bgGradient.addColorStop(0.7, '#DCDCDC'); // Gray floor transition
-    bgGradient.addColorStop(1, '#C0C0C0'); // Darker floor
-    ctx.fillStyle = bgGradient;
-    ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
+    // OPTIMIZED: Simplified lab background for better performance
     
-    // Add fluorescent lighting strips
+    // Simple gradient background
+    ctx.fillStyle = '#E0E0E0';
+    ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight * 0.7);
+    ctx.fillStyle = '#DCDCDC';
+    ctx.fillRect(0, this.canvasHeight * 0.7, this.canvasWidth, this.canvasHeight * 0.3);
+    
+    // OPTIMIZED: Fewer lighting strips
     ctx.fillStyle = '#FFFFFF';
-    for (let x = 100; x < this.canvasWidth; x += 200) {
-      ctx.fillRect(x, 20, 80, 8);
-      // Simplified for performance
-    }
+    ctx.fillRect(200, 20, 80, 8);
+    ctx.fillRect(500, 20, 80, 8);
     
-    // Add grid floor pattern
+    // OPTIMIZED: Simplified grid pattern (64px spacing instead of 32px = 4x fewer operations)
     ctx.strokeStyle = '#B0B0B0';
     ctx.lineWidth = 1;
-    for (let x = 0; x < this.canvasWidth; x += 32) {
+    for (let x = 0; x < this.canvasWidth; x += 64) {
       ctx.beginPath();
       ctx.moveTo(x, this.canvasHeight * 0.7);
       ctx.lineTo(x, this.canvasHeight);
       ctx.stroke();
     }
-    for (let y = this.canvasHeight * 0.7; y < this.canvasHeight; y += 32) {
+    for (let y = this.canvasHeight * 0.7; y < this.canvasHeight; y += 64) {
       ctx.beginPath();
       ctx.moveTo(0, y);
       ctx.lineTo(this.canvasWidth, y);
@@ -688,24 +685,18 @@ export class Level {
       { x: 650, y: this.canvasHeight - 130, tilt: -3 }
     ];
 
+    // OPTIMIZED: Simplified tombstones without expensive rotations
     tombstonePositions.forEach(tomb => {
-      ctx.save();
-      ctx.translate(tomb.x + 12, tomb.y + 30);
-      ctx.rotate(tomb.tilt * Math.PI / 180);
+      // Simple tombstone base (no rotation transforms)
+      ctx.fillStyle = '#696969';
+      ctx.fillRect(tomb.x, tomb.y, 24, 40);
       
-      // Tombstone base
-      ctx.fillStyle = '#696969'; // Dim gray
-      ctx.fillRect(-12, -30, 24, 40);
+      // Tombstone top
+      ctx.fillRect(tomb.x + 4, tomb.y - 5, 16, 10);
       
-      // Tombstone top (rounded)
-      ctx.fillRect(-8, -35, 16, 10);
-      
-      // Moss/weathering
+      // Single moss patch instead of multiple
       ctx.fillStyle = '#228B22';
-      ctx.fillRect(-10, -20, 4, 6);
-      ctx.fillRect(6, -25, 3, 8);
-      
-      ctx.restore();
+      ctx.fillRect(tomb.x + 2, tomb.y + 10, 4, 6);
     });
 
     // Dead trees
@@ -728,52 +719,48 @@ export class Level {
   }
 
   private renderLabEnvironment(ctx: CanvasRenderingContext2D) {
-    // Lab tables/desks
+    // OPTIMIZED: Reduced to 2 tables instead of 3
     const tablePositions = [
-      { x: 100, y: this.canvasHeight - 80 },
-      { x: 300, y: this.canvasHeight - 80 },
-      { x: 500, y: this.canvasHeight - 80 }
+      { x: 200, y: this.canvasHeight - 80 },
+      { x: 450, y: this.canvasHeight - 80 }
     ];
 
     tablePositions.forEach(table => {
-      // Table surface
-      ctx.fillStyle = '#D3D3D3'; // Light gray
+      // Table surface (simplified)
+      ctx.fillStyle = '#D3D3D3';
       ctx.fillRect(table.x, table.y, 80, 16);
       
-      // Table legs
-      ctx.fillStyle = '#A9A9A9';
-      ctx.fillRect(table.x + 4, table.y + 16, 4, 20);
-      ctx.fillRect(table.x + 72, table.y + 16, 4, 20);
-      
-      // Lab equipment on tables
-      ctx.fillStyle = '#4169E1'; // Royal blue (beakers)
+      // OPTIMIZED: Single equipment piece per table instead of multiple
+      ctx.fillStyle = '#4169E1'; // Blue beaker
       ctx.fillRect(table.x + 20, table.y - 8, 6, 8);
-      ctx.fillStyle = '#32CD32'; // Lime green (liquid)
+      ctx.fillStyle = '#32CD32'; // Green liquid
       ctx.fillRect(table.x + 21, table.y - 6, 4, 4);
-      
-      // Computer/monitor
-      ctx.fillStyle = '#2F2F2F';
-      ctx.fillRect(table.x + 40, table.y - 12, 20, 12);
-      ctx.fillStyle = '#00FF00';
-      ctx.fillRect(table.x + 42, table.y - 10, 16, 8);
     });
 
-    // Wall cabinets
+    // OPTIMIZED: Fewer wall cabinets (3 instead of 6)
     ctx.fillStyle = '#F5F5F5';
-    for (let x = 50; x < this.canvasWidth - 50; x += 120) {
+    const cabinetPositions = [150, 350, 550];
+    cabinetPositions.forEach(x => {
       ctx.fillRect(x, 100, 60, 40);
-      // Cabinet doors
+      // OPTIMIZED: Single cabinet stroke instead of multiple doors
       ctx.strokeStyle = '#C0C0C0';
       ctx.lineWidth = 1;
       ctx.strokeRect(x, 100, 60, 40);
-      ctx.strokeRect(x + 30, 100, 30, 40);
-    }
+    });
 
-    // Special bag on desk (The Adjudicator)
+    // OPTIMIZED: Minimal animation - just 2 key elements
+    const time = Date.now() * 0.001;
+    
+    // Blinking screen on first table
+    if (Math.sin(time * 2) > 0.5) {
+      ctx.fillStyle = '#00FF00';
+      ctx.fillRect(220, this.canvasHeight - 92, 16, 8);
+    }
+    
+    // Special bag on desk (The Adjudicator) - static
     if (this.levelNumber === 5) {
-      ctx.fillStyle = '#FFD700'; // Gold
-      ctx.fillRect(320, this.canvasHeight - 88, 12, 8);
-      // Simplified rendering for performance
+      ctx.fillStyle = '#FFD700';
+      ctx.fillRect(470, this.canvasHeight - 88, 12, 8);
     }
   }
 
