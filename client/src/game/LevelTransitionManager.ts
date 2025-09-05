@@ -3,18 +3,25 @@
  * Handles smooth level transitions without lag or resets
  */
 
+import { EasingFunctions, type EasingFunction } from './utils/EasingFunctions';
+
 export interface LevelTransitionConfig {
   fadeOutDuration: number;
   fadeInDuration: number;
   loadingDuration: number;
   showLoadingScreen: boolean;
+  fadeOutEasing: EasingFunction;
+  fadeInEasing: EasingFunction;
+  progressEasing: EasingFunction;
 }
+
+type TransitionPhase = 'fadeOut' | 'loading' | 'fadeIn' | 'complete';
 
 export class LevelTransitionManager {
   private canvas: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D;
   private isTransitioning: boolean = false;
-  private transitionPhase: 'fadeOut' | 'loading' | 'fadeIn' | 'complete' = 'complete';
+  private transitionPhase: TransitionPhase = 'complete';
   private transitionTimer: number = 0;
   private config: LevelTransitionConfig;
   private onComplete: (() => void) | null = null;
@@ -30,10 +37,13 @@ export class LevelTransitionManager {
     }
     this.ctx = context;
     this.config = {
-      fadeOutDuration: 300,   // Faster, smoother fade out
-      fadeInDuration: 400,    // Slightly longer fade in for smoothness
-      loadingDuration: 800,   // Reduced loading time
-      showLoadingScreen: true
+      fadeOutDuration: 300,
+      fadeInDuration: 400,
+      loadingDuration: 800,
+      showLoadingScreen: true,
+      fadeOutEasing: EasingFunctions.easeInQuad,
+      fadeInEasing: EasingFunctions.easeOutQuad,
+      progressEasing: EasingFunctions.easeInOutQuad
     };
   }
 
@@ -95,12 +105,23 @@ export class LevelTransitionManager {
    * Load a single asset
    */
   private async loadAsset(assetPath: string): Promise<void> {
-    return new Promise((resolve) => {
-      // Simulate loading delay
-      setTimeout(() => {
-        console.log(`Loaded asset: ${assetPath}`);
-        resolve();
-      }, 100);
+    return new Promise((resolve, reject) => {
+      if (assetPath.endsWith('.mp3') || assetPath.endsWith('.wav')) {
+        // Audio loading
+        const audio = new Audio(assetPath);
+        audio.addEventListener('canplaythrough', () => resolve(), { once: true });
+        audio.addEventListener('error', () => reject(new Error(`Failed to load audio: ${assetPath}`)), { once: true });
+        audio.load();
+      } else if (assetPath.endsWith('.png') || assetPath.endsWith('.jpg')) {
+        // Image loading
+        const img = new Image();
+        img.onload = () => resolve();
+        img.onerror = () => reject(new Error(`Failed to load image: ${assetPath}`));
+        img.src = assetPath;
+      } else {
+        // Fallback for other asset types
+        setTimeout(() => resolve(), 50);
+      }
     });
   }
 
@@ -163,11 +184,10 @@ export class LevelTransitionManager {
 
     switch (this.transitionPhase) {
       case 'fadeOut':
-        // Smooth ease-in fade to black
-        const fadeOutProgress = Math.min(1, this.transitionTimer / this.config.fadeOutDuration);
-        const fadeOutAlpha = this.easeInQuad(fadeOutProgress);
-        this.ctx.fillStyle = `rgba(0, 0, 0, ${fadeOutAlpha})`;
-        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        this.renderFadeOverlay(
+          this.transitionTimer / this.config.fadeOutDuration,
+          this.config.fadeOutEasing
+        );
         break;
 
       case 'loading':
@@ -178,11 +198,10 @@ export class LevelTransitionManager {
         break;
 
       case 'fadeIn':
-        // Smooth ease-out fade from black
-        const fadeInProgress = Math.min(1, this.transitionTimer / this.config.fadeInDuration);
-        const fadeInAlpha = 1 - this.easeOutQuad(fadeInProgress);
-        this.ctx.fillStyle = `rgba(0, 0, 0, ${fadeInAlpha})`;
-        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        this.renderFadeOverlay(
+          1 - (this.transitionTimer / this.config.fadeInDuration),
+          this.config.fadeInEasing
+        );
         break;
     }
 
@@ -210,7 +229,7 @@ export class LevelTransitionManager {
 
     // Smooth progress bar with easing
     const rawProgress = this.transitionTimer / this.config.loadingDuration;
-    const progress = this.easeInOutQuad(rawProgress);
+    const progress = EasingFunctions.apply(this.config.progressEasing, rawProgress);
     const barWidth = 300;
     const barHeight = 20;
     const barX = (this.canvas.width - barWidth) / 2;
@@ -256,14 +275,8 @@ export class LevelTransitionManager {
    * Clean up resources from previous level
    */
   private cleanupPreviousLevel(): void {
-    // Force garbage collection by nullifying references
     console.log(`Cleaning up level ${this.currentLevel} resources`);
-    
-    // This would be called by the game engine to clean up:
-    // - Enemy arrays
-    // - Bullet arrays
-    // - Particle effects
-    // - Unused textures
+    // Cleanup is handled by the game engine when setting new level
   }
 
   /**
@@ -287,18 +300,12 @@ export class LevelTransitionManager {
   }
 
   /**
-   * Smooth easing functions for fluid transitions
+   * Render fade overlay with easing
    */
-  private easeInQuad(t: number): number {
-    return t * t;
-  }
-
-  private easeOutQuad(t: number): number {
-    return 1 - (1 - t) * (1 - t);
-  }
-
-  private easeInOutQuad(t: number): number {
-    return t < 0.5 ? 2 * t * t : 1 - 2 * (1 - t) * (1 - t);
+  private renderFadeOverlay(progress: number, easingFn: EasingFunction): void {
+    const alpha = EasingFunctions.apply(easingFn, progress);
+    this.ctx.fillStyle = `rgba(0, 0, 0, ${alpha})`;
+    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
   }
 
   /**

@@ -149,7 +149,7 @@ export class GameEngine {
       throw new Error('GameEngine: Unable to get player bounds for boss context');
     }
 
-    // No weapons in game
+  
 
     return {
       playerPosition: { x: playerBounds.x, y: playerBounds.y },
@@ -207,13 +207,13 @@ export class GameEngine {
       } else if (this.gameState.phase === 'levelComplete') {
         this.nextLevel();
       }
-      // No weapons in game
+    
     });
 
     this.commandInputSystem.registerCommandExecutor(GameCommand.FIRE_SECONDARY, (cmd: InputCommand) => {
       if (!cmd.pressed) return; // Only on key press, not release
 
-      // No weapons in game
+    
     });
 
     this.commandInputSystem.registerCommandExecutor(GameCommand.SKIP_CUTSCENE, (cmd: InputCommand) => {
@@ -405,7 +405,7 @@ export class GameEngine {
     this.transitionManager.startTransition(currentLevel, nextLevel, () => {
       this.gameState.level = nextLevel;
       this.gameState.cookiesCollected = 0;
-      // No weapons in game
+    
 
       // Initialize new level immediately to prevent null reference issues
       this.initializeLevel();
@@ -476,7 +476,7 @@ export class GameEngine {
   private initializeLevel() {
     // Initializing level
 
-    // No weapons in game
+  
 
     this.player.reset(this.canvas.width / 2, this.canvas.height - 50);
     this.currentLevel = new Level(this.gameState.level, this.canvas.width, this.canvas.height);
@@ -497,28 +497,28 @@ export class GameEngine {
 
     this.gameState.totalCookies = this.currentLevel.getTotalCookies();
     this.gameState.phase = 'playing';
-    // No weapons in game
+  
     this.updateState();
 
     // Level initialized
   }
 
-  // No weapons in game
 
-  // No weapons in game
+
+
 
   // Removed updateBullets for better performance
 
   private gameLoop(currentTime: number) {
     if (!this.isRunning) return;
 
-    // CRITICAL: Start frame profiling to identify bottlenecks
+    // Start frame profiling
     this.performanceProfiler.startFrame();
 
     const deltaTime = currentTime - this.lastTime;
     this.lastTime = currentTime;
 
-    // CRITICAL: Profile update operations
+    // Profile update operations
     this.performanceProfiler.startUpdate();
 
     // Update only essential systems
@@ -527,16 +527,17 @@ export class GameEngine {
 
     // Only update game logic if not in cutscene and playing
     try {
-      // Update transition manager for smooth transitions
+      // Always update transition manager first for smooth transitions
       this.transitionManager.update(deltaTime);
       
-      if (this.gameState.phase === 'playing' && !this.currentCutscene && !this.transitionManager.isInTransition()) {
+      // Only update game logic during active gameplay
+      if (this.shouldUpdateGameLogic()) {
         this.update(deltaTime);
       }
 
       this.performanceProfiler.endUpdate();
 
-      // CRITICAL: Profile render operations (main bottleneck suspect)
+      // Profile render operations
       this.performanceProfiler.startRender();
       
       this.render();
@@ -544,14 +545,12 @@ export class GameEngine {
       this.performanceProfiler.endRender();
       
     } catch (error) {
-      // Critical error in game loop
+      console.error('GameEngine: Critical error in game loop:', error);
       // Emergency fallback: pause game and transition to safe state
-      this.isRunning = false;
-      this.stateManager.forceTransitionTo(GamePhase.TITLE);
-      this.uiController.forceReset();
+      this.emergencyStop();
     }
 
-    // CRITICAL: End frame profiling
+    // End frame profiling
     this.performanceProfiler.endFrame();
 
     this.animationId = requestAnimationFrame((time) => this.gameLoop(time));
@@ -582,7 +581,7 @@ export class GameEngine {
       }
     }
 
-    // No weapons in game
+  
 
     // Check collisions
     this.checkCollisions();
@@ -751,7 +750,28 @@ export class GameEngine {
     }
   }
 
-  // No weapons in game
+  /**
+   * Check if game logic should be updated
+   */
+  private shouldUpdateGameLogic(): boolean {
+    return this.gameState.phase === 'playing' && 
+           !this.currentCutscene && 
+           !this.transitionManager.isInTransition();
+  }
+
+  /**
+   * Emergency stop for critical errors
+   */
+  private emergencyStop(): void {
+    this.isRunning = false;
+    try {
+      this.stateManager.forceTransitionTo(GamePhase.TITLE);
+      this.uiController.forceReset();
+      this.transitionManager.reset();
+    } catch (recoveryError) {
+      console.error('GameEngine: Failed to recover from critical error:', recoveryError);
+    }
+  }
 
   private showVictorySequence() {
     console.log('GameEngine: Victory!');

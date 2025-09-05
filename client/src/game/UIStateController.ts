@@ -5,15 +5,18 @@
  */
 
 export interface UITransitionConfig {
-  gameOverDelay: number;        // Delay before showing game over screen
-  levelCardDuration: number;    // How long level card displays
-  transitionBuffer: number;      // Buffer time between transitions
-  cutsceneDuration: number;      // Duration of cutscenes
-  victoryDelay: number;          // Delay before victory screen
+  gameOverDelay: number;
+  levelCardDuration: number;
+  transitionBuffer: number;
+  cutsceneDuration: number;
+  victoryDelay: number;
 }
 
+export type UITransitionType = 'cutscene' | 'levelCard' | 'gameOver' | 'victory';
+export type UIState = 'none' | UITransitionType | 'transition';
+
 export class UIStateController {
-  private activeUI: 'none' | 'cutscene' | 'levelCard' | 'gameOver' | 'victory' | 'transition' = 'none';
+  private activeUI: UIState = 'none';
   private transitionQueue: (() => void)[] = [];
   private isProcessing: boolean = false;
   private config: UITransitionConfig;
@@ -34,7 +37,7 @@ export class UIStateController {
    * Queue a UI transition with proper timing
    */
   public queueTransition(
-    type: 'cutscene' | 'levelCard' | 'gameOver' | 'victory',
+    type: UITransitionType,
     callback: () => void,
     customDelay?: number
   ): void {
@@ -56,7 +59,7 @@ export class UIStateController {
    * Execute a transition with proper timing
    */
   private executeTransition(
-    type: 'cutscene' | 'levelCard' | 'gameOver' | 'victory',
+    type: UITransitionType,
     callback: () => void,
     customDelay?: number
   ): void {
@@ -68,40 +71,36 @@ export class UIStateController {
     
     console.log(`UIStateController: Starting ${type} transition`);
     
-    // Add buffer before starting transition (track timeouts)
-    try {
-      const bufferTimeout = window.setTimeout(() => {
-        callback();
-        
-        // Schedule cleanup after transition completes
-        try {
-          const cleanupTimeout = window.setTimeout(() => {
-            this.completeTransition();
-            this.activeTimeouts.delete(cleanupTimeout);
-          }, this.getTransitionDuration(type, customDelay));
-          
-          this.activeTimeouts.add(cleanupTimeout);
-        } catch (error) {
-          console.error('UIStateController: Failed to create cleanup timeout:', error);
-          // Fallback: complete transition immediately
-          this.completeTransition();
-        }
-        this.activeTimeouts.delete(bufferTimeout);
-      }, this.config.transitionBuffer);
-      
-      this.activeTimeouts.add(bufferTimeout);
-    } catch (error) {
-      console.error('UIStateController: Failed to create buffer timeout:', error);
-      // Fallback: execute callback immediately
+    // Simplified timeout management
+    this.createTimeout(() => {
       callback();
-      this.completeTransition();
+      this.createTimeout(() => {
+        this.completeTransition();
+      }, this.getTransitionDuration(type, customDelay));
+    }, this.config.transitionBuffer);
+  }
+  
+  /**
+   * Helper method for safe timeout creation
+   */
+  private createTimeout(callback: () => void, delay: number): void {
+    try {
+      const timeout = window.setTimeout(() => {
+        callback();
+        this.activeTimeouts.delete(timeout);
+      }, delay);
+      this.activeTimeouts.add(timeout);
+    } catch (error) {
+      console.error('UIStateController: Failed to create timeout:', error);
+      // Fallback: execute immediately
+      callback();
     }
   }
   
   /**
    * Get duration for specific transition type
    */
-  private getTransitionDuration(type: string, customDelay?: number): number {
+  private getTransitionDuration(type: UITransitionType, customDelay?: number): number {
     if (customDelay !== undefined) return customDelay;
     
     switch (type) {
