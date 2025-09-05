@@ -48,12 +48,12 @@ export class LevelPerformanceDiagnostic {
     // Calculate total enemy count
     data.enemyCount = config.fbiAgents + config.armyMen + config.radioactiveRats + config.zombies;
 
-    // Calculate entity complexity (different enemy types have different AI complexity)
+    // Calculate entity complexity (OPTIMIZED: Universal AI throttling + batching)
     data.entityComplexity = 
-      (config.fbiAgents * 1.0) +     // CIA agents: basic AI
-      (config.armyMen * 1.2) +       // Army: slightly more complex
-      (config.radioactiveRats * 1.5) + // Rats: more complex movement
-      (config.zombies * 2.0);        // Zombies: most complex AI
+      (config.fbiAgents * 0.3) +     // OPTIMIZED: Batched + 250ms AI throttling
+      (config.armyMen * 0.4) +       // OPTIMIZED: Batched + 250ms AI throttling  
+      (config.radioactiveRats * 0.6) + // OPTIMIZED: Universal AI throttling
+      (config.zombies * 0.7);        // OPTIMIZED: Simplified pathfinding
 
     // Analyze background rendering complexity
     data.backgroundComplexity = this.analyzeBackgroundComplexity(levelNumber);
