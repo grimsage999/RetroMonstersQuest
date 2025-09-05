@@ -43,7 +43,7 @@ export class UIStateController {
   ): void {
     // Atomic check and set to prevent race conditions
     if (this.isProcessing) {
-      console.log(`UIStateController: Queuing ${type} transition`);
+      // Queuing transition
       // Use atomic operation to prevent race conditions
       const queuedTransition = () => this.executeTransition(type, callback, customDelay);
       this.transitionQueue.push(queuedTransition);
@@ -69,7 +69,7 @@ export class UIStateController {
     // Block input during transitions
     this.blockInputUntil = Date.now() + this.getTransitionDuration(type, customDelay);
     
-    console.log(`UIStateController: Starting ${type} transition`);
+    // Starting transition
     
     // Simplified timeout management
     this.createTimeout(() => {
@@ -91,7 +91,7 @@ export class UIStateController {
       }, delay);
       this.activeTimeouts.add(timeout);
     } catch (error) {
-      console.error('UIStateController: Failed to create timeout:', error);
+      // Failed to create timeout
       // Fallback: execute immediately
       callback();
     }

@@ -30,14 +30,14 @@ export class Cutscene {
   }
 
   public start() {
-    console.log('Cutscene: Starting cutscene');
+    // Starting cutscene
     this.isActive = true;
     this.startTime = Date.now();
 
     // Auto-advance after 4.5 seconds (more time to read) or on spacebar press
     this.skipHandler = (e: KeyboardEvent) => {
       if (e.key === ' ' || e.key === 'Space' || e.key === 'Enter') {
-        console.log('Cutscene: Skipped by user');
+        // Cutscene skipped by user
         this.complete();
       }
     };
@@ -49,22 +49,22 @@ export class Cutscene {
       try {
         this.autoAdvanceTimeout = window.setTimeout(() => {
           if (this.isActive) {
-            console.log('Cutscene: Auto-completing after timeout');
+            // Auto-completing cutscene
             this.complete();
           }
         }, 4500); // 4.5 seconds for comfortable reading
       } catch (error) {
-        console.error('Cutscene: Failed to create auto-advance timeout:', error);
+        // Failed to create auto-advance timeout
         this.complete();
       }
     } catch (error) {
-      console.error('Cutscene: Error setting up event listeners:', error);
+      // Error setting up event listeners
       this.complete();
     }
   }
 
   private complete() {
-    console.log('Cutscene: Completing cutscene');
+    // Completing cutscene
     this.isActive = false;
 
     // Clean up event listeners and timeouts to prevent memory leaks
@@ -72,7 +72,7 @@ export class Cutscene {
       try {
         document.removeEventListener('keydown', this.skipHandler);
       } catch (error) {
-        console.error('Cutscene: Failed to remove keydown listener:', error);
+        // Failed to remove keydown listener
       }
       this.skipHandler = null;
     }

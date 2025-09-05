@@ -39,7 +39,7 @@ export abstract class BossState {
    */
   public onEnter(context: GameContext): void {
     this.entryTime = performance.now();
-    console.log(`Boss State: Entering ${this.name}`);
+    // Boss state transition
   }
   
   /**
@@ -51,7 +51,7 @@ export abstract class BossState {
    * Called when leaving this state
    */
   public onExit(context: GameContext): void {
-    console.log(`Boss State: Exiting ${this.name}`);
+    // Boss state exit
     this.stateData.clear();
   }
   
@@ -172,7 +172,7 @@ export class BossPhase1State extends BossState {
   
   private launchProjectileAttack(context: GameContext): void {
     // OPTIMIZED: Simplified projectile creation (no complex targeting)
-    console.log('Boss Phase 1: Launching simplified projectile attack');
+    // Boss Phase 1: Projectile attack
     // Reduced complexity projectile implementation
   }
 }
@@ -187,7 +187,7 @@ export class BossPhase1To2Transition extends BossState {
   
   onEnter(context: GameContext): void {
     super.onEnter(context);
-    console.log('Boss: Entering vulnerable transition phase');
+    // Boss entering vulnerable phase
   }
   
   execute(context: GameContext): BehaviorResult {
@@ -223,7 +223,7 @@ export class BossPhase2State extends BossState {
     super.onEnter(context);
     this.setData('chargeTimer', 0);
     this.setData('isCharging', false);
-    console.log('Boss Phase 2: More aggressive behavior activated');
+    // Boss Phase 2: Aggressive mode
   }
   
   execute(context: GameContext): BehaviorResult {
@@ -242,7 +242,7 @@ export class BossPhase2State extends BossState {
         this.setData('chargeTimer', 0);
         this.setData('chargeStartX', this.getData('targetX'));
         this.setData('chargeStartY', this.getData('targetY'));
-        console.log('Boss Phase 2: Initiating charge attack');
+        // Boss Phase 2: Charge attack
       } else {
         this.setData('chargeTimer', chargeTimer);
       }
@@ -287,7 +287,7 @@ export class BossFinalPhase extends BossState {
     super.onEnter(context);
     this.setData('attackFrequency', 500); // Very fast attacks
     this.setData('lastAttackTime', 0);
-    console.log('Boss Final Phase: All-out assault mode');
+    // Boss Final Phase: Assault mode
   }
   
   execute(context: GameContext): BehaviorResult {
@@ -321,7 +321,7 @@ export class BossFinalPhase extends BossState {
   }
   
   private launchDesperateAttack(context: GameContext): void {
-    console.log('Boss Final Phase: Desperate attack launched');
+    // Boss Final Phase: Desperate attack
     // Implementation would create multiple projectiles or area effects
   }
 }

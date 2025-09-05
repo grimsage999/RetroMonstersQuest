@@ -11,11 +11,11 @@ export class SpatialGrid {
   constructor(width: number, height: number, cellSize: number = 100) {
     // Validate inputs to prevent division by zero and other edge cases
     if (cellSize <= 0) {
-      console.warn('SpatialGrid: Invalid cellSize, using default of 100');
+      // Invalid cellSize, using default
       cellSize = 100;
     }
     if (width <= 0 || height <= 0) {
-      console.warn('SpatialGrid: Invalid dimensions, using defaults');
+      // Invalid dimensions, using defaults
       width = Math.max(width, 800);
       height = Math.max(height, 600);
     }

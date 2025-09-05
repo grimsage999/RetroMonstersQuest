@@ -49,7 +49,7 @@ export class DamageSystem {
 
     // Validate damage amount
     if (amount <= 0) {
-      console.warn(`Invalid damage amount: ${amount}`);
+      // Invalid damage amount
       return false;
     }
 

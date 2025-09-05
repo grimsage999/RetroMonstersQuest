@@ -14,11 +14,8 @@ import { UIStateController } from './UIStateController';
 import { PerformanceProfiler } from './PerformanceProfiler';
 import { BossStateMachine, GameContext } from './BossStateMachine';
 import { CommandInputSystem, GameCommand, InputCommand } from './CommandInputSystem';
-import { GameUtils } from './GameUtils'; // Assuming GameUtils contains createBounds
+import { GameUtils } from './GameUtils';
 import { COLLISION_CONFIG } from './GameConstants';
-import { LevelPerformanceDiagnostic } from './LevelPerformanceDiagnostic';
-import { LevelOptimizer } from './LevelOptimizer';
-import { runLevelDiagnostic } from './runLevelDiagnostic';
 
 export interface GameState {
   score: number;
@@ -45,14 +42,11 @@ export class GameEngine {
   private currentCutscene: Cutscene | null = null;
 
   private animationId: number = 0;
-  private lastTime: number = 0; // Renamed to lastFrameTime for clarity
+  private lastTime: number = 0;
   private isRunning: boolean = false;
 
-  // Performance metrics
-  private drawCallCount: number = 0;
-  private entityCount: number = 0;
+  // Core metrics
   private frameCount: number = 0;
-  private fpsTimer: number = 0;
   private currentFPS: number = 0;
 
   // Optimization systems
@@ -61,7 +55,7 @@ export class GameEngine {
   private audioPool: AudioPool;
   private activeTimeouts: Set<number> = new Set();
 
-  // Bug fix systems
+  // Core systems
   private stateManager: GameStateManager;
   private transitionManager: LevelTransitionManager;
   private damageSystem: DamageSystem;
@@ -69,8 +63,6 @@ export class GameEngine {
   private performanceProfiler: PerformanceProfiler;
   private bossStateMachine: BossStateMachine | null = null;
   private commandInputSystem: CommandInputSystem;
-  private levelDiagnostic: LevelPerformanceDiagnostic;
-  private levelOptimizer: LevelOptimizer;
 
   constructor(canvas: HTMLCanvasElement, onStateChange: (state: GameState) => void) {
     this.canvas = canvas;
@@ -111,10 +103,6 @@ export class GameEngine {
     // Initialize command input system with proper filtering
     this.commandInputSystem = new CommandInputSystem();
     this.setupCommandExecutors();
-
-    // Initialize level performance systems
-    this.levelDiagnostic = new LevelPerformanceDiagnostic();
-    this.levelOptimizer = new LevelOptimizer();
 
     // Sync initial state with state manager to prevent opening glitches
     this.commandInputSystem.setGamePhase(GamePhase.TITLE);
@@ -167,7 +155,7 @@ export class GameEngine {
       deltaTime: Math.max(1, deltaTime), // Use actual deltaTime, minimum 1ms
       canvasWidth: this.canvas.width,
       canvasHeight: this.canvas.height,
-      currentWeapons: []
+      currentWeapons: [] // No weapons in movement-based gameplay
     };
   }
 
@@ -232,9 +220,7 @@ export class GameEngine {
 
     this.commandInputSystem.registerCommandExecutor(GameCommand.DEBUG_DIAGNOSTIC, (cmd: InputCommand) => {
       if (!cmd.pressed) return;
-      // Generate level performance diagnostic
-      const report = this.levelOptimizer.generateOptimizationReport();
-      console.log(report);
+      // Performance diagnostic removed for production
     });
   }
 
@@ -258,14 +244,11 @@ export class GameEngine {
     if (!this.isRunning) {
       // Starting game
 
-      // Run level diagnostic analysis
-      setTimeout(() => {
-        runLevelDiagnostic();
-      }, 1000);
+      // Diagnostic analysis removed for production
 
       // Set running flag and start game loop immediately for responsiveness
       this.isRunning = true;
-      this.lastTime = performance.now(); // Renamed variable
+      this.lastTime = performance.now();
 
       // Initialize game state for level 1
       this.gameState.level = 1;
@@ -495,10 +478,7 @@ export class GameEngine {
   private initializeLevel() {
     // Initializing level
 
-    // Apply level-specific optimizations for levels 3-5
-    if (this.gameState.level >= 3) {
-      this.levelOptimizer.optimizeLevel(this.gameState.level, this.canvas);
-    }
+    // Level optimization handled by game engine
 
     this.player.reset(this.canvas.width / 2, this.canvas.height - 50);
     this.currentLevel = new Level(this.gameState.level, this.canvas.width, this.canvas.height);
@@ -537,7 +517,7 @@ export class GameEngine {
     // Start frame profiling
     this.performanceProfiler.startFrame();
 
-    const deltaTime = currentTime - this.lastTime; // Renamed variable
+    const deltaTime = currentTime - this.lastTime;
 
     // CRITICAL BUG FIX: Ensure minimum deltaTime for consistent speeds
     if (deltaTime < 1) { // Prevent zero or negative deltaTime
