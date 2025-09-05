@@ -379,7 +379,7 @@ export class GameEngine {
 
   private handleGameOver() {
     // CRITICAL BUG FIX: Prevent multiple game over calls
-    if (this.gameState.phase === 'gameOver' || this.gameState.phase === 'title') {
+    if (this.gameState.phase === 'gameOver') {
       return; // Already handled
     }
 
@@ -520,9 +520,9 @@ export class GameEngine {
 
     const deltaTime = currentTime - this.lastTime; // Renamed variable
 
-    // Limit to 60 FPS max for consistent movement speeds
+    // CRITICAL BUG FIX: Limit to 60 FPS max for consistent movement speeds
     if (deltaTime < 16.67) { // 1000/60 = 16.67ms per frame
-      requestAnimationFrame(this.gameLoop);
+      this.animationId = requestAnimationFrame((time) => this.gameLoop(time));
       return;
     }
 
