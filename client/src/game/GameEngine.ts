@@ -16,6 +16,9 @@ import { BossStateMachine, GameContext } from './BossStateMachine';
 import { CommandInputSystem, GameCommand, InputCommand } from './CommandInputSystem';
 import { GameUtils } from './GameUtils'; // Assuming GameUtils contains createBounds
 import { COLLISION_CONFIG } from './GameConstants';
+import { LevelPerformanceDiagnostic } from './LevelPerformanceDiagnostic';
+import { LevelOptimizer } from './LevelOptimizer';
+import { runLevelDiagnostic } from './runLevelDiagnostic';
 
 export interface GameState {
   score: number;
@@ -66,6 +69,8 @@ export class GameEngine {
   private performanceProfiler: PerformanceProfiler;
   private bossStateMachine: BossStateMachine | null = null;
   private commandInputSystem: CommandInputSystem;
+  private levelDiagnostic: LevelPerformanceDiagnostic;
+  private levelOptimizer: LevelOptimizer;
 
   constructor(canvas: HTMLCanvasElement, onStateChange: (state: GameState) => void) {
     this.canvas = canvas;
@@ -106,6 +111,10 @@ export class GameEngine {
     // Initialize command input system with proper filtering
     this.commandInputSystem = new CommandInputSystem();
     this.setupCommandExecutors();
+
+    // Initialize level performance systems
+    this.levelDiagnostic = new LevelPerformanceDiagnostic();
+    this.levelOptimizer = new LevelOptimizer();
 
     // Sync initial state with state manager to prevent opening glitches
     this.commandInputSystem.setGamePhase(GamePhase.TITLE);
@@ -223,7 +232,9 @@ export class GameEngine {
 
     this.commandInputSystem.registerCommandExecutor(GameCommand.DEBUG_DIAGNOSTIC, (cmd: InputCommand) => {
       if (!cmd.pressed) return;
-      // Diagnostic system removed
+      // Generate level performance diagnostic
+      const report = this.levelOptimizer.generateOptimizationReport();
+      console.log(report);
     });
   }
 
@@ -246,6 +257,11 @@ export class GameEngine {
   public async start() {
     if (!this.isRunning) {
       // Starting game
+
+      // Run level diagnostic analysis
+      setTimeout(() => {
+        runLevelDiagnostic();
+      }, 1000);
 
       // Set running flag and start game loop immediately for responsiveness
       this.isRunning = true;
@@ -479,7 +495,10 @@ export class GameEngine {
   private initializeLevel() {
     // Initializing level
 
-
+    // Apply level-specific optimizations for levels 3-5
+    if (this.gameState.level >= 3) {
+      this.levelOptimizer.optimizeLevel(this.gameState.level, this.canvas);
+    }
 
     this.player.reset(this.canvas.width / 2, this.canvas.height - 50);
     this.currentLevel = new Level(this.gameState.level, this.canvas.width, this.canvas.height);
