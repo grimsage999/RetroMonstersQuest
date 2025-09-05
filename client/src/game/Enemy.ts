@@ -1,3 +1,5 @@
+import { SpriteCache } from './SpriteCache';
+
 export type EnemyType = 'cia' | 'army' | 'rat' | 'zombie' | 'boss';
 
 
@@ -174,7 +176,11 @@ export class Enemy {
   }
 
   private renderEnemySprite(ctx: CanvasRenderingContext2D, spriteData: { pixels: number[][], colors: string[], hasGlow?: boolean }) {
-    const { pixels, colors, hasGlow } = spriteData;
+    const { hasGlow } = spriteData;
+    
+    // PERFORMANCE OPTIMIZATION: Use pre-rendered sprite instead of nested loops
+    const spriteCache = SpriteCache.getInstance();
+    const enemySprite = spriteCache.createEnemySprite(this.type, this.animationFrame);
     
     if (hasGlow) {
       const glowIntensity = Math.sin(Date.now() * 0.01) * 2 + 3;
@@ -182,47 +188,17 @@ export class Enemy {
       ctx.shadowBlur = glowIntensity;
     }
     
-    const scale = 3;
-    for (let row = 0; row < pixels.length; row++) {
-      for (let col = 0; col < pixels[row].length; col++) {
-        const colorIndex = pixels[row][col];
-        if (colorIndex > 0) {
-          ctx.fillStyle = colors[colorIndex];
-          ctx.fillRect(this.x + col * scale, this.y + row * scale, scale, scale);
-        }
-      }
-    }
+    // Single drawImage call instead of 400+ fillRect calls - massive performance gain
+    ctx.drawImage(enemySprite, this.x, this.y);
   }
 
   private renderCIAAgent(ctx: CanvasRenderingContext2D) {
-    // CIA Agent with walk cycle animation
-    let agentPixels;
-    if (this.animationFrame === 0) {
-      agentPixels = this.getCIAWalkFrame1();
-    } else {
-      agentPixels = this.getCIAWalkFrame2();
-    }
-
-    const colors = [
-      'transparent', // 0
-      '#000000',     // 1 - black hair/suit
-      '#fdbcb4',     // 2 - skin
-      '#333333',     // 3 - sunglasses
-      '#ffffff',     // 4 - collar
-      '#1a1a1a',     // 5 - dark suit
-      '#ff0000',     // 6 - red tie
-    ];
-
-    const scale = 3; // 3x scale for better visibility
-    for (let row = 0; row < agentPixels.length; row++) {
-      for (let col = 0; col < agentPixels[row].length; col++) {
-        const colorIndex = agentPixels[row][col];
-        if (colorIndex > 0) {
-          ctx.fillStyle = colors[colorIndex];
-          ctx.fillRect(this.x + col * scale, this.y + row * scale, scale, scale);
-        }
-      }
-    }
+    // PERFORMANCE OPTIMIZATION: Use pre-rendered sprite instead of nested loops
+    const spriteCache = SpriteCache.getInstance();
+    const agentSprite = spriteCache.createEnemySprite('cia', this.animationFrame);
+    
+    // Single drawImage call instead of 400+ fillRect calls - massive performance gain
+    ctx.drawImage(agentSprite, this.x, this.y);
   }
 
   private getCIAWalkFrame1() {

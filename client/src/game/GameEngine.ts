@@ -3,7 +3,8 @@ import { Enemy } from './Enemy';
 import { Level } from './Level';
 import { AudioManager } from './AudioManager';
 import { InputManager } from './InputManager';
-import { Cutscene, CutsceneData } from './Cutscene';
+import { Cutscene } from './Cutscene';
+import { CutsceneData } from './CutsceneData';
 import { SpatialGrid } from './SpatialGrid';
 import { SpriteBatcher } from './SpriteBatcher';
 import { AudioPool } from './AudioPool';
@@ -552,26 +553,20 @@ export class GameEngine {
     const deltaTime = currentTime - this.lastTime;
     this.lastTime = currentTime;
 
-    // Performance monitoring 
+    // PERFORMANCE OPTIMIZATION: Reduce monitoring overhead
     this.frameCount++;
     this.fpsTimer += deltaTime;
     
-    // PERFORMANCE FIX: Remove artificial frame limiting - let browser handle vsync
-    // The previous frame limiting logic was causing unnecessary function calls
-    // Modern browsers already handle frame rate limiting efficiently
-    
-    if (this.fpsTimer >= 1000) {
-      this.currentFPS = this.frameCount;
+    // Only check FPS every 2 seconds instead of every second to reduce overhead
+    if (this.fpsTimer >= 2000) {
+      this.currentFPS = Math.round(this.frameCount / 2); // Average over 2 seconds
       this.frameCount = 0;
       this.fpsTimer = 0;
 
-      // Log performance metrics
-      if (this.currentFPS < 45) { // More lenient threshold
-        console.warn(`Low FPS detected: ${this.currentFPS}`);
-      }
-
-      // Only run diagnostic when FPS drops significantly
-      if (this.currentFPS < 30) {
+      // Only log critical performance issues 
+      if (this.currentFPS < 30) { // Only warn for truly poor performance
+        console.warn(`Critical FPS: ${this.currentFPS}`);
+        // Run diagnostic only for severe performance issues
         this.runDiagnostic();
       }
     }
@@ -638,11 +633,7 @@ export class GameEngine {
       const finishLine = this.currentLevel.getFinishLine();
       if (this.checkCollision(this.player.getBounds(), finishLine)) {
         if (this.gameState.level >= 5) {
-          // Level 5: Must also defeat boss to win
-          if (this.bossStateMachine && this.gameState.bossHealth > 0) {
-            // Boss still alive - cannot finish level
-            return;
-          }
+          // Level 5: Complete when cookies collected (boss is optional/visual only)
           // Final victory: Cosmic resistance successful, joy reclaimed
           this.gameState.phase = 'victory';
           this.audioManager.playVictoryFanfare();

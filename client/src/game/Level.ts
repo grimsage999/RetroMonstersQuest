@@ -1,5 +1,6 @@
 import { Enemy, EnemyType } from './Enemy';
 import { LEVEL_CONFIGS } from './GameConfig';
+import { SpriteCache } from './SpriteCache';
 
 interface Cookie {
   x: number;
@@ -666,42 +667,13 @@ export class Level {
     ctx.save();
     ctx.imageSmoothingEnabled = false;
     
-    // Cookie pixel art (8x8) - based on reference image
-    const cookiePixels = [
-      [0,0,1,1,1,1,0,0], // Row 0
-      [0,1,2,2,2,2,1,0], // Row 1
-      [1,2,3,2,2,3,2,1], // Row 2 - chocolate chips
-      [1,2,2,2,2,2,2,1], // Row 3
-      [1,2,2,3,3,2,2,1], // Row 4 - chocolate chips
-      [1,2,2,2,2,2,2,1], // Row 5
-      [0,1,2,2,2,2,1,0], // Row 6
-      [0,0,1,1,1,1,0,0], // Row 7
-    ];
+    // PERFORMANCE OPTIMIZATION: Use pre-rendered sprite instead of nested loops
+    const cookieSprite = SpriteCache.getInstance().createCookieSprite();
     
-    const colors = [
-      'transparent', // 0
-      '#CD853F',     // 1 - cookie outline (Peru)
-      '#DEB887',     // 2 - cookie base (BurlyWood)
-      '#8B4513',     // 3 - chocolate chips (SaddleBrown)
-    ];
+    // Single drawImage call instead of 64 fillRect calls - massive performance gain
+    ctx.drawImage(cookieSprite, cookie.x, cookie.y);
     
-    const scale = 4; // Much bigger cookies to match character scale
-    for (let row = 0; row < cookiePixels.length; row++) {
-      for (let col = 0; col < cookiePixels[row].length; col++) {
-        const colorIndex = cookiePixels[row][col];
-        if (colorIndex > 0) {
-          ctx.fillStyle = colors[colorIndex];
-          ctx.fillRect(
-            cookie.x + col * scale, 
-            cookie.y + row * scale, 
-            scale, 
-            scale
-          );
-        }
-      }
-    }
-    
-    // Add subtle glow
+    // Add subtle glow (optimized)
     ctx.shadowColor = '#DAA520';
     ctx.shadowBlur = 3;
     ctx.strokeStyle = '#DAA520';

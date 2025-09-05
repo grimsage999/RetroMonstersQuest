@@ -1,4 +1,4 @@
-import { CutsceneData } from './CutsceneData'; // Assuming CutsceneData is in a separate file
+import { CutsceneData } from './CutsceneData';
 import { CosmicTextRenderer } from './CosmicTextRenderer'; // Import the new renderer
 
 export class Cutscene {
@@ -151,7 +151,7 @@ export class Cutscene {
         this.ctx.textAlign = 'center';
         const lines = this.data.description.split('\n');
 
-        lines.forEach((line, index) => {
+        lines.forEach((line: string, index: number) => {
           const lineDelay = index * 100; // Stagger each line by 100ms
           const lineProgress = Math.min(Math.max((elapsed - 800 - lineDelay) / 600, 0), 1);
           if (lineProgress > 0) {
