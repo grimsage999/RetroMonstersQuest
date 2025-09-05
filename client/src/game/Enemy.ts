@@ -41,6 +41,17 @@ class EnemySpriteData {
     '#1C1C1C',     // 6 - black shadows
     '#FFFFFF'      // 7 - white teeth/eyes
   ];
+
+  static readonly BOSS_COLORS = [
+    'transparent', // 0
+    '#800080',     // 1 - purple outline/shadows
+    '#4B0082',     // 2 - dark purple body
+    '#FFD700',     // 3 - gold accents/crown
+    '#FF00FF',     // 4 - magenta energy
+    '#00FFFF',     // 5 - cyan glow
+    '#FFFFFF',     // 6 - white highlights
+    '#000000'      // 7 - black features
+  ];
 }
 
 
@@ -164,6 +175,12 @@ export class Enemy {
         return {
           pixels: frame === 1 ? this.getZombieWalkFrame1() : this.getZombieWalkFrame2(),
           colors: EnemySpriteData.ZOMBIE_COLORS
+        };
+      case 'boss':
+        return {
+          pixels: frame === 1 ? this.getBossWalkFrame1() : this.getBossWalkFrame2(),
+          colors: EnemySpriteData.BOSS_COLORS,
+          hasGlow: true // Boss gets glowing effect
         };
       default:
         return {
@@ -515,6 +532,50 @@ export class Enemy {
       [0,0,1,1,1,1,1,0,0,1,1,1,1,1,0,0], // Row 12
       [0,0,1,1,1,0,0,0,0,0,1,1,1,1,0,0], // Row 13 - legs (walking)
       [0,0,6,6,6,0,0,0,0,0,6,6,6,0,0,0], // Row 14 - feet
+      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]  // Row 15
+    ];
+  }
+
+  private getBossWalkFrame1() {
+    // Boss Frame 1 - Larger 24x24 boss sprite (scaled down to 16x16 for consistency)
+    return [
+      [0,0,0,3,3,3,3,3,3,3,3,3,3,0,0,0], // Row 0 - golden crown
+      [0,0,3,2,2,2,2,2,2,2,2,2,2,3,0,0], // Row 1 - crown base
+      [0,3,2,1,1,1,1,2,2,1,1,1,1,2,3,0], // Row 2 - head outline
+      [0,2,1,5,7,1,1,1,1,1,1,5,7,1,2,0], // Row 3 - glowing eyes
+      [0,2,1,1,1,1,4,1,1,4,1,1,1,1,2,0], // Row 4 - energy marks
+      [0,2,1,1,7,7,7,7,7,7,7,7,1,1,2,0], // Row 5 - menacing mouth
+      [0,2,1,1,1,1,1,1,1,1,1,1,1,1,2,0], // Row 6 - lower face
+      [0,0,2,2,2,2,2,2,2,2,2,2,2,2,0,0], // Row 7 - neck
+      [0,0,1,1,2,2,2,2,2,2,2,2,1,1,0,0], // Row 8 - shoulders
+      [0,0,1,2,4,4,4,4,4,4,4,4,2,1,0,0], // Row 9 - chest energy
+      [0,0,1,2,2,2,2,2,2,2,2,2,2,1,0,0], // Row 10 - body
+      [0,0,1,1,2,2,2,0,0,2,2,2,1,1,0,0], // Row 11 - arms
+      [0,0,1,1,1,2,0,0,0,0,2,1,1,1,0,0], // Row 12 - lower arms
+      [0,0,0,1,1,1,0,0,0,0,1,1,1,0,0,0], // Row 13 - legs
+      [0,0,0,1,1,1,0,0,0,0,1,1,1,0,0,0], // Row 14 - feet
+      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]  // Row 15
+    ];
+  }
+
+  private getBossWalkFrame2() {
+    // Boss Frame 2 - Slightly different pose
+    return [
+      [0,0,0,3,3,3,3,3,3,3,3,3,3,0,0,0], // Row 0 - golden crown
+      [0,0,3,2,2,2,2,2,2,2,2,2,2,3,0,0], // Row 1 - crown base
+      [0,3,2,1,1,1,1,2,2,1,1,1,1,2,3,0], // Row 2 - head outline
+      [0,2,1,5,7,1,1,1,1,1,1,5,7,1,2,0], // Row 3 - glowing eyes
+      [0,2,1,1,4,1,1,4,4,1,1,4,1,1,2,0], // Row 4 - energy marks (different pattern)
+      [0,2,1,1,7,7,7,7,7,7,7,7,1,1,2,0], // Row 5 - menacing mouth
+      [0,2,1,1,1,1,1,1,1,1,1,1,1,1,2,0], // Row 6 - lower face
+      [0,0,2,2,2,2,2,2,2,2,2,2,2,2,0,0], // Row 7 - neck
+      [0,0,1,1,2,2,2,2,2,2,2,2,1,1,0,0], // Row 8 - shoulders
+      [0,0,1,2,4,4,4,4,4,4,4,4,2,1,0,0], // Row 9 - chest energy
+      [0,0,1,2,2,2,2,2,2,2,2,2,2,1,0,0], // Row 10 - body
+      [0,0,0,1,1,2,2,0,0,2,2,1,1,0,0,0], // Row 11 - arms (different position)
+      [0,0,1,1,1,1,2,0,0,2,1,1,1,1,0,0], // Row 12 - lower arms
+      [0,0,1,1,1,0,0,0,0,0,1,1,1,1,0,0], // Row 13 - legs (walking)
+      [0,0,1,1,1,0,0,0,0,0,1,1,1,0,0,0], // Row 14 - feet
       [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]  // Row 15
     ];
   }
