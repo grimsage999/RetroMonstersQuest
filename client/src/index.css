@@ -69,164 +69,27 @@ body {
 }
 
 .cosmic-text {
-  font-family: "Comic Sans MS", "Marker Felt", "Chalkduster", cursive !important;
-  font-weight: 900 !important;
-  color: #FFFF00 !important;
-  /* INFLATED BALLOON EFFECT - extremely thick like Japanese bubble references */
+  font-family: "Comic Sans MS", cursive;
+  font-weight: bold;
+  color: #FFFF00;
   text-shadow: 
-    /* Outermost layer - massive balloon outline */
-    -20px -20px 0 #000000, -20px -19px 0 #000000, -20px -18px 0 #000000,
-    20px -20px 0 #000000, 20px -19px 0 #000000, 20px -18px 0 #000000,
-    -20px 20px 0 #000000, -19px 20px 0 #000000, -18px 20px 0 #000000,
-    20px 20px 0 #000000, 19px 20px 0 #000000, 18px 20px 0 #000000,
-    
-    /* Ultra-thick middle layers */
-    -16px -16px 0 #000000, 16px -16px 0 #000000, -16px 16px 0 #000000, 16px 16px 0 #000000,
-    -14px -14px 0 #000000, 14px -14px 0 #000000, -14px 14px 0 #000000, 14px 14px 0 #000000,
-    -12px -12px 0 #000000, 12px -12px 0 #000000, -12px 12px 0 #000000, 12px 12px 0 #000000,
-    -10px -10px 0 #000000, 10px -10px 0 #000000, -10px 10px 0 #000000, 10px 10px 0 #000000,
-    -8px -8px 0 #000000, 8px -8px 0 #000000, -8px 8px 0 #000000, 8px 8px 0 #000000,
-    -6px -6px 0 #000000, 6px -6px 0 #000000, -6px 6px 0 #000000, 6px 6px 0 #000000,
-    -4px -4px 0 #000000, 4px -4px 0 #000000, -4px 4px 0 #000000, 4px 4px 0 #000000,
-    -2px -2px 0 #000000, 2px -2px 0 #000000, -2px 2px 0 #000000, 2px 2px 0 #000000,
-    
-    /* Inner glow for balloon effect */
-    0 0 25px #FFD700, 0 0 50px #FFD700, 0 0 75px #FFD700;
-  
-  /* Multiple dimensional drop shadows for 3D balloon effect */
-  filter: drop-shadow(12px 12px 0 rgba(0, 0, 0, 0.9)) 
-          drop-shadow(18px 18px 0 rgba(0, 0, 0, 0.7))
-          drop-shadow(24px 24px 0 rgba(0, 0, 0, 0.5))
-          drop-shadow(30px 30px 0 rgba(0, 0, 0, 0.3));
-          
-  /* Scale up for maximum impact */
-  transform: scale(1.1);
-  animation: inflated-bounce 3s ease-in-out infinite;
-  will-change: transform; /* Optimize for animations */
+    -2px -2px 0 #000000,
+    2px -2px 0 #000000,
+    -2px 2px 0 #000000,
+    2px 2px 0 #000000,
+    0 0 8px #FFD700;
 }
 
-/* Inflated balloon bounce animation */
-@keyframes inflated-bounce {
-  0%, 100% {
-    transform: scale(1.1); /* Always inflated */
-    text-shadow: 
-      /* Ultra-thick balloon outline */
-      -20px -20px 0 #000000, -20px -19px 0 #000000, -20px -18px 0 #000000,
-      20px -20px 0 #000000, 20px -19px 0 #000000, 20px -18px 0 #000000,
-      -20px 20px 0 #000000, -19px 20px 0 #000000, -18px 20px 0 #000000,
-      20px 20px 0 #000000, 19px 20px 0 #000000, 18px 20px 0 #000000,
-      -16px -16px 0 #000000, 16px -16px 0 #000000, -16px 16px 0 #000000, 16px 16px 0 #000000,
-      -14px -14px 0 #000000, 14px -14px 0 #000000, -14px 14px 0 #000000, 14px 14px 0 #000000,
-      -12px -12px 0 #000000, 12px -12px 0 #000000, -12px 12px 0 #000000, 12px 12px 0 #000000,
-      -10px -10px 0 #000000, 10px -10px 0 #000000, -10px 10px 0 #000000, 10px 10px 0 #000000,
-      -8px -8px 0 #000000, 8px -8px 0 #000000, -8px 8px 0 #000000, 8px 8px 0 #000000,
-      -6px -6px 0 #000000, 6px -6px 0 #000000, -6px 6px 0 #000000, 6px 6px 0 #000000,
-      -4px -4px 0 #000000, 4px -4px 0 #000000, -4px 4px 0 #000000, 4px 4px 0 #000000,
-      -2px -2px 0 #000000, 2px -2px 0 #000000, -2px 2px 0 #000000, 2px 2px 0 #000000,
-      0 0 25px #FFD700, 0 0 50px #FFD700, 0 0 75px #FFD700;
-  }
-  50% {
-    transform: scale(1.18); /* Even more inflated at peak */
-    text-shadow: 
-      /* MAXIMUM INFLATION - like a balloon being blown up */
-      -24px -24px 0 #000000, -24px -23px 0 #000000, -24px -22px 0 #000000,
-      24px -24px 0 #000000, 24px -23px 0 #000000, 24px -22px 0 #000000,
-      -24px 24px 0 #000000, -23px 24px 0 #000000, -22px 24px 0 #000000,
-      24px 24px 0 #000000, 23px 24px 0 #000000, 22px 24px 0 #000000,
-      -20px -20px 0 #000000, 20px -20px 0 #000000, -20px 20px 0 #000000, 20px 20px 0 #000000,
-      -18px -18px 0 #000000, 18px -18px 0 #000000, -18px 18px 0 #000000, 18px 18px 0 #000000,
-      -16px -16px 0 #000000, 16px -16px 0 #000000, -16px 16px 0 #000000, 16px 16px 0 #000000,
-      -14px -14px 0 #000000, 14px -14px 0 #000000, -14px 14px 0 #000000, 14px 14px 0 #000000,
-      -12px -12px 0 #000000, 12px -12px 0 #000000, -12px 12px 0 #000000, 12px 12px 0 #000000,
-      -10px -10px 0 #000000, 10px -10px 0 #000000, -10px 10px 0 #000000, 10px 10px 0 #000000,
-      -8px -8px 0 #000000, 8px -8px 0 #000000, -8px 8px 0 #000000, 8px 8px 0 #000000,
-      -6px -6px 0 #000000, 6px -6px 0 #000000, -6px 6px 0 #000000, 6px 6px 0 #000000,
-      -4px -4px 0 #000000, 4px -4px 0 #000000, -4px 4px 0 #000000, 4px 4px 0 #000000,
-      -2px -2px 0 #000000, 2px -2px 0 #000000, -2px 2px 0 #000000, 2px 2px 0 #000000,
-      0 0 35px #FFD700, 0 0 70px #FFD700, 0 0 105px #FFD700;
-  }
-}
-
-/* Green Graffiti Style - matching reference aesthetic */
 .green-graffiti-text {
-  font-family: "Comic Sans MS", "Marker Felt", "Chalkduster", cursive !important;
-  font-weight: 900 !important;
-  color: #39FF14 !important; /* Electric lime green */
+  font-family: "Comic Sans MS", cursive;
+  font-weight: bold;
+  color: #39FF14;
   text-shadow: 
-    /* ULTRA-INFLATED balloon effect matching Japanese references */
-    -22px -22px 0 #000000, -22px -21px 0 #000000, -22px -20px 0 #000000,
-    22px -22px 0 #000000, 22px -21px 0 #000000, 22px -20px 0 #000000,
-    -22px 22px 0 #000000, -21px 22px 0 #000000, -20px 22px 0 #000000,
-    22px 22px 0 #000000, 21px 22px 0 #000000, 20px 22px 0 #000000,
-    
-    /* Massive balloon outline layers */
-    -18px -18px 0 #000000, 18px -18px 0 #000000, -18px 18px 0 #000000, 18px 18px 0 #000000,
-    -16px -16px 0 #000000, 16px -16px 0 #000000, -16px 16px 0 #000000, 16px 16px 0 #000000,
-    -14px -14px 0 #000000, 14px -14px 0 #000000, -14px 14px 0 #000000, 14px 14px 0 #000000,
-    -12px -12px 0 #000000, 12px -12px 0 #000000, -12px 12px 0 #000000, 12px 12px 0 #000000,
-    -10px -10px 0 #000000, 10px -10px 0 #000000, -10px 10px 0 #000000, 10px 10px 0 #000000,
-    -8px -8px 0 #000000, 8px -8px 0 #000000, -8px 8px 0 #000000, 8px 8px 0 #000000,
-    -6px -6px 0 #000000, 6px -6px 0 #000000, -6px 6px 0 #000000, 6px 6px 0 #000000,
-    -4px -4px 0 #000000, 4px -4px 0 #000000, -4px 4px 0 #000000, 4px 4px 0 #000000,
-    -2px -2px 0 #000000, 2px -2px 0 #000000, -2px 2px 0 #000000, 2px 2px 0 #000000,
-    
-    /* Toxic green balloon glow */
-    0 0 30px #39FF14, 0 0 60px #39FF14, 0 0 90px #39FF14, 0 0 120px #00FF41;
-  filter: drop-shadow(14px 14px 0 rgba(0, 0, 0, 0.95)) 
-          drop-shadow(20px 20px 0 rgba(0, 0, 0, 0.8))
-          drop-shadow(26px 26px 0 rgba(0, 0, 0, 0.6))
-          drop-shadow(32px 32px 0 rgba(0, 0, 0, 0.4));
-  
-  /* Ultra-inflated balloon transform */
-  transform: scale(1.15);
-  animation: toxic-balloon-bounce 2.5s ease-in-out infinite;
-  will-change: transform; /* Optimize for GPU acceleration */
-}
-
-@keyframes toxic-balloon-bounce {
-  0%, 100% {
-    transform: scale(1.15); /* Always massively inflated */
-    text-shadow: 
-      /* Ultra-inflated balloon outline at rest */
-      -22px -22px 0 #000000, -22px -21px 0 #000000, -22px -20px 0 #000000,
-      22px -22px 0 #000000, 22px -21px 0 #000000, 22px -20px 0 #000000,
-      -22px 22px 0 #000000, -21px 22px 0 #000000, -20px 22px 0 #000000,
-      22px 22px 0 #000000, 21px 22px 0 #000000, 20px 22px 0 #000000,
-      -18px -18px 0 #000000, 18px -18px 0 #000000, -18px 18px 0 #000000, 18px 18px 0 #000000,
-      -16px -16px 0 #000000, 16px -16px 0 #000000, -16px 16px 0 #000000, 16px 16px 0 #000000,
-      -14px -14px 0 #000000, 14px -14px 0 #000000, -14px 14px 0 #000000, 14px 14px 0 #000000,
-      -12px -12px 0 #000000, 12px -12px 0 #000000, -12px 12px 0 #000000, 12px 12px 0 #000000,
-      -10px -10px 0 #000000, 10px -10px 0 #000000, -10px 10px 0 #000000, 10px 10px 0 #000000,
-      -8px -8px 0 #000000, 8px -8px 0 #000000, -8px 8px 0 #000000, 8px 8px 0 #000000,
-      -6px -6px 0 #000000, 6px -6px 0 #000000, -6px 6px 0 #000000, 6px 6px 0 #000000,
-      -4px -4px 0 #000000, 4px -4px 0 #000000, -4px 4px 0 #000000, 4px 4px 0 #000000,
-      -2px -2px 0 #000000, 2px -2px 0 #000000, -2px 2px 0 #000000, 2px 2px 0 #000000,
-      0 0 30px #39FF14, 0 0 60px #39FF14, 0 0 90px #39FF14, 0 0 120px #00FF41;
-  }
-  50% {
-    transform: scale(1.22); /* MAXIMUM INFLATION like balloon references */
-    text-shadow: 
-      /* MAXIMUM BALLOON INFLATION - like about to burst */
-      -26px -26px 0 #000000, -26px -25px 0 #000000, -26px -24px 0 #000000,
-      26px -26px 0 #000000, 26px -25px 0 #000000, 26px -24px 0 #000000,
-      -26px 26px 0 #000000, -25px 26px 0 #000000, -24px 26px 0 #000000,
-      26px 26px 0 #000000, 25px 26px 0 #000000, 24px 26px 0 #000000,
-      -22px -22px 0 #000000, 22px -22px 0 #000000, -22px 22px 0 #000000, 22px 22px 0 #000000,
-      -20px -20px 0 #000000, 20px -20px 0 #000000, -20px 20px 0 #000000, 20px 20px 0 #000000,
-      -18px -18px 0 #000000, 18px -18px 0 #000000, -18px 18px 0 #000000, 18px 18px 0 #000000,
-      -16px -16px 0 #000000, 16px -16px 0 #000000, -16px 16px 0 #000000, 16px 16px 0 #000000,
-      -14px -14px 0 #000000, 14px -14px 0 #000000, -14px 14px 0 #000000, 14px 14px 0 #000000,
-      -12px -12px 0 #000000, 12px -12px 0 #000000, -12px 12px 0 #000000, 12px 12px 0 #000000,
-      -10px -10px 0 #000000, 10px -10px 0 #000000, -10px 10px 0 #000000, 10px 10px 0 #000000,
-      -8px -8px 0 #000000, 8px -8px 0 #000000, -8px 8px 0 #000000, 8px 8px 0 #000000,
-      -6px -6px 0 #000000, 6px -6px 0 #000000, -6px 6px 0 #000000, 6px 6px 0 #000000,
-      -4px -4px 0 #000000, 4px -4px 0 #000000, -4px 4px 0 #000000, 4px 4px 0 #000000,
-      -2px -2px 0 #000000, 2px -2px 0 #000000, -2px 2px 0 #000000, 2px 2px 0 #000000,
-      0 0 40px #39FF14, /* MAXIMUM TOXIC GLOW */
-      0 0 80px #39FF14,
-      0 0 120px #39FF14,
-      0 0 160px #00FF41;
-  }
+    -2px -2px 0 #000000,
+    2px -2px 0 #000000,
+    -2px 2px 0 #000000,
+    2px 2px 0 #000000,
+    0 0 8px #39FF14;
 }
 
 .mobile-controls {
@@ -285,14 +148,14 @@ body {
     align-items: center;
     justify-content: center;
     color: #FFFF00;
-    font-family: "Comic Sans MS", "Marker Felt", "Chalkduster", cursive;
-    font-weight: 900;
+    font-family: "Comic Sans MS", cursive;
+    font-weight: bold;
     font-size: 28px;
     text-shadow: 
-        -3px -3px 0 #000000,
-        3px -3px 0 #000000,
-        -3px 3px 0 #000000,
-        3px 3px 0 #000000,
+        -2px -2px 0 #000000,
+        2px -2px 0 #000000,
+        -2px 2px 0 #000000,
+        2px 2px 0 #000000,
         0 0 10px #FFD700;
     z-index: 100;
 }
@@ -302,50 +165,49 @@ body {
     border: 3px solid #FFD700;
     border-radius: 15px;
     color: #FFD700;
-    font-family: "Comic Sans MS", "Marker Felt", "Chalkduster", cursive;
     font-size: 20px;
-    font-weight: 900;
-    padding: 12px 24px;
+    font-weight: bold;
+    padding: 15px 30px;
     margin-top: 20px;
     cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: "Comic Sans MS", cursive;
     text-shadow: 
-        -2px -2px 0 #000000,
-        2px -2px 0 #000000,
-        -2px 2px 0 #000000,
-        2px 2px 0 #000000;
-    transition: all 0.2s ease;
+        -1px -1px 0 #000000,
+        1px -1px 0 #000000,
+        -1px 1px 0 #000000,
+        1px 1px 0 #000000;
 }
 
 .restart-btn:hover {
-    background: rgba(255, 255, 0, 0.6);
+    background: rgba(255, 255, 0, 0.5);
     transform: scale(1.05);
-    text-shadow: 
-        -3px -3px 0 #000000,
-        3px -3px 0 #000000,
-        -3px 3px 0 #000000,
-        3px 3px 0 #000000,
-        0 0 8px #FFD700;
+    box-shadow: 0 0 15px #FFD700;
+}
+
+.victory-screen {
+    color: #39FF14;
+}
+
+.victory-screen .restart-btn {
+    border-color: #39FF14;
+    color: #39FF14;
+    background: rgba(57, 255, 20, 0.3);
+}
+
+.victory-screen .restart-btn:hover {
+    background: rgba(57, 255, 20, 0.5);
+    box-shadow: 0 0 15px #39FF14;
 }
 
 @media (max-width: 768px) {
     .mobile-controls {
         display: block;
+        opacity: 1;
+        pointer-events: all;
     }
-
+    
     .game-canvas {
-        width: 100%;
-        max-width: 100vw;
-        height: auto;
-    }
-}
-
-@media (max-width: 480px) {
-    .control-pad {
-        width: 120px;
-        height: 120px;
-    }
-
-    .control-btn {
-        font-size: 16px;
+        max-height: 70vh;
     }
 }

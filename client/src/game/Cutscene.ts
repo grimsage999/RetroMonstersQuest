@@ -1,4 +1,9 @@
-import { CutsceneData } from './CutsceneData'; // Assuming CutsceneData is in a separate file
+interface CutsceneData {
+  levelNumber: number;
+  title: string;
+  description: string;
+  weaponUnlocked?: string;
+}
 import { CosmicTextRenderer } from './CosmicTextRenderer'; // Import the new renderer
 
 export class Cutscene {
