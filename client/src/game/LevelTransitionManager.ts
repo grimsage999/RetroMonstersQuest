@@ -37,9 +37,9 @@ export class LevelTransitionManager {
     }
     this.ctx = context;
     this.config = {
-      fadeOutDuration: 200,  // Faster to reduce slow frames
-      fadeInDuration: 250,   // Faster transition
-      loadingDuration: 400,  // Much faster loading
+      fadeOutDuration: 800,  // SLOWER for readability
+      fadeInDuration: 1000,  // SLOWER transition
+      loadingDuration: 2000, // MUCH SLOWER loading for reading
       showLoadingScreen: true,
       fadeOutEasing: EasingFunctions.easeInQuad,
       fadeInEasing: EasingFunctions.easeOutQuad,

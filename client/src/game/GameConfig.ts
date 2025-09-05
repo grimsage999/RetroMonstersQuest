@@ -43,11 +43,11 @@ export const GAME_CONFIG = {
 
   // Timing Configuration
   TIMING: {
-    CUTSCENE_AUTO_ADVANCE: 4500, // 4.5 seconds
+    CUTSCENE_AUTO_ADVANCE: 8000, // 8 seconds - MUCH LONGER
     ADJUDICATOR_COOLDOWN: 5000,
-    LEVEL_COMPLETE_DELAY: 2000,
-    VICTORY_DELAY: 1000,
-    GAME_OVER_DELAY: 1000,
+    LEVEL_COMPLETE_DELAY: 3000, // LONGER delay
+    VICTORY_DELAY: 2000, // LONGER delay
+    GAME_OVER_DELAY: 2000, // LONGER delay
   },
 
   // Audio Configuration
@@ -60,11 +60,11 @@ export const GAME_CONFIG = {
 
   // Movement Configuration
   MOVEMENT: {
-    BASE_SPEED: 4,
-    MAX_SPEED: 6,
-    ACCELERATION: 0.25,
+    BASE_SPEED: 2, // REDUCED
+    MAX_SPEED: 3, // REDUCED
+    ACCELERATION: 0.2, // REDUCED
     DECELERATION: 0.15,
-    DASH_SPEED: 10,
+    DASH_SPEED: 6, // REDUCED
     DASH_DURATION: 200,
     DASH_COOLDOWN: 800,
   },
@@ -85,11 +85,11 @@ export const GAME_CONFIG = {
 
   // Transition Configuration
   TRANSITIONS: {
-    FADE_OUT_DURATION: 1000,
-    FADE_IN_DURATION: 800,
-    LOADING_DURATION: 1000,
-    LEVEL_CARD_DURATION: 2000,
-    TRANSITION_BUFFER: 500,
+    FADE_OUT_DURATION: 1500, // LONGER
+    FADE_IN_DURATION: 1200, // LONGER
+    LOADING_DURATION: 2500, // MUCH LONGER
+    LEVEL_CARD_DURATION: 4000, // LONGER for reading
+    TRANSITION_BUFFER: 800, // LONGER buffer
   },
 
   // Boss State Timings

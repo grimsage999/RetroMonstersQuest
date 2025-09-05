@@ -71,8 +71,14 @@ class TransitionInputFilter implements InputFilter {
   name = 'transition';
   
   accepts(command: InputCommand): boolean {
-    // During transitions, only allow debug commands
-    return command.command === GameCommand.DEBUG_DIAGNOSTIC;
+    // During transitions, allow movement and debug commands
+    return [
+      GameCommand.MOVE_UP,
+      GameCommand.MOVE_DOWN,
+      GameCommand.MOVE_LEFT,
+      GameCommand.MOVE_RIGHT,
+      GameCommand.DEBUG_DIAGNOSTIC
+    ].includes(command.command);
   }
 }
 

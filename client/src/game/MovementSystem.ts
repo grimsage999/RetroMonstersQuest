@@ -26,13 +26,13 @@ interface MovementUpdate {
  */
 export class MovementSystem {
   // Movement parameters
-  private baseSpeed: number = 4; // Base speed in pixels/frame
-  private maxSpeed: number = 6; // Maximum speed
-  private acceleration: number = 0.3; // How quickly we reach max speed
-  private deceleration: number = 0.2; // How quickly we slow down
-  private dashSpeed: number = 12; // Speed during dash
-  private dashDuration: number = 150; // Dash duration in ms
-  private dashCooldown: number = 500; // Cooldown between dashes in ms
+  private baseSpeed: number = 2; // Base speed in pixels/frame - REDUCED
+  private maxSpeed: number = 3; // Maximum speed - REDUCED  
+  private acceleration: number = 0.2; // How quickly we reach max speed - REDUCED
+  private deceleration: number = 0.15; // How quickly we slow down - REDUCED
+  private dashSpeed: number = 6; // Speed during dash - REDUCED
+  private dashDuration: number = 200; // Dash duration in ms - INCREASED
+  private dashCooldown: number = 800; // Cooldown between dashes in ms - INCREASED
 
   // Current state
   private velocityX: number = 0;

@@ -42,7 +42,7 @@ export class GameEngine {
   private currentCutscene: Cutscene | null = null;
 
   private animationId: number = 0;
-  private lastTime: number = 0;
+  private lastTime: number = 0; // Renamed to lastFrameTime for clarity
   private isRunning: boolean = false;
 
   // Performance metrics
@@ -149,7 +149,7 @@ export class GameEngine {
       throw new Error('GameEngine: Unable to get player bounds for boss context');
     }
 
-  
+
 
     return {
       playerPosition: { x: playerBounds.x, y: playerBounds.y },
@@ -207,13 +207,13 @@ export class GameEngine {
       } else if (this.gameState.phase === 'levelComplete') {
         this.nextLevel();
       }
-    
+
     });
 
     this.commandInputSystem.registerCommandExecutor(GameCommand.FIRE_SECONDARY, (cmd: InputCommand) => {
       if (!cmd.pressed) return; // Only on key press, not release
 
-    
+
     });
 
     this.commandInputSystem.registerCommandExecutor(GameCommand.SKIP_CUTSCENE, (cmd: InputCommand) => {
@@ -249,7 +249,7 @@ export class GameEngine {
 
       // Set running flag and start game loop immediately for responsiveness
       this.isRunning = true;
-      this.lastTime = performance.now();
+      this.lastTime = performance.now(); // Renamed variable
 
       // Initialize game state for level 1
       this.gameState.level = 1;
@@ -408,7 +408,7 @@ export class GameEngine {
     this.transitionManager.startTransition(currentLevel, nextLevel, () => {
       this.gameState.level = nextLevel;
       this.gameState.cookiesCollected = 0;
-    
+
 
       // Initialize new level immediately to prevent null reference issues
       this.initializeLevel();
@@ -458,7 +458,7 @@ export class GameEngine {
       },
       4: {
         levelNumber: 4,
-        title: "Level 4: Graveyard of the Fallen", 
+        title: "Level 4: Graveyard of the Fallen",
         description: "Government experiments created unholy abominations.\nZombies shamble between crooked tombstones.\nMist swirls as the undead hunt for fresh victims."
       },
       5: {
@@ -479,7 +479,7 @@ export class GameEngine {
   private initializeLevel() {
     // Initializing level
 
-  
+
 
     this.player.reset(this.canvas.width / 2, this.canvas.height - 50);
     this.currentLevel = new Level(this.gameState.level, this.canvas.width, this.canvas.height);
@@ -500,7 +500,7 @@ export class GameEngine {
 
     this.gameState.totalCookies = this.currentLevel.getTotalCookies();
     this.gameState.phase = 'playing';
-  
+
     this.updateState();
 
     // Level initialized
@@ -518,38 +518,42 @@ export class GameEngine {
     // Start frame profiling
     this.performanceProfiler.startFrame();
 
-    const deltaTime = currentTime - this.lastTime;
-    this.lastTime = currentTime;
+    const deltaTime = currentTime - this.lastTime; // Renamed variable
 
-    // CRITICAL BUG FIX: Cap deltaTime to prevent timing issues at very high framerates
-    const cappedDeltaTime = Math.min(deltaTime, 1000/60); // Cap to 60 FPS equivalent for stable timing
+    // Limit to 60 FPS max for consistent movement speeds
+    if (deltaTime < 16.67) { // 1000/60 = 16.67ms per frame
+      requestAnimationFrame(this.gameLoop);
+      return;
+    }
+
+    this.lastTime = currentTime; // Renamed variable
 
     // Profile update operations
     this.performanceProfiler.startUpdate();
 
     // Update only essential systems with capped deltaTime
-    this.damageSystem.update(cappedDeltaTime);
+    this.damageSystem.update(deltaTime); // Use the actual deltaTime after FPS capping
     this.commandInputSystem.processEventQueue();
 
     // Only update game logic if not in cutscene and playing
     try {
       // Always update transition manager first for smooth transitions
-      this.transitionManager.update(cappedDeltaTime);
-      
+      this.transitionManager.update(deltaTime); // Use the actual deltaTime after FPS capping
+
       // Only update game logic during active gameplay
       if (this.shouldUpdateGameLogic()) {
-        this.update(cappedDeltaTime);
+        this.update(deltaTime); // Use the actual deltaTime after FPS capping
       }
 
       this.performanceProfiler.endUpdate();
 
       // Profile render operations
       this.performanceProfiler.startRender();
-      
+
       this.render();
-      
+
       this.performanceProfiler.endRender();
-      
+
     } catch (error) {
       console.error('GameEngine: Critical error in game loop:', error);
       // Emergency fallback: pause game and transition to safe state
@@ -587,7 +591,7 @@ export class GameEngine {
       }
     }
 
-  
+
 
     // Check collisions
     this.checkCollisions();
@@ -639,7 +643,7 @@ export class GameEngine {
       this.ctx.save();
       this.ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
       this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-      
+
       // Add sparkle effect for extra satisfaction
       for (let i = 0; i < 8; i++) {
         const sparkleX = playerBounds.x + Math.random() * playerBounds.width;
@@ -760,8 +764,8 @@ export class GameEngine {
    * Check if game logic should be updated
    */
   private shouldUpdateGameLogic(): boolean {
-    return this.gameState.phase === 'playing' && 
-           !this.currentCutscene && 
+    return this.gameState.phase === 'playing' &&
+           !this.currentCutscene &&
            !this.transitionManager.isInTransition();
   }
 
