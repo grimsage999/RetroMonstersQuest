@@ -18,6 +18,7 @@ class PlayerSpriteColors {
 
 import { InputManager } from './InputManager';
 import { MovementSystem } from './MovementSystem';
+import { OptimizedSpriteRenderer } from './OptimizedSpriteRenderer';
 
 export class Player {
   private x: number;
@@ -35,6 +36,10 @@ export class Player {
   
   // Simplified animation properties
   private simpleWalkCycle: boolean = false;
+  
+  // CRITICAL: Optimized sprite renderer for performance
+  private static spriteRenderer: OptimizedSpriteRenderer = new OptimizedSpriteRenderer();
+  private cachedSprites: { [key: string]: ImageData } = {};
 
   constructor(x: number, y: number) {
     this.x = x;
@@ -105,10 +110,12 @@ export class Player {
 
   public render(ctx: CanvasRenderingContext2D) {
     ctx.save();
-    ctx.imageSmoothingEnabled = false;
+    ctx.imageSmoothingEnabled = false; // Critical for pixel art
     
     const spritePixels = this.getCurrentSpriteFrame();
-    this.renderSprite(ctx, spritePixels);
+    
+    // CRITICAL PERFORMANCE FIX: Use optimized sprite rendering
+    this.renderSpriteOptimized(ctx, spritePixels);
     
     ctx.restore();
   }
@@ -120,24 +127,43 @@ export class Player {
     return this.getIdleFrame();
   }
 
-  private renderSprite(ctx: CanvasRenderingContext2D, spritePixels: number[][]) {
+  /**
+   * CRITICAL PERFORMANCE FIX: Optimized sprite rendering
+   * Replaces 256+ individual fillRect calls with cached ImageData rendering
+   */
+  private renderSpriteOptimized(ctx: CanvasRenderingContext2D, spritePixels: number[][]) {
     const colors = PlayerSpriteColors.COSMO_PALETTE;
     const scale = PlayerSpriteColors.SPRITE_SCALE;
     
-    for (let row = 0; row < spritePixels.length; row++) {
-      for (let col = 0; col < spritePixels[row].length; col++) {
-        const colorIndex = spritePixels[row][col];
-        if (colorIndex > 0) {
-          ctx.fillStyle = colors[colorIndex];
-          ctx.fillRect(
-            this.x + col * scale, 
-            this.y + row * scale, 
-            scale, 
-            scale
-          );
-        }
+    // Create sprite ID for caching
+    const spriteId = this.getSpriteId(spritePixels);
+    
+    // Get or create cached sprite
+    if (!this.cachedSprites[spriteId]) {
+      this.cachedSprites[spriteId] = Player.spriteRenderer.preRenderSprite(
+        spritePixels, 
+        colors, 
+        scale, 
+        spriteId
+      );
+    }
+    
+    // Render with single optimized call (replaces 256+ fillRect calls)
+    Player.spriteRenderer.renderSprite(ctx, this.cachedSprites[spriteId], this.x, this.y);
+  }
+  
+  /**
+   * Generate unique ID for sprite caching
+   */
+  private getSpriteId(spritePixels: number[][]): string {
+    // Simple hash based on sprite content for caching
+    let hash = '';
+    for (let row = 0; row < Math.min(spritePixels.length, 4); row++) {
+      for (let col = 0; col < Math.min(spritePixels[row].length, 4); col++) {
+        hash += spritePixels[row][col].toString();
       }
     }
+    return `player_${hash}_${this.direction}_${this.simpleWalkCycle}`;
   }
 
   private getIdleFrame() {

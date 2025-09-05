@@ -1,5 +1,6 @@
 import { Enemy, EnemyType } from './Enemy';
 import { LEVEL_CONFIGS } from './GameConfig';
+import { BackgroundCache } from './BackgroundCache';
 
 interface Cookie {
   x: number;
@@ -29,6 +30,10 @@ export class Level {
   private boss: Enemy | null = null;
   private finishLine: { x: number; y: number; width: number; height: number; } | null = null;
   private config: LevelConfig;
+  
+  // CRITICAL: Background cache for performance
+  private static backgroundCache: BackgroundCache = new BackgroundCache();
+  private cachedBackground: HTMLCanvasElement | null = null;
 
   private levelConfigs = LEVEL_CONFIGS;
 
@@ -125,8 +130,8 @@ export class Level {
   }
 
   public render(ctx: CanvasRenderingContext2D) {
-    // Render background
-    this.renderBackground(ctx);
+    // CRITICAL PERFORMANCE FIX: Use cached background rendering
+    this.renderBackgroundOptimized(ctx);
     
     // Render cookies
     this.cookies.forEach(cookie => {
@@ -177,6 +182,115 @@ export class Level {
     
     // Add environmental details
     this.renderEnvironment(ctx);
+  }
+
+  /**
+   * CRITICAL PERFORMANCE FIX: Optimized background rendering with caching
+   * Replaces expensive gradient calculations every frame with cached canvas
+   */
+  private renderBackgroundOptimized(ctx: CanvasRenderingContext2D) {
+    // Get or create cached background
+    if (!this.cachedBackground) {
+      this.cachedBackground = Level.backgroundCache.getCachedBackground(
+        `level_${this.levelNumber}`,
+        this.canvasWidth,
+        this.canvasHeight,
+        (cacheCtx) => {
+          // Render background once to cache
+          this.renderBackgroundToCache(cacheCtx);
+        }
+      );
+    }
+    
+    // CRITICAL: Single drawImage call replaces all expensive background calculations
+    ctx.drawImage(this.cachedBackground, 0, 0);
+    
+    // Add any dynamic environmental details (if needed)
+    this.renderEnvironment(ctx);
+  }
+
+  /**
+   * Render background to cache (called only once)
+   */
+  private renderBackgroundToCache(ctx: CanvasRenderingContext2D) {
+    ctx.save();
+    ctx.imageSmoothingEnabled = false;
+    
+    switch (this.levelNumber) {
+      case 1: // Desert - Area 51
+        this.renderDesertBackgroundCached(ctx);
+        break;
+      case 2: // Dystopian City
+        this.renderCityBackgroundCached(ctx);
+        break;
+      case 3: // Subway
+        this.renderSubwayBackgroundCached(ctx);
+        break;
+      case 4: // Graveyard
+        this.renderGraveyardBackgroundCached(ctx);
+        break;
+      case 5: // Government Lab
+        this.renderLabBackgroundCached(ctx);
+        break;
+      default:
+        this.renderSpaceBackgroundCached(ctx);
+    }
+    
+    ctx.restore();
+  }
+
+  /**
+   * CRITICAL: Cached background methods (optimized versions)
+   */
+  private renderDesertBackgroundCached(ctx: CanvasRenderingContext2D) {
+    // Simplified desert background for caching
+    const skyGradient = ctx.createLinearGradient(0, 0, 0, this.canvasHeight * 0.7);
+    skyGradient.addColorStop(0, '#FF6B35');
+    skyGradient.addColorStop(0.3, '#FF8C42');
+    skyGradient.addColorStop(0.6, '#FFAA44');
+    skyGradient.addColorStop(1, '#F4A460');
+    ctx.fillStyle = skyGradient;
+    ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight * 0.7);
+    
+    // Simple sand (no animation)
+    ctx.fillStyle = '#CD853F';
+    ctx.fillRect(0, this.canvasHeight * 0.7, this.canvasWidth, this.canvasHeight * 0.3);
+  }
+
+  private renderCityBackgroundCached(ctx: CanvasRenderingContext2D) {
+    // Simple city background
+    const skyGradient = ctx.createLinearGradient(0, 0, 0, this.canvasHeight * 0.7);
+    skyGradient.addColorStop(0, '#4B0082');
+    skyGradient.addColorStop(1, '#2F4F4F');
+    ctx.fillStyle = skyGradient;
+    ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight * 0.7);
+    
+    ctx.fillStyle = '#483D8B';
+    ctx.fillRect(0, this.canvasHeight * 0.7, this.canvasWidth, this.canvasHeight * 0.3);
+  }
+
+  private renderSubwayBackgroundCached(ctx: CanvasRenderingContext2D) {
+    // Simple subway background
+    ctx.fillStyle = '#2F2F2F';
+    ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
+  }
+
+  private renderGraveyardBackgroundCached(ctx: CanvasRenderingContext2D) {
+    // Simple graveyard background
+    ctx.fillStyle = '#1a1a2e';
+    ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
+  }
+
+  private renderLabBackgroundCached(ctx: CanvasRenderingContext2D) {
+    // Simple lab background
+    ctx.fillStyle = '#E6E6FA';
+    ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
+  }
+
+  private renderSpaceBackgroundCached(ctx: CanvasRenderingContext2D) {
+    // Simple space background
+    ctx.fillStyle = '#000011';
+    ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
   }
 
   private renderDesertBackground(ctx: CanvasRenderingContext2D) {

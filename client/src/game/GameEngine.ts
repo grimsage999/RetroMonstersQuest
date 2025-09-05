@@ -11,7 +11,7 @@ import { GameStateManager, GamePhase } from './GameStateManager';
 import { LevelTransitionManager } from './LevelTransitionManager';
 import { DamageSystem } from './DamageSystem';
 import { UIStateController } from './UIStateController';
-import { DiagnosticSystem } from './DiagnosticSystem';
+import { PerformanceProfiler } from './PerformanceProfiler';
 import { BossStateMachine, GameContext } from './BossStateMachine';
 import { CommandInputSystem, GameCommand, InputCommand } from './CommandInputSystem';
 import { GameUtils } from './GameUtils'; // Assuming GameUtils contains createBounds
@@ -63,7 +63,7 @@ export class GameEngine {
   private transitionManager: LevelTransitionManager;
   private damageSystem: DamageSystem;
   private uiController: UIStateController;
-  // Diagnostic system removed for performance
+  private performanceProfiler: PerformanceProfiler;
   private bossStateMachine: BossStateMachine | null = null;
   private commandInputSystem: CommandInputSystem;
 
@@ -100,7 +100,8 @@ export class GameEngine {
     this.damageSystem = new DamageSystem(3);
     this.uiController = new UIStateController();
 
-    // Diagnostic system disabled for performance
+    // Initialize performance profiler for critical monitoring
+    this.performanceProfiler = new PerformanceProfiler();
 
     // Initialize command input system with proper filtering
     this.commandInputSystem = new CommandInputSystem();
@@ -512,10 +513,14 @@ export class GameEngine {
   private gameLoop(currentTime: number) {
     if (!this.isRunning) return;
 
+    // CRITICAL: Start frame profiling to identify bottlenecks
+    this.performanceProfiler.startFrame();
+
     const deltaTime = currentTime - this.lastTime;
     this.lastTime = currentTime;
 
-    // Simplified: No performance monitoring overhead
+    // CRITICAL: Profile update operations
+    this.performanceProfiler.startUpdate();
 
     // Update only essential systems
     this.damageSystem.update(deltaTime);
@@ -527,7 +532,15 @@ export class GameEngine {
         this.update(deltaTime);
       }
 
+      this.performanceProfiler.endUpdate();
+
+      // CRITICAL: Profile render operations (main bottleneck suspect)
+      this.performanceProfiler.startRender();
+      
       this.render();
+      
+      this.performanceProfiler.endRender();
+      
     } catch (error) {
       // Critical error in game loop
       // Emergency fallback: pause game and transition to safe state
@@ -535,6 +548,9 @@ export class GameEngine {
       this.stateManager.forceTransitionTo(GamePhase.TITLE);
       this.uiController.forceReset();
     }
+
+    // CRITICAL: End frame profiling
+    this.performanceProfiler.endFrame();
 
     this.animationId = requestAnimationFrame((time) => this.gameLoop(time));
   }
