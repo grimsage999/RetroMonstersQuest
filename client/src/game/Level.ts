@@ -143,8 +143,8 @@ export class Level {
   }
 
   public render(ctx: CanvasRenderingContext2D) {
-    // CRITICAL PERFORMANCE FIX: Use cached background rendering
-    this.renderBackgroundOptimized(ctx);
+    // Simple background rendering
+    this.renderBackground(ctx);
     
     // Render cookies
     this.cookies.forEach(cookie => {
@@ -197,20 +197,7 @@ export class Level {
     this.renderEnvironment(ctx);
   }
 
-  /**
-   * CRITICAL PERFORMANCE FIX: Optimized background rendering with caching
-   * Replaces expensive gradient calculations every frame with cached canvas
-   */
-  private renderBackgroundOptimized(ctx: CanvasRenderingContext2D) {
-    // Get or create cached background
-    // Direct background rendering
-    
-    // Simple background rendering
-    this.renderBackground(ctx);
-    
-    // Add any dynamic environmental details (if needed)
-    this.renderEnvironment(ctx);
-  }
+  // Removed complex background caching - using simple rendering
 
   /**
    * Render background to cache (called only once)
