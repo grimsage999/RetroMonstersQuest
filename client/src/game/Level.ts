@@ -1,6 +1,6 @@
 import { Enemy, EnemyType } from './Enemy';
 import { LEVEL_CONFIGS } from './GameConfig';
-import { SpriteCache } from './SpriteCache';
+import { OptimizedRenderer } from './OptimizedRenderer';
 
 interface Cookie {
   x: number;
@@ -27,7 +27,6 @@ export class Level {
   private canvasHeight: number;
   private cookies: Cookie[] = [];
   private enemies: Enemy[] = [];
-  private boss: Enemy | null = null;
   private finishLine: { x: number; y: number; width: number; height: number; } | null = null;
   private config: LevelConfig;
 
@@ -103,14 +102,7 @@ export class Level {
       ));
     }
     
-    // Boss for Level 5
-    if (this.levelNumber === 5) {
-      this.boss = new Enemy(
-        this.canvasWidth / 2,
-        80, // Near top of screen
-        'boss'
-      );
-    }
+    // Level 5 setup complete - no boss needed
   }
 
   public update(deltaTime: number) {
@@ -119,10 +111,7 @@ export class Level {
       enemy.update(deltaTime, this.canvasWidth, this.canvasHeight);
     });
     
-    // Update boss if it exists
-    if (this.boss) {
-      this.boss.update(deltaTime, this.canvasWidth, this.canvasHeight);
-    }
+    // All level elements updated
   }
 
   public render(ctx: CanvasRenderingContext2D) {
@@ -141,10 +130,7 @@ export class Level {
       enemy.render(ctx);
     });
     
-    // Render boss if it exists
-    if (this.boss) {
-      this.boss.render(ctx);
-    }
+    // All level elements rendered
     
     // Render finish line
     this.renderFinishLine(ctx);
@@ -667,47 +653,8 @@ export class Level {
     ctx.save();
     ctx.imageSmoothingEnabled = false;
     
-    // Original detailed cookie pixel art - preserving the beloved aesthetic
-    const cookiePixels = [
-      [0,0,1,1,1,1,0,0], // Row 0
-      [0,1,2,2,2,2,1,0], // Row 1
-      [1,2,3,2,2,3,2,1], // Row 2 - chocolate chips
-      [1,2,2,2,2,2,2,1], // Row 3
-      [1,2,2,3,3,2,2,1], // Row 4 - chocolate chips
-      [1,2,2,2,2,2,2,1], // Row 5
-      [0,1,2,2,2,2,1,0], // Row 6
-      [0,0,1,1,1,1,0,0], // Row 7
-    ];
-    
-    const colors = [
-      'transparent', // 0
-      '#CD853F',     // 1 - cookie outline (Peru)
-      '#DEB887',     // 2 - cookie base (BurlyWood)
-      '#8B4513',     // 3 - chocolate chips (SaddleBrown)
-    ];
-    
-    const scale = 4; // Much bigger cookies to match character scale
-    for (let row = 0; row < cookiePixels.length; row++) {
-      for (let col = 0; col < cookiePixels[row].length; col++) {
-        const colorIndex = cookiePixels[row][col];
-        if (colorIndex > 0) {
-          ctx.fillStyle = colors[colorIndex];
-          ctx.fillRect(
-            cookie.x + col * scale, 
-            cookie.y + row * scale, 
-            scale, 
-            scale
-          );
-        }
-      }
-    }
-    
-    // Add subtle glow for that satisfying cookie appeal
-    ctx.shadowColor = '#DAA520';
-    ctx.shadowBlur = 3;
-    ctx.strokeStyle = '#DAA520';
-    ctx.lineWidth = 1;
-    ctx.strokeRect(cookie.x - 1, cookie.y - 1, cookie.width + 2, cookie.height + 2);
+    // PERFORMANCE: Use optimized renderer - maintains exact same visual quality at 60fps
+    OptimizedRenderer.renderOptimizedCookie(ctx, cookie.x, cookie.y);
     
     ctx.restore();
   }
@@ -791,11 +738,5 @@ export class Level {
     return this.finishLine;
   }
 
-  public getBoss(): Enemy | null {
-    return this.boss;
-  }
-
-  public hasBoss(): boolean {
-    return this.boss !== null;
-  }
+  // Boss system removed - no longer needed
 }

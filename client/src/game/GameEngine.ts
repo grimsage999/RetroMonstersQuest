@@ -13,7 +13,6 @@ import { LevelTransitionManager } from './LevelTransitionManager';
 import { DamageSystem } from './DamageSystem';
 import { UIStateController } from './UIStateController';
 import { DiagnosticSystem } from './DiagnosticSystem';
-import { BossStateMachine, GameContext } from './BossStateMachine';
 import { CommandInputSystem, GameCommand, InputCommand } from './CommandInputSystem';
 import { GameUtils } from './GameUtils'; // Assuming GameUtils contains createBounds
 import { COLLISION_CONFIG } from './GameConstants';
@@ -25,7 +24,6 @@ export interface GameState {
   phase: 'playing' | 'gameOver' | 'victory' | 'levelComplete';
   cookiesCollected: number;
   totalCookies: number;
-  bossHealth: number;
 }
 
 export class GameEngine {
@@ -65,7 +63,6 @@ export class GameEngine {
   private damageSystem: DamageSystem;
   private uiController: UIStateController;
   private diagnosticSystem: DiagnosticSystem;
-  private bossStateMachine: BossStateMachine | null = null;
   private commandInputSystem: CommandInputSystem;
 
   constructor(canvas: HTMLCanvasElement, onStateChange: (state: GameState) => void) {
@@ -80,7 +77,7 @@ export class GameEngine {
       phase: 'playing', // Will be synced with state manager
       cookiesCollected: 0,
       totalCookies: 0,
-      bossHealth: 100
+
     };
 
     // Initialize game components
@@ -379,7 +376,7 @@ export class GameEngine {
       phase: 'playing',
       cookiesCollected: 0,
       totalCookies: 0,
-      bossHealth: 100
+
     };
 
     // Reset player completely including movement system
@@ -478,7 +475,7 @@ export class GameEngine {
       1: {
         levelNumber: 1,
         title: "👽 COSMIC PLAYGROUND 🛸",
-        description: "Cosmo crash-landed in Roswell!\nThe CIA hoards cookies - encoded joy itself.\nReclaim happiness through cosmic resistance!\n\nUse arrow keys to move • Collect all cookies • Avoid agents • Reach the finish!"
+        description: "Cosmo crash-landed in Roswell!\nThe CIA hoards cookies - encoded joy itself.\nReclaim happiness through cosmic resistance!\n\nUse arrows to control Cosmo • Collect all cookies • Avoid agents • Reach the finish!"
       },
       2: {
         levelNumber: 2,
@@ -489,7 +486,6 @@ export class GameEngine {
         levelNumber: 3,
         title: "Level 3: Abandoned Subway",
         description: "Underground tunnels echo with danger.\nRadioactive rats emerge from dark corners.\nIn the debris, you discover alien technology...",
-        weaponUnlocked: "⚡ RAY GUN ACQUIRED ⚡\nPress SPACE to fire lightning bolts!\n(3 hits to defeat enemies)"
       },
       4: {
         levelNumber: 4,
@@ -499,8 +495,7 @@ export class GameEngine {
       5: {
         levelNumber: 5,
         title: "Level 5: Government Lab",
-        description: "The sterile facility hides dark secrets.\nInteract with lab equipment to uncover fragments.\nSomewhere here lies The Adjudicator...",
-        weaponUnlocked: "🔮 THE ADJUDICATOR 🔮\nPress X for instant death rays!\nGlowing orb grants ultimate power!"
+        description: "The sterile facility hides dark secrets.\nInteract with lab equipment to uncover fragments.\nCosmo's final challenge awaits..."
       }
     };
 
@@ -519,19 +514,7 @@ export class GameEngine {
     this.player.reset(this.canvas.width / 2, this.canvas.height - 50);
     this.currentLevel = new Level(this.gameState.level, this.canvas.width, this.canvas.height);
 
-    // Initialize boss for Level 5
-    if (this.gameState.level === 5 && this.currentLevel.hasBoss()) {
-      this.bossStateMachine = new BossStateMachine();
-      this.gameState.bossHealth = 100;
-      console.log('GameEngine: Boss State Machine initialized for Level 5');
-
-      // Start boss intro sequence
-      const context = this.createBossContext(16); // Default 16ms for initialization
-      this.bossStateMachine.start('BOSS_INTRO', context);
-    } else {
-      this.bossStateMachine = null;
-      this.gameState.bossHealth = 0;
-    }
+    // Level initialization complete - no boss mechanics needed
 
     this.gameState.totalCookies = this.currentLevel.getTotalCookies();
     this.gameState.phase = 'playing';
@@ -605,23 +588,7 @@ export class GameEngine {
     // Update level (enemies, etc.)
     this.currentLevel.update(deltaTime);
 
-    // Update boss state machine if active
-    if (this.bossStateMachine) {
-      const context = this.createBossContext(deltaTime);
-      const result = this.bossStateMachine.update(context);
-
-      // Handle boss state transitions
-      if (result && result.shouldTransition) {
-        console.log(`Boss State Machine: ${result.message || 'State transition'}`);
-
-        // Boss defeated - trigger victory
-        if (result.nextState === 'DEFEATED') {
-          this.gameState.bossHealth = 0;
-          this.audioManager.playVictoryFanfare();
-          console.log('GameEngine: Boss defeated! Victory condition met.');
-        }
-      }
-    }
+    // Game logic updates complete - no boss mechanics needed
 
     // No weapon updates in simplified game for better performance
 

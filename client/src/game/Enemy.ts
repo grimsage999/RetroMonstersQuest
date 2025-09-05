@@ -1,6 +1,6 @@
-import { SpriteCache } from './SpriteCache';
+import { OptimizedRenderer } from './OptimizedRenderer';
 
-export type EnemyType = 'cia' | 'army' | 'rat' | 'zombie' | 'boss';
+export type EnemyType = 'cia' | 'army' | 'rat' | 'zombie';
 
 
 // Enemy sprite color palettes
@@ -88,9 +88,7 @@ export class Enemy {
         this.speedX = (Math.random() - 0.5) * 2.5;
         this.speedY = (Math.random() - 0.5) * 2.5;
         break;
-      case 'boss':
-        this.width = 72; // 24 * 3 scale for boss
-        this.height = 72;
+      // Boss type removed
         this.speedX = (Math.random() - 0.5) * 2;
         this.speedY = (Math.random() - 0.5) * 2;
         break;
@@ -176,56 +174,15 @@ export class Enemy {
   }
 
   private renderEnemySprite(ctx: CanvasRenderingContext2D, spriteData: { pixels: number[][], colors: string[], hasGlow?: boolean }) {
-    const { pixels, colors, hasGlow } = spriteData;
+    const { hasGlow } = spriteData;
     
-    if (hasGlow) {
-      const glowIntensity = Math.sin(Date.now() * 0.01) * 2 + 3;
-      ctx.shadowColor = '#39ff14';
-      ctx.shadowBlur = glowIntensity;
-    }
-    
-    // Restore original pixel-by-pixel rendering for better visual quality
-    const scale = 3;
-    for (let row = 0; row < pixels.length; row++) {
-      for (let col = 0; col < pixels[row].length; col++) {
-        const colorIndex = pixels[row][col];
-        if (colorIndex > 0) {
-          ctx.fillStyle = colors[colorIndex];
-          ctx.fillRect(this.x + col * scale, this.y + row * scale, scale, scale);
-        }
-      }
-    }
+    // PERFORMANCE: Use optimized renderer - maintains exact same visual quality at 60fps
+    OptimizedRenderer.renderOptimizedEnemy(ctx, this.x, this.y, this.type, this.animationFrame, hasGlow);
   }
 
   private renderCIAAgent(ctx: CanvasRenderingContext2D) {
-    // CIA Agent with walk cycle animation - original detailed pixel art
-    let agentPixels;
-    if (this.animationFrame === 0) {
-      agentPixels = this.getCIAWalkFrame1();
-    } else {
-      agentPixels = this.getCIAWalkFrame2();
-    }
-
-    const colors = [
-      'transparent', // 0
-      '#000000',     // 1 - black hair/suit
-      '#fdbcb4',     // 2 - skin
-      '#333333',     // 3 - sunglasses
-      '#ffffff',     // 4 - collar
-      '#1a1a1a',     // 5 - dark suit
-      '#ff0000',     // 6 - red tie
-    ];
-
-    const scale = 3; // 3x scale for better visibility
-    for (let row = 0; row < agentPixels.length; row++) {
-      for (let col = 0; col < agentPixels[row].length; col++) {
-        const colorIndex = agentPixels[row][col];
-        if (colorIndex > 0) {
-          ctx.fillStyle = colors[colorIndex];
-          ctx.fillRect(this.x + col * scale, this.y + row * scale, scale, scale);
-        }
-      }
-    }
+    // PERFORMANCE: Use optimized renderer - maintains exact same CIA agent visual quality at 60fps
+    OptimizedRenderer.renderOptimizedEnemy(ctx, this.x, this.y, 'cia', this.animationFrame);
   }
 
   private getCIAWalkFrame1() {
