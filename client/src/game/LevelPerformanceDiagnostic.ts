@@ -94,8 +94,8 @@ export class LevelPerformanceDiagnostic {
     switch (levelNumber) {
       case 3: // Subway - Flickering lights animation
         return baseLoad + 4; // Additional load from light animations
-      case 4: // Graveyard - Atmospheric animations
-        return baseLoad + 3; // Mist and atmospheric effects
+      case 4: // Graveyard - OPTIMIZED Atmospheric animations
+        return baseLoad + 1; // Reduced mist particles (8 max instead of 20+)
       case 5: // Lab - Equipment animations
         return baseLoad + 2; // Lab equipment animations
       default:

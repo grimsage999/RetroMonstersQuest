@@ -699,23 +699,36 @@ export class Level {
       ctx.fillRect(tomb.x + 2, tomb.y + 10, 4, 6);
     });
 
-    // Dead trees
-    const treePositions = [150, 400, 600];
+    // OPTIMIZED: Simplified dead trees
+    const treePositions = [200, 450]; // Reduced from 3 to 2 trees
     treePositions.forEach(x => {
       // Tree trunk
       ctx.fillStyle = '#2F2F2F';
       ctx.fillRect(x, this.canvasHeight - 180, 8, 60);
       
-      // Bare branches
+      // OPTIMIZED: Single branch instead of multiple strokes
       ctx.strokeStyle = '#2F2F2F';
       ctx.lineWidth = 2;
       ctx.beginPath();
-      ctx.moveTo(x + 4, this.canvasHeight - 160);
-      ctx.lineTo(x - 10, this.canvasHeight - 170);
       ctx.moveTo(x + 4, this.canvasHeight - 150);
-      ctx.lineTo(x + 18, this.canvasHeight - 165);
+      ctx.lineTo(x + 15, this.canvasHeight - 165);
       ctx.stroke();
     });
+
+    // OPTIMIZED: Minimal atmospheric mist (8 particles maximum)
+    const time = Date.now() * 0.0005;
+    const maxMistParticles = 8;
+    
+    for (let i = 0; i < maxMistParticles; i++) {
+      // Simple particle position calculation
+      const x = (i * 100 + Math.sin(time + i) * 20) % this.canvasWidth;
+      const y = this.canvasHeight * 0.6 + Math.cos(time * 0.7 + i) * 30;
+      
+      // Simple mist rendering
+      const alpha = (Math.sin(time * 2 + i) + 1) * 0.1;
+      ctx.fillStyle = `rgba(200, 200, 255, ${alpha})`;
+      ctx.fillRect(x, y, 3, 3);
+    }
   }
 
   private renderLabEnvironment(ctx: CanvasRenderingContext2D) {
