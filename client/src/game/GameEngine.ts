@@ -450,7 +450,7 @@ export class GameEngine {
       3: {
         levelNumber: 3,
         title: "Level 3: Abandoned Subway",
-        description: "Underground tunnels echo with danger.\nRadioactive rats emerge from dark corners.\nIn the debris, you discover alien technology...",
+        description: "Underground tunnels echo with danger.\nRadioactive rats emerge from dark corners.\nNavigate through the abandoned transit system...",
         weaponUnlocked: ""
       },
       4: {
@@ -461,7 +461,7 @@ export class GameEngine {
       5: {
         levelNumber: 5,
         title: "Level 5: Government Lab",
-        description: "The sterile facility hides dark secrets.\nInteract with lab equipment to uncover fragments.\nSomewhere here lies The Adjudicator...",
+        description: "The sterile facility hides dark secrets.\nInteract with lab equipment to uncover fragments.\nNavigate carefully through the final challenge...",
         weaponUnlocked: ""
       }
     };

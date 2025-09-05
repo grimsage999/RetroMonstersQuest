@@ -74,9 +74,9 @@ export class LevelTransitionManager {
     const levelAssets: { [key: number]: string[] } = {
       1: ['/sounds/level1_music.mp3'],
       2: ['/sounds/level2_music.mp3', '/textures/city_bg.png'],
-      3: ['/sounds/level3_music.mp3', '/textures/subway_bg.png', '/sounds/raygun.mp3'],
+      3: ['/sounds/level3_music.mp3', '/textures/subway_bg.png'],
       4: ['/sounds/level4_music.mp3', '/textures/graveyard_bg.png'],
-      5: ['/sounds/level5_music.mp3', '/textures/lab_bg.png', '/sounds/adjudicator.mp3']
+      5: ['/sounds/level5_music.mp3', '/textures/lab_bg.png']
     };
 
     this.assetsToPreload = levelAssets[level] || [];
@@ -224,9 +224,9 @@ export class LevelTransitionManager {
     const tips = [
       'Tip: Press Shift to dash!',
       'Tip: Collect all cookies to proceed',
-      'Tip: Ray Gun unlocks at Level 3',
+      'Tip: Watch out for radioactive rats in the subway!',
       'Tip: Watch out for enemy patterns',
-      'Tip: The Adjudicator awaits in Level 5'
+      'Tip: The final lab holds the greatest challenge!'
     ];
     
     const tipIndex = Math.floor(this.nextLevel - 1) % tips.length;

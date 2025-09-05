@@ -238,8 +238,8 @@ export const CUTSCENE_DATA = {
   3: {
     levelNumber: 3,
     title: "Level 3: Abandoned Subway",
-    description: "Underground tunnels echo with danger.\nRadioactive rats emerge from dark corners.\nIn the debris, you discover alien technology...",
-    weaponUnlocked: "🚀 ENHANCED AGILITY 🚀\nCosmo's movement becomes more responsive!\nDodge faster and collect more cookies!"
+    description: "Underground tunnels echo with danger.\nRadioactive rats emerge from dark corners.\nNavigate through the abandoned transit system...",
+    weaponUnlocked: ""
   },
   4: {
     levelNumber: 4,
@@ -249,7 +249,7 @@ export const CUTSCENE_DATA = {
   5: {
     levelNumber: 5,
     title: "Level 5: Government Lab",
-    description: "The sterile facility hides dark secrets.\nInteract with lab equipment to uncover fragments.\nSomewhere here lies The Adjudicator...",
-    weaponUnlocked: "🌟 COSMIC MASTERY 🌟\nCosmo reaches peak performance!\nUltimate speed and agility unlocked!"
+    description: "The sterile facility hides dark secrets.\nInteract with lab equipment to uncover fragments.\nNavigate carefully through the final challenge...",
+    weaponUnlocked: ""
   }
 } as const;
