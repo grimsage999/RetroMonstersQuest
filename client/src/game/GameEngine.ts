@@ -3,7 +3,7 @@ import { Enemy } from './Enemy';
 import { Level } from './Level';
 import { AudioManager } from './AudioManager';
 import { InputManager } from './InputManager';
-import { Cutscene, CutsceneData } from './Cutscene';
+import { Cutscene } from './Cutscene';
 import { SpatialGrid } from './SpatialGrid';
 import { SpriteBatcher } from './SpriteBatcher';
 import { AudioPool } from './AudioPool';
@@ -38,7 +38,7 @@ export class GameEngine {
   private audioManager: AudioManager;
   private inputManager: InputManager;
 
-  // Removed bullets and weapon cooldowns for performance
+  // No weapons system
   private currentCutscene: Cutscene | null = null;
 
   private animationId: number = 0;
@@ -149,8 +149,7 @@ export class GameEngine {
       throw new Error('GameEngine: Unable to get player bounds for boss context');
     }
 
-    // No weapons in simplified game
-    const weapons: string[] = [];
+    // No weapons in game
 
     return {
       playerPosition: { x: playerBounds.x, y: playerBounds.y },
@@ -159,7 +158,7 @@ export class GameEngine {
       deltaTime: Math.max(1, deltaTime), // Use actual deltaTime, minimum 1ms
       canvasWidth: this.canvas.width,
       canvasHeight: this.canvas.height,
-      currentWeapons: weapons
+      currentWeapons: []
     };
   }
 
@@ -208,13 +207,13 @@ export class GameEngine {
       } else if (this.gameState.phase === 'levelComplete') {
         this.nextLevel();
       }
-      // No weapon firing in simplified game
+      // No weapons in game
     });
 
     this.commandInputSystem.registerCommandExecutor(GameCommand.FIRE_SECONDARY, (cmd: InputCommand) => {
       if (!cmd.pressed) return; // Only on key press, not release
 
-      // No secondary weapon in simplified game
+      // No weapons in game
     });
 
     this.commandInputSystem.registerCommandExecutor(GameCommand.SKIP_CUTSCENE, (cmd: InputCommand) => {
@@ -224,7 +223,7 @@ export class GameEngine {
 
     this.commandInputSystem.registerCommandExecutor(GameCommand.DEBUG_DIAGNOSTIC, (cmd: InputCommand) => {
       if (!cmd.pressed) return;
-      this.runDiagnostic();
+      // Diagnostic system removed
     });
   }
 
@@ -406,7 +405,7 @@ export class GameEngine {
     this.transitionManager.startTransition(currentLevel, nextLevel, () => {
       this.gameState.level = nextLevel;
       this.gameState.cookiesCollected = 0;
-      // No bullets in simplified game
+      // No weapons in game
 
       // Initialize new level immediately to prevent null reference issues
       this.initializeLevel();
@@ -452,7 +451,7 @@ export class GameEngine {
         levelNumber: 3,
         title: "Level 3: Abandoned Subway",
         description: "Underground tunnels echo with danger.\nRadioactive rats emerge from dark corners.\nIn the debris, you discover alien technology...",
-        weaponUnlocked: "⚡ RAY GUN ACQUIRED ⚡\nPress SPACE to fire lightning bolts!\n(3 hits to defeat enemies)"
+        weaponUnlocked: ""
       },
       4: {
         levelNumber: 4,
@@ -463,7 +462,7 @@ export class GameEngine {
         levelNumber: 5,
         title: "Level 5: Government Lab",
         description: "The sterile facility hides dark secrets.\nInteract with lab equipment to uncover fragments.\nSomewhere here lies The Adjudicator...",
-        weaponUnlocked: "🔮 THE ADJUDICATOR 🔮\nPress X for instant death rays!\nGlowing orb grants ultimate power!"
+        weaponUnlocked: ""
       }
     };
 
@@ -477,7 +476,7 @@ export class GameEngine {
   private initializeLevel() {
     // Initializing level
 
-    // No weapons in simplified game for better performance
+    // No weapons in game
 
     this.player.reset(this.canvas.width / 2, this.canvas.height - 50);
     this.currentLevel = new Level(this.gameState.level, this.canvas.width, this.canvas.height);
@@ -498,15 +497,15 @@ export class GameEngine {
 
     this.gameState.totalCookies = this.currentLevel.getTotalCookies();
     this.gameState.phase = 'playing';
-    // No bullets in simplified game
+    // No weapons in game
     this.updateState();
 
     // Level initialized
   }
 
-  // Removed fireRayGun for better performance
+  // No weapons in game
 
-  // Removed fireAdjudicator for better performance
+  // No weapons in game
 
   // Removed updateBullets for better performance
 
@@ -580,7 +579,7 @@ export class GameEngine {
       }
     }
 
-    // No weapon updates in simplified game for better performance
+    // No weapons in game
 
     // Check collisions
     this.checkCollisions();
@@ -749,9 +748,7 @@ export class GameEngine {
     }
   }
 
-  // Removed renderBullets for better performance
-
-  // Removed renderWeaponUI for better performance
+  // No weapons in game
 
   private showVictorySequence() {
     console.log('GameEngine: Victory!');
@@ -759,7 +756,7 @@ export class GameEngine {
     // Use UI controller to properly queue the victory screen
     this.uiController.queueTransition('victory', () => {
       // Epilogue: Mystery + sequel tease as specified in design doc
-      const epilogueData: CutsceneData = {
+      const epilogueData = {
         levelNumber: 6,
         title: "🎃 COSMIC PLAYGROUND EPILOGUE 🎃",
         description: "Cosmo escapes through the facility doors...\nAmbience drops to empty hallway echoes.\nA white room appears...\n\n\"what?\"\n\nCosmic Playground will be back on Halloween!"
