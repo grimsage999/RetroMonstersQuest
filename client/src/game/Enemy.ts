@@ -174,15 +174,31 @@ export class Enemy {
   }
 
   private renderEnemySprite(ctx: CanvasRenderingContext2D, spriteData: { pixels: number[][], colors: string[], hasGlow?: boolean }) {
-    const { hasGlow } = spriteData;
+    const { pixels, colors, hasGlow } = spriteData;
     
-    // PERFORMANCE: Use optimized renderer - maintains exact same visual quality at 60fps
-    OptimizedRenderer.renderOptimizedEnemy(ctx, this.x, this.y, this.type, this.animationFrame, hasGlow);
-  }
-
-  private renderCIAAgent(ctx: CanvasRenderingContext2D) {
-    // PERFORMANCE: Use optimized renderer - maintains exact same CIA agent visual quality at 60fps
-    OptimizedRenderer.renderOptimizedEnemy(ctx, this.x, this.y, 'cia', this.animationFrame);
+    // DIRECT PIXEL RENDERING: Ensures original detailed pixel art is preserved
+    if (hasGlow) {
+      // Add pulsing glowing effect for radioactive rats
+      const glowIntensity = Math.sin(Date.now() * 0.01) * 2 + 3;
+      ctx.shadowColor = '#39ff14';
+      ctx.shadowBlur = glowIntensity;
+    }
+    
+    const scale = 3; // 3x scale to match Cosmo's size
+    for (let row = 0; row < pixels.length; row++) {
+      for (let col = 0; col < pixels[row].length; col++) {
+        const colorIndex = pixels[row][col];
+        if (colorIndex > 0) {
+          ctx.fillStyle = colors[colorIndex];
+          ctx.fillRect(this.x + col * scale, this.y + row * scale, scale, scale);
+        }
+      }
+    }
+    
+    // Reset shadow for other enemies
+    if (hasGlow) {
+      ctx.shadowBlur = 0;
+    }
   }
 
   private getCIAWalkFrame1() {
@@ -229,35 +245,6 @@ export class Enemy {
     ];
   }
 
-  private renderArmyMan(ctx: CanvasRenderingContext2D) {
-    // Army Man with walk cycle animation
-    let armyPixels;
-    if (this.animationFrame === 0) {
-      armyPixels = this.getArmyWalkFrame1();
-    } else {
-      armyPixels = this.getArmyWalkFrame2();
-    }
-
-    const colors = [
-      'transparent', // 0
-      '#228b22',     // 1 - green uniform/helmet
-      '#fdbcb4',     // 2 - skin
-      '#000000',     // 3 - eyes/details
-      '#1f5f1f',     // 4 - dark green camo
-    ];
-
-    const scale = 3; // 3x scale for better visibility
-    for (let row = 0; row < armyPixels.length; row++) {
-      for (let col = 0; col < armyPixels[row].length; col++) {
-        const colorIndex = armyPixels[row][col];
-        if (colorIndex > 0) {
-          ctx.fillStyle = colors[colorIndex];
-          ctx.fillRect(this.x + col * scale, this.y + row * scale, scale, scale);
-        }
-      }
-    }
-  }
-
   private getArmyWalkFrame1() {
     // Army Man walk frame 1 - left leg forward, rifle position
     return [
@@ -300,42 +287,6 @@ export class Enemy {
       [0,0,0,1,1,0,0,1,1,1,1,0,0,0,0,0], // Row 14 - marching stance
       [0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0], // Row 15 - boots
     ];
-  }
-
-  private renderRadioactiveRat(ctx: CanvasRenderingContext2D) {
-    // Radioactive Rat with simple walk cycle animation
-    let ratPixels;
-    if (this.animationFrame === 0) {
-      ratPixels = this.getRatWalkFrame1();
-    } else {
-      ratPixels = this.getRatWalkFrame2();
-    }
-
-    const colors = [
-      'transparent', // 0
-      '#1a5f1a',     // 1 - dark green outline
-      '#39ff14',     // 2 - bright radioactive green
-      '#ff0000',     // 3 - red eyes
-      '#ffffff',     // 4 - white eye highlights
-      '#000000',     // 5 - nose/mouth
-      '#32cd32',     // 6 - tail
-    ];
-
-    // Add pulsing glowing effect
-    const glowIntensity = Math.sin(Date.now() * 0.01) * 2 + 3;
-    ctx.shadowColor = '#39ff14';
-    ctx.shadowBlur = glowIntensity;
-
-    const scale = 3; // 3x scale for better visibility
-    for (let row = 0; row < ratPixels.length; row++) {
-      for (let col = 0; col < ratPixels[row].length; col++) {
-        const colorIndex = ratPixels[row][col];
-        if (colorIndex > 0) {
-          ctx.fillStyle = colors[colorIndex];
-          ctx.fillRect(this.x + col * scale, this.y + row * scale, scale, scale);
-        }
-      }
-    }
   }
 
   private getRatWalkFrame1() {
@@ -403,38 +354,6 @@ export class Enemy {
 
   public isActive(): boolean {
     return this.active;
-  }
-
-  private renderZombie(ctx: CanvasRenderingContext2D) {
-    // Zombie with walk cycle animation
-    let zombiePixels;
-    if (this.animationFrame === 0) {
-      zombiePixels = this.getZombieWalkFrame1();
-    } else {
-      zombiePixels = this.getZombieWalkFrame2();
-    }
-
-    const colors = [
-      'transparent', // 0
-      '#2F4F2F',     // 1 - dark green skin
-      '#228B22',     // 2 - lighter green
-      '#8B0000',     // 3 - dark red blood
-      '#FF0000',     // 4 - bright red
-      '#654321',     // 5 - brown clothes
-      '#1C1C1C',     // 6 - black shadows
-      '#FFFFFF'      // 7 - white teeth/eyes
-    ];
-
-    // Render 16x16 sprite scaled 3x
-    for (let row = 0; row < zombiePixels.length; row++) {
-      for (let col = 0; col < zombiePixels[row].length; col++) {
-        const colorIndex = zombiePixels[row][col];
-        if (colorIndex !== 0) {
-          ctx.fillStyle = colors[colorIndex];
-          ctx.fillRect(this.x + col * 3, this.y + row * 3, 3, 3);
-        }
-      }
-    }
   }
 
   private getZombieWalkFrame1() {
