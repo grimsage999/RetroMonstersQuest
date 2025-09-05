@@ -130,11 +130,11 @@ export const GAME_CONFIG = {
   TEXT_STYLES: {
     TITLE: {
       FONT_SIZE: 48,
-      OUTLINE_WIDTH: 4,
+      OUTLINE_WIDTH: 6, // Thicker for bubble effect
       SHADOW_OFFSET: 6,
       GLOW_INTENSITY: 8,
       PRIMARY_COLOR: '#FFD700', // Cosmic gold
-      OUTLINE_COLOR: '#8A2BE2', // Deep purple
+      OUTLINE_COLOR: '#000000', // Black outline for readability
       SHADOW_COLOR: '#FF1493', // Hot pink
       GLOW_COLOR: '#00FFFF', // Cyan glow
     },
@@ -160,13 +160,33 @@ export const GAME_CONFIG = {
     },
     UI_TEXT: {
       FONT_SIZE: 24,
-      OUTLINE_WIDTH: 2,
+      OUTLINE_WIDTH: 4, // Thicker outline for bubble effect
       SHADOW_OFFSET: 3,
       GLOW_INTENSITY: 5,
-      PRIMARY_COLOR: '#FF6347', // Tomato
-      OUTLINE_COLOR: '#191970', // Midnight blue
+      PRIMARY_COLOR: '#FFFF00', // Bright yellow for UI
+      OUTLINE_COLOR: '#000000', // Thick black outline
       SHADOW_COLOR: '#FF1493', // Deep pink
-      GLOW_COLOR: '#00BFFF', // Deep sky blue
+      GLOW_COLOR: '#FFD700', // Gold glow
+    },
+    GAME_OVER: {
+      FONT_SIZE: 48,
+      OUTLINE_WIDTH: 6, // Extra thick for impact
+      SHADOW_OFFSET: 5,
+      GLOW_INTENSITY: 8,
+      PRIMARY_COLOR: '#FF4444', // Bright red
+      OUTLINE_COLOR: '#000000', // Thick black outline
+      SHADOW_COLOR: '#800080', // Purple shadow
+      GLOW_COLOR: '#FF0000', // Red glow
+    },
+    LEVEL_NAME: {
+      FONT_SIZE: 42,
+      OUTLINE_WIDTH: 5,
+      SHADOW_OFFSET: 4,
+      GLOW_INTENSITY: 7,
+      PRIMARY_COLOR: '#00FFFF', // Cyan
+      OUTLINE_COLOR: '#000000', // Thick black outline
+      SHADOW_COLOR: '#4B0082', // Indigo shadow
+      GLOW_COLOR: '#00BFFF', // Sky blue glow
     }
   },
 } as const;

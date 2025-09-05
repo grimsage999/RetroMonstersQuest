@@ -69,38 +69,40 @@ body {
 }
 
 .cosmic-text {
-  color: #FFD700;
+  font-family: "Comic Sans MS", "Marker Felt", "Chalkduster", cursive !important;
+  font-weight: 900 !important;
+  color: #FFFF00 !important; /* Bright yellow for UI */
   text-shadow: 
-    -2px -2px 0 #8A2BE2,
-    2px -2px 0 #8A2BE2,
-    -2px 2px 0 #8A2BE2,
-    2px 2px 0 #8A2BE2,
-    0 0 10px #00FFFF,
-    0 0 20px #FF1493;
-  filter: drop-shadow(4px 4px 0 rgba(255, 20, 147, 0.8));
-  animation: cosmic-pulse 2s ease-in-out infinite;
+    -3px -3px 0 #000000, /* Thick black outline */
+    3px -3px 0 #000000,
+    -3px 3px 0 #000000,
+    3px 3px 0 #000000,
+    0 0 8px #FFD700, /* Gold glow */
+    0 0 16px #FFD700;
+  filter: drop-shadow(2px 2px 0 rgba(0, 0, 0, 0.8));
+  animation: bubble-bounce 1.5s ease-in-out infinite;
 }
 
-@keyframes cosmic-pulse {
+@keyframes bubble-bounce {
   0%, 100% {
     transform: scale(1);
     text-shadow: 
-      -2px -2px 0 #8A2BE2,
-      2px -2px 0 #8A2BE2,
-      -2px 2px 0 #8A2BE2,
-      2px 2px 0 #8A2BE2,
-      0 0 10px #00FFFF,
-      0 0 20px #FF1493;
+      -3px -3px 0 #000000,
+      3px -3px 0 #000000,
+      -3px 3px 0 #000000,
+      3px 3px 0 #000000,
+      0 0 8px #FFD700,
+      0 0 16px #FFD700;
   }
   50% {
-    transform: scale(1.05);
+    transform: scale(1.08);
     text-shadow: 
-      -3px -3px 0 #8A2BE2,
-      3px -3px 0 #8A2BE2,
-      -3px 3px 0 #8A2BE2,
-      3px 3px 0 #8A2BE2,
-      0 0 15px #00FFFF,
-      0 0 30px #FF1493;
+      -4px -4px 0 #000000,
+      4px -4px 0 #000000,
+      -4px 4px 0 #000000,
+      4px 4px 0 #000000,
+      0 0 12px #FFD700,
+      0 0 24px #FFD700;
   }
 }
 
@@ -159,26 +161,47 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    color: #00ff00;
-    font-size: 24px;
+    color: #FFFF00;
+    font-family: "Comic Sans MS", "Marker Felt", "Chalkduster", cursive;
+    font-weight: 900;
+    font-size: 28px;
+    text-shadow: 
+        -3px -3px 0 #000000,
+        3px -3px 0 #000000,
+        -3px 3px 0 #000000,
+        3px 3px 0 #000000,
+        0 0 10px #FFD700;
     z-index: 100;
 }
 
 .restart-btn {
-    background: rgba(0, 255, 0, 0.3);
-    border: 2px solid #00ff00;
-    border-radius: 10px;
-    color: #00ff00;
-    font-size: 18px;
-    font-weight: bold;
-    padding: 10px 20px;
+    background: rgba(255, 255, 0, 0.3);
+    border: 3px solid #FFD700;
+    border-radius: 15px;
+    color: #FFD700;
+    font-family: "Comic Sans MS", "Marker Felt", "Chalkduster", cursive;
+    font-size: 20px;
+    font-weight: 900;
+    padding: 12px 24px;
     margin-top: 20px;
     cursor: pointer;
-    font-family: 'Courier New', monospace;
+    text-shadow: 
+        -2px -2px 0 #000000,
+        2px -2px 0 #000000,
+        -2px 2px 0 #000000,
+        2px 2px 0 #000000;
+    transition: all 0.2s ease;
 }
 
 .restart-btn:hover {
-    background: rgba(0, 255, 0, 0.6);
+    background: rgba(255, 255, 0, 0.6);
+    transform: scale(1.05);
+    text-shadow: 
+        -3px -3px 0 #000000,
+        3px -3px 0 #000000,
+        -3px 3px 0 #000000,
+        3px 3px 0 #000000,
+        0 0 8px #FFD700;
 }
 
 @media (max-width: 768px) {

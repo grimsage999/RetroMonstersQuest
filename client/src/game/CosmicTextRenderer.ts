@@ -41,15 +41,15 @@ export class CosmicTextRenderer {
     // Save context
     ctx.save();
 
-    // Set font with bold weight for graffiti effect
-    ctx.font = `bold ${style.FONT_SIZE}px "Courier New", monospace`;
+    // Set bubble font with rounded, chunky weight
+    ctx.font = `900 ${style.FONT_SIZE}px "Comic Sans MS", "Marker Felt", "Chalkduster", cursive`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
 
     // Create pulsing effect
     const pulseFactor = 1 + Math.sin(pulsePhase) * 0.1;
     const adjustedFontSize = style.FONT_SIZE * pulseFactor;
-    ctx.font = `bold ${adjustedFontSize}px "Courier New", monospace`;
+    ctx.font = `900 ${adjustedFontSize}px "Comic Sans MS", "Marker Felt", "Chalkduster", cursive`;
 
     // 1. Render outer glow (multiple passes for intensity)
     for (let i = 0; i < style.GLOW_INTENSITY; i++) {
@@ -78,8 +78,8 @@ export class CosmicTextRenderer {
     ctx.lineJoin = 'round';
     ctx.lineCap = 'round';
     
-    // Multiple outline passes for bolder effect
-    for (let i = 0; i < 3; i++) {
+    // Multiple outline passes for chunky bubble effect
+    for (let i = 0; i < 4; i++) {
       ctx.strokeText(text, x, y);
     }
 
