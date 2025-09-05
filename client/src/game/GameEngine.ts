@@ -684,10 +684,8 @@ export class GameEngine {
   }
 
   private render() {
-    // Optimized canvas clearing for better performance
+    // Clear canvas - let level handle background rendering
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    this.ctx.fillStyle = '#000011';
-    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
     // Don't render game content if we're still in TITLE phase (React overlay handles it)
     const currentPhase = this.stateManager.getCurrentPhase();
