@@ -384,33 +384,41 @@ export class Level {
   }
 
   private renderSubwayBackground(ctx: CanvasRenderingContext2D) {
-    // Atmospheric underground with warm lighting
-    const wallGradient = ctx.createLinearGradient(0, 0, 0, this.canvasHeight * 0.8);
-    wallGradient.addColorStop(0, '#4A4A4A'); // Medium gray
-    wallGradient.addColorStop(0.5, '#6A5ACD'); // Slate blue
-    wallGradient.addColorStop(1, '#2F2F2F'); // Dark gray
-    ctx.fillStyle = wallGradient;
+    // OPTIMIZED: Simplified subway background for better performance
+    
+    // Simple wall gradient (cached-friendly)
+    ctx.fillStyle = '#4A4A4A';
     ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight * 0.8);
     
-    // Colorful mosaic floor tiles
-    const tileSize = 16;
-    const tileColors = ['#4169E1', '#1E90FF', '#00CED1', '#20B2AA', '#4682B4'];
-    for (let x = 0; x < this.canvasWidth; x += tileSize) {
-      for (let y = this.canvasHeight * 0.8; y < this.canvasHeight; y += tileSize) {
-        const colorIndex = ((x + y) / tileSize) % tileColors.length;
-        ctx.fillStyle = tileColors[colorIndex];
-        ctx.globalAlpha = 0.8;
-        ctx.fillRect(x, y, tileSize, tileSize);
-        
-        // Add tile borders
-        ctx.globalAlpha = 1;
-        ctx.strokeStyle = '#1C1C1C';
-        ctx.lineWidth = 1;
-        ctx.strokeRect(x, y, tileSize, tileSize);
+    // OPTIMIZED: Large tile blocks instead of individual tiles with borders
+    const blockSize = 48; // 3x larger blocks for 9x fewer operations
+    const blockColors = ['#4169E1', '#1E90FF', '#00CED1'];
+    
+    ctx.globalAlpha = 0.8;
+    for (let x = 0; x < this.canvasWidth; x += blockSize) {
+      for (let y = this.canvasHeight * 0.8; y < this.canvasHeight; y += blockSize) {
+        const colorIndex = ((x + y) / blockSize) % blockColors.length;
+        ctx.fillStyle = blockColors[colorIndex];
+        ctx.fillRect(x, y, blockSize, blockSize);
       }
     }
+    ctx.globalAlpha = 1;
     
-    // Simplified lighting for better performance
+    // OPTIMIZED: Single border pass instead of individual strokes
+    ctx.strokeStyle = '#1C1C1C';
+    ctx.lineWidth = 2;
+    for (let x = 0; x < this.canvasWidth; x += blockSize) {
+      ctx.beginPath();
+      ctx.moveTo(x, this.canvasHeight * 0.8);
+      ctx.lineTo(x, this.canvasHeight);
+      ctx.stroke();
+    }
+    for (let y = this.canvasHeight * 0.8; y < this.canvasHeight; y += blockSize) {
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(this.canvasWidth, y);
+      ctx.stroke();
+    }
   }
 
   private renderGraveyardBackground(ctx: CanvasRenderingContext2D) {
@@ -618,21 +626,15 @@ export class Level {
   }
 
   private renderSubwayEnvironment(ctx: CanvasRenderingContext2D) {
-    // Support pillars
-    const pillarPositions = [150, 350, 550];
+    // OPTIMIZED: Simplified pillars (fewer details)
+    const pillarPositions = [250, 450]; // Reduced from 3 to 2 pillars
     pillarPositions.forEach(x => {
       ctx.fillStyle = '#4A4A4A';
       ctx.fillRect(x, 0, 16, this.canvasHeight);
       
-      // Pillar details
-      ctx.fillStyle = '#6A6A6A';
-      ctx.fillRect(x + 2, 0, 12, this.canvasHeight);
-      
-      // Rust/wear marks
+      // Single rust mark instead of loop
       ctx.fillStyle = '#8B4513';
-      for (let y = 50; y < this.canvasHeight; y += 100) {
-        ctx.fillRect(x, y, 16, 8);
-      }
+      ctx.fillRect(x, this.canvasHeight / 2, 16, 8);
     });
 
     // Subway tracks
@@ -640,23 +642,22 @@ export class Level {
     ctx.fillRect(0, this.canvasHeight - 24, this.canvasWidth, 8);
     ctx.fillRect(0, this.canvasHeight - 12, this.canvasWidth, 8);
     
-    // Track ties
+    // OPTIMIZED: Fewer track ties (every 48px instead of 24px)
     ctx.fillStyle = '#654321'; // Dark brown
-    for (let x = 0; x < this.canvasWidth; x += 24) {
+    for (let x = 0; x < this.canvasWidth; x += 48) {
       ctx.fillRect(x, this.canvasHeight - 28, 16, 20);
     }
 
-    // Flickering lights (simulated with random brightness)
-    const lightPositions = [100, 300, 500, 700];
+    // OPTIMIZED: Simplified flickering lights (less frequent, no gradients)
+    const lightPositions = [200, 500]; // Reduced from 4 to 2 lights
     lightPositions.forEach(x => {
-      const brightness = Math.random() > 0.8 ? 0.5 : 0.2;
-      const lightGradient = ctx.createRadialGradient(x, 30, 0, x, 30, 60);
-      lightGradient.addColorStop(0, `rgba(255, 255, 255, ${brightness})`);
-      lightGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
-      ctx.fillStyle = lightGradient;
-      ctx.fillRect(x - 60, 0, 120, 120);
+      // Simple flickering without expensive gradients
+      if (Math.random() > 0.7) { // 30% chance of flicker
+        ctx.fillStyle = 'rgba(255, 255, 200, 0.3)';
+        ctx.fillRect(x - 40, 0, 80, 80);
+      }
       
-      // Light fixture
+      // Light fixture (always visible)
       ctx.fillStyle = '#2F2F2F';
       ctx.fillRect(x - 8, 20, 16, 8);
     });
