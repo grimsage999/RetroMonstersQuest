@@ -44,15 +44,15 @@ export class Player {
     this.x = x;
     this.y = y;
     this.movementSystem = new MovementSystem();
-    // Configure for smoother gameplay
+    // Configure for faster, more responsive gameplay
     this.movementSystem.configure({
-      baseSpeed: 4,
-      maxSpeed: 6,
-      acceleration: 0.25,
-      deceleration: 0.15,
-      dashSpeed: 10,
-      dashDuration: 200,
-      dashCooldown: 800
+      baseSpeed: 6,
+      maxSpeed: 8,
+      acceleration: 0.35,
+      deceleration: 0.2,
+      dashSpeed: 12,
+      dashDuration: 250,
+      dashCooldown: 600
     });
   }
 

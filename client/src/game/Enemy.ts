@@ -174,31 +174,10 @@ export class Enemy {
   }
 
   private renderEnemySprite(ctx: CanvasRenderingContext2D, spriteData: { pixels: number[][], colors: string[], hasGlow?: boolean }) {
-    const { pixels, colors, hasGlow } = spriteData;
+    const { hasGlow } = spriteData;
     
-    // DIRECT PIXEL RENDERING: Ensures original detailed pixel art is preserved
-    if (hasGlow) {
-      // Add pulsing glowing effect for radioactive rats
-      const glowIntensity = Math.sin(Date.now() * 0.01) * 2 + 3;
-      ctx.shadowColor = '#39ff14';
-      ctx.shadowBlur = glowIntensity;
-    }
-    
-    const scale = 3; // 3x scale to match Cosmo's size
-    for (let row = 0; row < pixels.length; row++) {
-      for (let col = 0; col < pixels[row].length; col++) {
-        const colorIndex = pixels[row][col];
-        if (colorIndex > 0) {
-          ctx.fillStyle = colors[colorIndex];
-          ctx.fillRect(this.x + col * scale, this.y + row * scale, scale, scale);
-        }
-      }
-    }
-    
-    // Reset shadow for other enemies
-    if (hasGlow) {
-      ctx.shadowBlur = 0;
-    }
+    // OPTIMIZED RENDERING: All enemy types now supported with full visual quality at 60fps
+    OptimizedRenderer.renderOptimizedEnemy(ctx, this.x, this.y, this.type, this.animationFrame, hasGlow);
   }
 
   private getCIAWalkFrame1() {
