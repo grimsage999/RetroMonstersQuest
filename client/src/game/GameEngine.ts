@@ -520,11 +520,14 @@ export class GameEngine {
 
     const deltaTime = currentTime - this.lastTime; // Renamed variable
 
-    // CRITICAL BUG FIX: Limit to 60 FPS max for consistent movement speeds
-    if (deltaTime < 16.67) { // 1000/60 = 16.67ms per frame
+    // CRITICAL BUG FIX: Ensure minimum deltaTime for consistent speeds
+    if (deltaTime < 1) { // Prevent zero or negative deltaTime
       this.animationId = requestAnimationFrame((time) => this.gameLoop(time));
       return;
     }
+    
+    // Cap deltaTime to prevent jumps during lag spikes
+    const cappedDeltaTime = Math.min(deltaTime, 33.33); // Cap at 30fps minimum
 
     this.lastTime = currentTime; // Renamed variable
 
@@ -532,17 +535,17 @@ export class GameEngine {
     this.performanceProfiler.startUpdate();
 
     // Update only essential systems with capped deltaTime
-    this.damageSystem.update(deltaTime); // Use the actual deltaTime after FPS capping
+    this.damageSystem.update(cappedDeltaTime); // Use the capped deltaTime
     this.commandInputSystem.processEventQueue();
 
     // Only update game logic if not in cutscene and playing
     try {
       // Always update transition manager first for smooth transitions
-      this.transitionManager.update(deltaTime); // Use the actual deltaTime after FPS capping
+      this.transitionManager.update(cappedDeltaTime); // Use the capped deltaTime
 
       // Only update game logic during active gameplay
       if (this.shouldUpdateGameLogic()) {
-        this.update(deltaTime); // Use the actual deltaTime after FPS capping
+        this.update(cappedDeltaTime); // Use the capped deltaTime
       }
 
       this.performanceProfiler.endUpdate();

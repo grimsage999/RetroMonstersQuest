@@ -115,9 +115,10 @@ export class Enemy {
   public update(deltaTime: number, canvasWidth: number, canvasHeight: number) {
     if (!this.active) return;
     
-    // Restore original movement speed - no deltaTime normalization
-    this.x += this.speedX;
-    this.y += this.speedY;
+    // FIXED: Use deltaTime normalization for frame-rate independent movement
+    const normalizedDelta = deltaTime / 16.67; // Normalize to 60fps baseline
+    this.x += this.speedX * normalizedDelta;
+    this.y += this.speedY * normalizedDelta;
     
     // Bounce off walls
     if (this.x <= 0 || this.x + this.width >= canvasWidth) {
