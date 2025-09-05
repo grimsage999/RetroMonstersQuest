@@ -88,12 +88,12 @@ export class Player {
       this.jump();
     }
     
-    // CRITICAL: Dodge mechanics (Shift key)
+    // CRITICAL: Dodge mechanics (Shift key) 
     if (inputManager.isKeyPressed('Shift') && this.canDodge) {
       this.dodge();
     }
     
-    const isDashPressed = inputManager.isKeyPressed('Shift');
+    const isDashPressed = false; // Removed weapon system, dodge separate from dash
     
     // Get movement from movement system
     const movement = this.movementSystem.update(inputX, inputY, isDashPressed, deltaTime);
