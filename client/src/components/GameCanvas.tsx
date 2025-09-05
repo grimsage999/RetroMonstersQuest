@@ -178,14 +178,14 @@ const GameCanvas: React.FC = () => {
       {/* Game Over Screen */}
       {gameState.phase === 'gameOver' && (
         <div className="game-over-screen">
-          <div>💀 GAME OVER 💀</div>
-          <div style={{ fontSize: '16px', marginTop: '10px', color: '#FFFF00' }}>
+          <div className="green-graffiti-text" style={{fontSize: '92px', marginBottom: '20px'}}>💀 GAME OVER 💀</div>
+          <div className="cosmic-text" style={{ fontSize: '36px', marginTop: '10px' }}>
             Final Score: {gameState.score}
           </div>
-          <div style={{ fontSize: '14px', marginTop: '15px', color: '#CCCCCC' }}>
+          <div className="cosmic-text" style={{ fontSize: '24px', marginTop: '15px' }}>
             Better luck next time, cosmic traveler!
           </div>
-          <button className="restart-btn" onClick={handleRestart}>
+          <button className="restart-btn cosmic-text" onClick={handleRestart}>
             🔄 Return to Start
           </button>
         </div>
@@ -194,12 +194,12 @@ const GameCanvas: React.FC = () => {
       {/* Victory Screen */}
       {gameState.phase === 'victory' && (
         <div className="victory-screen">
-          <div>🎉 VICTORY! 🎉</div>
-          <div style={{ fontSize: '16px', marginTop: '10px' }}>
+          <div className="green-graffiti-text" style={{fontSize: '84px', marginBottom: '20px'}}>🎉 VICTORY! 🎉</div>
+          <div className="cosmic-text" style={{ fontSize: '32px', marginTop: '10px' }}>
             You saved the galaxy!<br />
             Final Score: {gameState.score}
           </div>
-          <button className="restart-btn" onClick={handleRestart}>
+          <button className="restart-btn cosmic-text" onClick={handleRestart}>
             Press SPACE to Play Again
           </button>
         </div>
@@ -208,12 +208,12 @@ const GameCanvas: React.FC = () => {
       {/* Level Complete Screen */}
       {gameState.phase === 'levelComplete' && (
         <div className="victory-screen">
-          <div>🌟 LEVEL COMPLETE! 🌟</div>
-          <div style={{ fontSize: '16px', marginTop: '10px' }}>
+          <div className="green-graffiti-text" style={{fontSize: '76px', marginBottom: '20px'}}>🌟 LEVEL COMPLETE! 🌟</div>
+          <div className="cosmic-text" style={{ fontSize: '32px', marginTop: '10px' }}>
             Level {gameState.level} Complete!<br />
             Score: {gameState.score}
           </div>
-          <button className="restart-btn" onClick={handleNextLevel}>
+          <button className="restart-btn cosmic-text" onClick={handleNextLevel}>
             Press SPACE for Next Level
           </button>
         </div>
