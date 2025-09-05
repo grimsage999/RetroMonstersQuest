@@ -30,7 +30,7 @@ export class GameStateManager {
   // Define valid state transitions to prevent invalid states
   private validTransitions: Map<GamePhase, GamePhase[]> = new Map([
     [GamePhase.TITLE, [GamePhase.PLAYING, GamePhase.CUTSCENE]],
-    [GamePhase.PLAYING, [GamePhase.PAUSED, GamePhase.LEVEL_COMPLETE, GamePhase.GAME_OVER, GamePhase.VICTORY]],
+    [GamePhase.PLAYING, [GamePhase.PAUSED, GamePhase.LEVEL_COMPLETE, GamePhase.LEVEL_TRANSITION, GamePhase.GAME_OVER, GamePhase.VICTORY]],
     [GamePhase.PAUSED, [GamePhase.PLAYING, GamePhase.TITLE]],
     [GamePhase.LEVEL_COMPLETE, [GamePhase.LEVEL_TRANSITION, GamePhase.TITLE]],
     [GamePhase.LEVEL_TRANSITION, [GamePhase.CUTSCENE, GamePhase.PLAYING]],
@@ -75,9 +75,14 @@ export class GameStateManager {
       return false;
     }
 
+    // Allow same-state transitions to prevent race conditions
+    if (newPhase === this.currentPhase) {
+      return true;
+    }
+
     // Validate transition
     if (!this.canTransitionTo(newPhase)) {
-      console.error(`Invalid state transition: ${this.currentPhase} -> ${newPhase}`);
+      console.warn(`Invalid state transition: ${this.currentPhase} -> ${newPhase}`);
       return false;
     }
 

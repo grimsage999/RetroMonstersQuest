@@ -37,9 +37,9 @@ export class LevelTransitionManager {
     }
     this.ctx = context;
     this.config = {
-      fadeOutDuration: 300,
-      fadeInDuration: 400,
-      loadingDuration: 800,
+      fadeOutDuration: 200,  // Faster to reduce slow frames
+      fadeInDuration: 250,   // Faster transition
+      loadingDuration: 400,  // Much faster loading
       showLoadingScreen: true,
       fadeOutEasing: EasingFunctions.easeInQuad,
       fadeInEasing: EasingFunctions.easeOutQuad,
@@ -80,46 +80,62 @@ export class LevelTransitionManager {
    * Preload assets for the next level
    */
   private async preloadLevelAssets(level: number): Promise<void> {
-    // Define assets per level
+    // Define assets per level (removing problematic assets)
     const levelAssets: { [key: number]: string[] } = {
       1: ['/sounds/level1_music.mp3'],
-      2: ['/sounds/level2_music.mp3', '/textures/city_bg.png'],
-      3: ['/sounds/level3_music.mp3', '/textures/subway_bg.png'],
-      4: ['/sounds/level4_music.mp3', '/textures/graveyard_bg.png'],
-      5: ['/sounds/level5_music.mp3', '/textures/lab_bg.png']
+      2: ['/sounds/level2_music.mp3'],
+      3: ['/sounds/level3_music.mp3'],
+      4: ['/sounds/level4_music.mp3'], // No graveyard_bg.png - using generated background
+      5: ['/sounds/level5_music.mp3']  // No lab_bg.png - using generated background
     };
 
     this.assetsToPreload = levelAssets[level] || [];
     
-    // Simulate asset loading (with error handling)
+    // Fast parallel loading with timeout
     const promises = this.assetsToPreload.map(asset => 
-      this.loadAsset(asset).catch(error => {
-        console.warn(`Failed to load asset ${asset}:`, error);
-        return Promise.resolve(); // Continue despite individual failures
-      })
+      this.loadAsset(asset)
     );
-    await Promise.all(promises);
+    
+    // Don't block transitions for more than 300ms total
+    const timeoutPromise = new Promise<void>(resolve => setTimeout(resolve, 300));
+    await Promise.race([Promise.all(promises), timeoutPromise]);
   }
 
   /**
-   * Load a single asset
+   * Load a single asset with timeout and graceful fallback
    */
   private async loadAsset(assetPath: string): Promise<void> {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
+      // Always resolve after timeout to prevent blocking transitions
+      const timeout = setTimeout(() => resolve(), 200);
+      
       if (assetPath.endsWith('.mp3') || assetPath.endsWith('.wav')) {
-        // Audio loading
+        // Audio loading with graceful fallback
         const audio = new Audio(assetPath);
-        audio.addEventListener('canplaythrough', () => resolve(), { once: true });
-        audio.addEventListener('error', () => reject(new Error(`Failed to load audio: ${assetPath}`)), { once: true });
+        audio.addEventListener('canplaythrough', () => {
+          clearTimeout(timeout);
+          resolve();
+        }, { once: true });
+        audio.addEventListener('error', () => {
+          clearTimeout(timeout);
+          resolve(); // Continue despite audio failure
+        }, { once: true });
         audio.load();
       } else if (assetPath.endsWith('.png') || assetPath.endsWith('.jpg')) {
-        // Image loading
+        // Image loading with graceful fallback
         const img = new Image();
-        img.onload = () => resolve();
-        img.onerror = () => reject(new Error(`Failed to load image: ${assetPath}`));
+        img.onload = () => {
+          clearTimeout(timeout);
+          resolve();
+        };
+        img.onerror = () => {
+          clearTimeout(timeout);
+          resolve(); // Continue despite image failure
+        };
         img.src = assetPath;
       } else {
         // Fallback for other asset types
+        clearTimeout(timeout);
         setTimeout(() => resolve(), 50);
       }
     });
