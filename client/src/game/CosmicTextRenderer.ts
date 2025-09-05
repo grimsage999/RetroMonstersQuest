@@ -51,12 +51,19 @@ export class CosmicTextRenderer {
     const adjustedFontSize = style.FONT_SIZE * pulseFactor;
     ctx.font = `900 ${adjustedFontSize}px "Comic Sans MS", "Marker Felt", "Chalkduster", cursive`;
 
-    // 1. Render deep 3D dimensional shadow layers (like COWZ/YOPPI examples)
-    const shadowDepth = 8; // Deep dimensional shadow
+    // 1. Render ultra-deep 3D dimensional shadow layers (green graffiti style)
+    const isGraffitiStyle = styleType === 'GREEN_GRAFFITI' || styleType === 'SPIKY_GRAFFITI';
+    const shadowDepth = isGraffitiStyle ? 15 : 8; // Extra deep for graffiti
+    
     for (let depth = shadowDepth; depth > 0; depth--) {
-      ctx.globalAlpha = 0.7 - (depth * 0.06); // Gradual fade
-      ctx.fillStyle = this.darkenColor(style.SHADOW_COLOR, depth * 0.1);
-      ctx.fillText(text, x + depth, y + depth);
+      ctx.globalAlpha = 0.8 - (depth * 0.04); // Stronger shadows for graffiti
+      ctx.fillStyle = this.darkenColor(style.SHADOW_COLOR, depth * 0.08);
+      
+      // Add slight roughness for graffiti effect
+      const roughnessX = isGraffitiStyle ? Math.sin(depth) * 0.5 : 0;
+      const roughnessY = isGraffitiStyle ? Math.cos(depth) * 0.3 : 0;
+      
+      ctx.fillText(text, x + depth + roughnessX, y + depth + roughnessY);
     }
 
     // 2. Render bright outer glow for pop
@@ -74,17 +81,35 @@ export class CosmicTextRenderer {
     ctx.shadowBlur = 0;
     ctx.shadowColor = 'transparent';
 
-    // 3. Render ultra-thick outline for maximum chunkiness
+    // 3. Render ultra-aggressive outline for maximum impact
     ctx.globalAlpha = 1;
     ctx.strokeStyle = style.OUTLINE_COLOR;
-    ctx.lineWidth = style.OUTLINE_WIDTH * 1.8; // Much thicker base
-    ctx.lineJoin = 'round';
-    ctx.lineCap = 'round';
     
-    // Multiple aggressive outline passes for chunky dimensional effect
-    for (let i = 0; i < 6; i++) {
-      ctx.lineWidth = style.OUTLINE_WIDTH * (1.8 - i * 0.2);
+    // Special aggressive treatment for graffiti styles
+    const outlineMultiplier = isGraffitiStyle ? 2.2 : 1.8;
+    const outlinePasses = isGraffitiStyle ? 8 : 6;
+    
+    ctx.lineWidth = style.OUTLINE_WIDTH * outlineMultiplier;
+    ctx.lineJoin = isGraffitiStyle ? 'miter' : 'round'; // Sharp edges for graffiti
+    ctx.lineCap = isGraffitiStyle ? 'square' : 'round'; // Sharp caps for graffiti
+    
+    // Multiple ultra-aggressive outline passes
+    for (let i = 0; i < outlinePasses; i++) {
+      ctx.lineWidth = style.OUTLINE_WIDTH * (outlineMultiplier - i * 0.15);
+      
+      // Add slight edge variation for graffiti roughness
+      if (isGraffitiStyle && i < 3) {
+        ctx.shadowColor = style.OUTLINE_COLOR;
+        ctx.shadowBlur = 2;
+        ctx.shadowOffsetX = Math.sin(i) * 0.5;
+        ctx.shadowOffsetY = Math.cos(i) * 0.5;
+      }
+      
       ctx.strokeText(text, x, y);
+      
+      // Clear shadow after outline passes
+      ctx.shadowBlur = 0;
+      ctx.shadowColor = 'transparent';
     }
 
     // 4. Render vibrant main text fill
@@ -101,6 +126,18 @@ export class CosmicTextRenderer {
     ctx.fillStyle = this.lightenColor(style.PRIMARY_COLOR, 0.6);
     ctx.globalAlpha = 0.4;
     ctx.fillText(text, x, y - 1);
+    
+    // 7. Special electric effect for green graffiti
+    if (isGraffitiStyle) {
+      ctx.fillStyle = '#FFFFFF'; // White hot core
+      ctx.globalAlpha = 0.3;
+      ctx.fillText(text, x, y - 2);
+      
+      // Add electric spark effect
+      ctx.fillStyle = this.lightenColor(style.PRIMARY_COLOR, 0.8);
+      ctx.globalAlpha = 0.2;
+      ctx.fillText(text, x - 0.5, y - 1.5);
+    }
 
     // Restore context
     ctx.restore();

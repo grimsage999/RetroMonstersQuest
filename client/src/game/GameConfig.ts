@@ -129,14 +129,14 @@ export const GAME_CONFIG = {
   // Cosmic Text Styling Configuration
   TEXT_STYLES: {
     TITLE: {
-      FONT_SIZE: 64, // Much bigger and chunkier like COWZ
-      OUTLINE_WIDTH: 12, // Ultra-thick outline for maximum impact
-      SHADOW_OFFSET: 8,
-      GLOW_INTENSITY: 10,
-      PRIMARY_COLOR: '#FFD700', // Cosmic gold
-      OUTLINE_COLOR: '#000000', // Thick black outline
-      SHADOW_COLOR: '#FF1493', // Hot pink shadow
-      GLOW_COLOR: '#00FFFF', // Cyan glow
+      FONT_SIZE: 68, // Chunky like COWZ/YOPPI examples
+      OUTLINE_WIDTH: 14, // Ultra-thick black outline like MARGE
+      SHADOW_OFFSET: 6,
+      GLOW_INTENSITY: 8,
+      PRIMARY_COLOR: '#FFD700', // Bright yellow like references
+      OUTLINE_COLOR: '#000000', // Clean black outline
+      SHADOW_COLOR: '#FF6B35', // Orange shadow like COWZ
+      GLOW_COLOR: '#FFFF00', // Bright yellow glow
     },
     LEVEL_CARD: {
       FONT_SIZE: 48, // Bigger for more presence
@@ -159,13 +159,13 @@ export const GAME_CONFIG = {
       GLOW_COLOR: '#32CD32', // Lime green
     },
     UI_TEXT: {
-      FONT_SIZE: 32, // Bigger UI text for more impact
-      OUTLINE_WIDTH: 8, // Much thicker for chunky bubble effect
-      SHADOW_OFFSET: 5,
-      GLOW_INTENSITY: 7,
-      PRIMARY_COLOR: '#FFFF00', // Bright yellow for UI
-      OUTLINE_COLOR: '#000000', // Ultra-thick black outline
-      SHADOW_COLOR: '#FF1493', // Deep pink shadow
+      FONT_SIZE: 36, // Bold like COMIC FESTIVAL examples
+      OUTLINE_WIDTH: 10, // Thick bubble outline like MARGE
+      SHADOW_OFFSET: 4,
+      GLOW_INTENSITY: 6,
+      PRIMARY_COLOR: '#FFFF00', // Bright yellow like references
+      OUTLINE_COLOR: '#000000', // Clean black outline
+      SHADOW_COLOR: '#FF1493', // Hot pink shadow
       GLOW_COLOR: '#FFD700', // Gold glow
     },
     GAME_OVER: {
@@ -188,38 +188,71 @@ export const GAME_CONFIG = {
       SHADOW_COLOR: '#4B0082', // Indigo shadow
       GLOW_COLOR: '#00BFFF', // Sky blue glow
     },
-    // New graffiti-style for impact moments (like COWZ/YOPPI examples)
+    // Graffiti style matching COWZ/BOMBER MADMAN aesthetic
     GRAFFITI_IMPACT: {
-      FONT_SIZE: 80, // Massive graffiti-style text
-      OUTLINE_WIDTH: 16, // Ultra-aggressive outline
-      SHADOW_OFFSET: 12,
-      GLOW_INTENSITY: 15,
-      PRIMARY_COLOR: '#39FF14', // Electric lime green
-      OUTLINE_COLOR: '#000000', // Thick black outline
-      SHADOW_COLOR: '#8B008B', // Dark magenta shadow
-      GLOW_COLOR: '#00FF7F', // Spring green glow
-    },
-    // Vibrant bubble style (like YOPPI example)
-    BUBBLE_VIBRANT: {
-      FONT_SIZE: 68, // Large bubble text
-      OUTLINE_WIDTH: 14, // Extra thick for bubble effect
-      SHADOW_OFFSET: 9,
+      FONT_SIZE: 84, // Massive like COWZ example
+      OUTLINE_WIDTH: 18, // Ultra-thick like reference
+      SHADOW_OFFSET: 8,
       GLOW_INTENSITY: 12,
-      PRIMARY_COLOR: '#FF6B35', // Bright orange
-      OUTLINE_COLOR: '#000000', // Black outline
-      SHADOW_COLOR: '#FF1493', // Deep pink shadow
-      GLOW_COLOR: '#FFD700', // Gold glow
+      PRIMARY_COLOR: '#FF6B35', // Bright orange like YOPPI
+      OUTLINE_COLOR: '#000000', // Clean black outline
+      SHADOW_COLOR: '#FF1493', // Hot pink shadow
+      GLOW_COLOR: '#FFD700', // Gold accent glow
     },
-    // Cosmic rainbow style (inspired by multicolor references)
-    COSMIC_RAINBOW: {
-      FONT_SIZE: 76, // Big cosmic text
-      OUTLINE_WIDTH: 15, // Ultra-thick outline
-      SHADOW_OFFSET: 10,
-      GLOW_INTENSITY: 14,
-      PRIMARY_COLOR: '#FF00FF', // Magenta base
+    // Clean bubble style matching MARGE/COMIC FESTIVAL
+    BUBBLE_CLEAN: {
+      FONT_SIZE: 72, // Large clean bubbles
+      OUTLINE_WIDTH: 16, // Ultra-thick like MARGE
+      SHADOW_OFFSET: 5,
+      GLOW_INTENSITY: 8,
+      PRIMARY_COLOR: '#FF69B4', // Hot pink like MARGE
+      OUTLINE_COLOR: '#000000', // Clean black outline
+      SHADOW_COLOR: '#4B0082', // Purple shadow
+      GLOW_COLOR: '#FF1493', // Pink glow
+    },
+    // Modern clean style like drip/MEET examples
+    MODERN_BOLD: {
+      FONT_SIZE: 64, // Bold modern sizing
+      OUTLINE_WIDTH: 12, // Clean thick outline
+      SHADOW_OFFSET: 4,
+      GLOW_INTENSITY: 6,
+      PRIMARY_COLOR: '#00FFFF', // Cyan like modern examples
+      OUTLINE_COLOR: '#000000', // Clean black outline
+      SHADOW_COLOR: '#8A2BE2', // Purple shadow
+      GLOW_COLOR: '#00BFFF', // Sky blue glow
+    },
+    // Bright neon style like COSMIC COCKTAIL
+    NEON_BRIGHT: {
+      FONT_SIZE: 76, // Large neon text
+      OUTLINE_WIDTH: 14, // Thick outline
+      SHADOW_OFFSET: 6,
+      GLOW_INTENSITY: 15, // Strong glow for neon effect
+      PRIMARY_COLOR: '#FF1493', // Hot pink like COSMIC COCKTAIL
       OUTLINE_COLOR: '#000000', // Black outline
-      SHADOW_COLOR: '#4B0082', // Indigo shadow
-      GLOW_COLOR: '#00FFFF', // Cyan glow
+      SHADOW_COLOR: '#8B008B', // Dark magenta shadow
+      GLOW_COLOR: '#FF69B4', // Bright pink glow
+    },
+    // GREEN GRAFFITI STYLE - matching exact reference aesthetic
+    GREEN_GRAFFITI: {
+      FONT_SIZE: 88, // Massive aggressive size
+      OUTLINE_WIDTH: 20, // Ultra-thick aggressive outline
+      SHADOW_OFFSET: 12, // Deep dimensional shadow
+      GLOW_INTENSITY: 18, // Intense electric glow
+      PRIMARY_COLOR: '#39FF14', // Electric lime green (exact match)
+      OUTLINE_COLOR: '#000000', // Heavy black outline
+      SHADOW_COLOR: '#1A1A1A', // Dark charcoal shadow
+      GLOW_COLOR: '#00FF41', // Bright green glow
+    },
+    // SPIKY GRAFFITI - for maximum aggression
+    SPIKY_GRAFFITI: {
+      FONT_SIZE: 92, // Huge spiky text
+      OUTLINE_WIDTH: 22, // Maximum outline thickness  
+      SHADOW_OFFSET: 15, // Extreme shadow depth
+      GLOW_INTENSITY: 20, // Maximum glow intensity
+      PRIMARY_COLOR: '#32CD32', // Lime green variant
+      OUTLINE_COLOR: '#000000', // Black spiky outline
+      SHADOW_COLOR: '#2F4F4F', // Dark slate shadow
+      GLOW_COLOR: '#ADFF2F', // Green yellow glow
     }
   },
 } as const;
