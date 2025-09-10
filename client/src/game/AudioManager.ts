@@ -19,6 +19,11 @@ export class AudioManager {
       // Create audio context on user interaction
       this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
       
+      // CRITICAL: Resume AudioContext to unlock audio playback
+      if (this.audioContext.state === 'suspended') {
+        await this.audioContext.resume();
+      }
+      
       // Load sounds in background (non-blocking)
       this.loadSounds(); // Don't await - let it load in background
       this.isInitialized = true;

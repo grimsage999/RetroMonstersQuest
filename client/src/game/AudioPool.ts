@@ -44,9 +44,11 @@ export class AudioPool {
     for (const audio of pool) {
       if (audio.paused || audio.ended) {
         audio.currentTime = 0;
+        // Improved error handling for better debugging
         audio.play().catch(e => {
-          // Silently handle autoplay restrictions
-          if (e.name !== 'NotAllowedError') {
+          if (e.name === 'NotAllowedError') {
+            console.log(`Audio autoplay prevented for '${name}' - user interaction required`);
+          } else {
             console.error(`Error playing sound '${name}':`, e);
           }
         });
@@ -59,7 +61,9 @@ export class AudioPool {
     const audio = pool[0].cloneNode() as HTMLAudioElement;
     audio.volume = this.volume;
     audio.play().catch(e => {
-      if (e.name !== 'NotAllowedError') {
+      if (e.name === 'NotAllowedError') {
+        console.log(`Audio autoplay prevented for cloned '${name}' - user interaction required`);
+      } else {
         console.error(`Error playing cloned sound '${name}':`, e);
       }
     });
