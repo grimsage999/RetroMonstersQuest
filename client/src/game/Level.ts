@@ -43,11 +43,12 @@ export class Level {
   }
 
   private initializeLevel() {
-    // Initialize finish line
+    // Initialize finish line - match pattern width for proper centering
+    const patternWidth = 13 * 16; // 13 columns × 16 pixels per tile = 208 pixels
     this.finishLine = {
-      x: this.canvasWidth / 2 - 50,
+      x: this.canvasWidth / 2 - (patternWidth / 2),
       y: 20,
-      width: 100,
+      width: patternWidth,
       height: 20
     };
 
