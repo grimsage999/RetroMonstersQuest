@@ -1,6 +1,7 @@
 import { Enemy, EnemyType } from './Enemy';
 import { LEVEL_CONFIGS } from './GameConfig';
 import { OptimizedRenderer } from './OptimizedRenderer';
+import { DancingCactus, HazardConfig } from './DancingCactus';
 
 interface Cookie {
   x: number;
@@ -19,6 +20,7 @@ interface LevelConfig {
   cookies: number;
   title: string;
   description: string;
+  hazards: readonly HazardConfig[];
 }
 
 export class Level {
@@ -27,6 +29,7 @@ export class Level {
   private canvasHeight: number;
   private cookies: Cookie[] = [];
   private enemies: Enemy[] = [];
+  private hazards: DancingCactus[] = [];
   private finishLine: { x: number; y: number; width: number; height: number; } | null = null;
   private config: LevelConfig;
 
@@ -103,7 +106,20 @@ export class Level {
       ));
     }
     
-    // Level 5 setup complete - no boss needed
+    // Initialize hazards
+    this.hazards = [];
+    if (this.config.hazards && this.config.hazards.length > 0) {
+      this.config.hazards.forEach(hazardConfig => {
+        if (hazardConfig.type === 'dancing_cactus') {
+          this.hazards.push(new DancingCactus(
+            hazardConfig.position.x,
+            hazardConfig.position.y,
+            hazardConfig.amplitude,
+            hazardConfig.speed
+          ));
+        }
+      });
+    }
   }
 
   public update(deltaTime: number) {
@@ -112,12 +128,20 @@ export class Level {
       enemy.update(deltaTime, this.canvasWidth, this.canvasHeight);
     });
     
-    // All level elements updated
+    // Update all hazards
+    this.hazards.forEach(hazard => {
+      hazard.update(deltaTime);
+    });
   }
 
   public render(ctx: CanvasRenderingContext2D) {
     // Render background
     this.renderBackground(ctx);
+    
+    // Render hazards (before cookies so they're in background layer)
+    this.hazards.forEach(hazard => {
+      hazard.render(ctx);
+    });
     
     // Render cookies
     this.cookies.forEach(cookie => {
@@ -143,6 +167,7 @@ export class Level {
     
     switch (this.levelNumber) {
       case 1: // Desert - Area 51
+      case 1.5: // Desert with dancing cacti
         this.renderDesertBackground(ctx);
         break;
       case 2: // Dystopian City
@@ -359,6 +384,7 @@ export class Level {
     
     switch (this.levelNumber) {
       case 1: // Desert - Area 51 with UFO wreckage and structures
+      case 1.5: // Desert with dancing cacti hazards
         this.renderDesertEnvironment(ctx);
         break;
         
@@ -717,6 +743,12 @@ export class Level {
   public checkEnemyCollisions(playerBounds: { x: number; y: number; width: number; height: number; }): boolean {
     return this.enemies.some(enemy => 
       enemy.isActive() && this.checkCollision(playerBounds, enemy.getBounds())
+    );
+  }
+
+  public checkHazardCollisions(playerBounds: { x: number; y: number; width: number; height: number; }): boolean {
+    return this.hazards.some(hazard => 
+      this.checkCollision(playerBounds, hazard.getBounds())
     );
   }
 

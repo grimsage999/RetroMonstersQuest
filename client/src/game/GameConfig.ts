@@ -179,8 +179,23 @@ export const LEVEL_CONFIGS = {
     radioactiveRats: 0,
     zombies: 0,
     cookies: 8,
-    title: 'Level 1: Roswell/Area 51 Desert',
-    description: 'Sandy terrain, UFO wreckage, desert shrubs, military hangars, and alien crash sites'
+    title: 'Level 1-1: Roswell/Area 51 Desert',
+    description: 'Sandy terrain, UFO wreckage, desert shrubs, military hangars, and alien crash sites',
+    hazards: []
+  },
+  1.5: {
+    background: '#8B4513',
+    fbiAgents: 8,
+    armyMen: 0,
+    radioactiveRats: 0,
+    zombies: 0,
+    cookies: 8,
+    title: 'Level 1-2: Dancing Desert',
+    description: 'Watch out for the dancing cacti! Time your moves carefully to slip past their rhythm.',
+    hazards: [
+      { type: 'dancing_cactus', position: { x: 160, y: 320 }, amplitude: 56, speed: 2.4 },
+      { type: 'dancing_cactus', position: { x: 272, y: 288 }, amplitude: 36, speed: 3.2 }
+    ]
   },
   2: {
     background: '#2F4F4F',
@@ -190,7 +205,8 @@ export const LEVEL_CONFIGS = {
     zombies: 0,
     cookies: 12,
     title: 'Level 2: Dystopian City',
-    description: 'Cracked pavement, crumbling skyscrapers, flickering neon signs, surveillance cameras'
+    description: 'Cracked pavement, crumbling skyscrapers, flickering neon signs, surveillance cameras',
+    hazards: []
   },
   3: {
     background: '#1C1C1C',
@@ -200,7 +216,8 @@ export const LEVEL_CONFIGS = {
     zombies: 0,
     cookies: 12,
     title: 'Level 3: Abandoned Subway',
-    description: 'Underground tunnels, graffiti, flickering lights'
+    description: 'Underground tunnels, graffiti, flickering lights',
+    hazards: []
   },
   4: {
     background: '#2F2F2F',
@@ -210,7 +227,8 @@ export const LEVEL_CONFIGS = {
     zombies: 4,
     cookies: 14,
     title: 'Level 4: Graveyard',
-    description: 'Crooked tombstones, mist, dead trees'
+    description: 'Crooked tombstones, mist, dead trees',
+    hazards: []
   },
   5: {
     background: '#1C1C1C',
@@ -220,7 +238,8 @@ export const LEVEL_CONFIGS = {
     zombies: 6,
     cookies: 18,
     title: 'Level 5: Government Lab + Boss Cathedral',
-    description: 'Sterile laboratory with dark secrets, then gothic cathedral boss arena'
+    description: 'Sterile laboratory with dark secrets, then gothic cathedral boss arena',
+    hazards: []
   }
 } as const;
 
@@ -229,6 +248,11 @@ export const CUTSCENE_DATA = {
     levelNumber: 1,
     title: "👽 COSMIC PLAYGROUND 🛸",
     description: "Cosmo crash-landed in Roswell!\nThe CIA hoards cookies - encoded joy itself.\nReclaim happiness through cosmic resistance!\n\nUse arrow keys to move • Collect all cookies • Avoid agents • Reach the finish!"
+  },
+  1.5: {
+    levelNumber: 1.5,
+    title: "Level 1-2: Dancing Desert",
+    description: "Watch out for the dancing cacti!\n\nThese rhythmic desert dwellers sway side to side.\nTime your movements carefully to slip past their dance.\n\nNew Challenge: Avoid environmental hazards!"
   },
   2: {
     levelNumber: 2,

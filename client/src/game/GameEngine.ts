@@ -676,6 +676,27 @@ export class GameEngine {
         }
       }
     }
+
+    // Check hazard collisions (dancing cacti, etc.) with damage system
+    if (this.currentLevel.checkHazardCollisions(playerBounds)) {
+      // Use damage system to handle hits from environmental hazards
+      const damageApplied = this.damageSystem.takeDamage('hazard', 1, {
+        x: playerBounds.x,
+        y: playerBounds.y
+      });
+
+      if (damageApplied) {
+        this.audioManager.playHit();
+
+        if (this.damageSystem.getHealth() <= 0) {
+          // Game over - use UI controller to properly queue the transition
+          this.handleGameOver();
+        } else {
+          // Respawn player but keep invincibility
+          this.player.reset(this.canvas.width / 2, this.canvas.height - 50);
+        }
+      }
+    }
   }
 
   private checkCollision(rect1: any, rect2: any): boolean {
