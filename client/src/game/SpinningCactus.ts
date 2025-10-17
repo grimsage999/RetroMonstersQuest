@@ -64,11 +64,32 @@ export class SpinningCactus {
   }
 
   private shootFireball(targetX: number, targetY: number): void {
+    // Calculate direction to player
+    const centerX = this.x + this.width / 2;
+    const centerY = this.y + this.height / 2;
+    const playerCenterX = targetX + 24;
+    const playerCenterY = targetY + 24;
+    
+    const dx = playerCenterX - centerX;
+    const dy = playerCenterY - centerY;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    
+    // Guard against division by zero (player exactly at cactus center)
+    if (distance < 1) {
+      console.log('Player too close to cactus center, skipping fireball');
+      return;
+    }
+    
+    // Spawn fireball outside the cactus bounds (at edge + buffer)
+    const spawnDistance = Math.max(this.width, this.height) / 2 + 20; // Edge + 20px buffer
+    const spawnX = centerX + (dx / distance) * spawnDistance;
+    const spawnY = centerY + (dy / distance) * spawnDistance;
+
     const config: FireballConfig = {
-      x: this.x + this.width / 2,
-      y: this.y + this.height / 2,
-      targetX: targetX + 24, // Center of player
-      targetY: targetY + 24,
+      x: spawnX,
+      y: spawnY,
+      targetX: playerCenterX,
+      targetY: playerCenterY,
       speed: this.fireballSpeed,
       homing: this.fireballHoming,
       damage: this.fireballDamage

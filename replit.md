@@ -163,6 +163,15 @@ Changelog:
   - Updated LEVEL_SEQUENCE: 1 → 1.5 → 1.75 → 2 → 3 → 4 → 5
   - Dash mechanic essential for dodging homing fireballs (invulnerability works)
   - Level designed to teach skillful dash usage in combat situations
+- October 17, 2025. Fireball Redirect Mechanic - Indirect Offense:
+  - Implemented offensive mechanic through skillful movement and fireball redirection
+  - Fireballs can now hit and destroy enemies (1 fireball = 1 enemy killed)
+  - Fireballs can damage the Spinning Cactus mini-boss (5 fireballs = cactus destroyed)
+  - SpinningCactus has health system (5 HP) with visual health bar and color fading
+  - Players must strategically position themselves to lead fireballs into targets
+  - Collision detection added for fireball-enemy and fireball-cactus interactions
+  - Destroyed enemies are removed from level, destroyed cactus stops shooting
+  - Creates strategic gameplay: dodge fireballs while leading them to enemies
 ```
 
 ## User Preferences
