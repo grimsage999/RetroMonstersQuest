@@ -24,6 +24,8 @@ export class SpinningCactus {
   private timeSinceLastShot: number = 0;
   private fireballs: Fireball[] = [];
   private armWaveOffset: number = 0;
+  private health: number = 5; // Takes 5 hits to destroy
+  private alive: boolean = true;
 
   constructor(config: SpinningCactusConfig) {
     this.x = config.x;
@@ -76,12 +78,16 @@ export class SpinningCactus {
   }
 
   public render(ctx: CanvasRenderingContext2D): void {
+    if (!this.alive) return; // Don't render if dead
+
     ctx.save();
     ctx.translate(this.x + this.width / 2, this.y + this.height / 2);
     ctx.rotate(this.rotation);
 
-    // Draw cactus body (bright green with pink accents)
-    ctx.fillStyle = '#00FF88'; // Bright alien green
+    // Draw cactus body (bright green with pink accents, fades based on health)
+    const healthPercent = this.health / 5;
+    const greenValue = Math.floor(255 * healthPercent);
+    ctx.fillStyle = `rgb(0, ${greenValue}, 136)`; // Fades as health decreases
     ctx.fillRect(-24, -36, 48, 72);
 
     // Draw spinning arms (animated)
@@ -89,7 +95,7 @@ export class SpinningCactus {
     const armWave2 = Math.sin(this.armWaveOffset + Math.PI) * 8;
 
     // Left arm
-    ctx.fillStyle = '#00FF88';
+    ctx.fillStyle = `rgb(0, ${greenValue}, 136)`;
     ctx.fillRect(-48, -12 + armWave1, 24, 12);
     
     // Right arm
@@ -107,6 +113,20 @@ export class SpinningCactus {
     }
 
     ctx.restore();
+
+    // Draw health bar above cactus
+    const barWidth = 60;
+    const barHeight = 6;
+    const barX = this.x + this.width / 2 - barWidth / 2;
+    const barY = this.y - 15;
+    
+    // Background
+    ctx.fillStyle = '#333';
+    ctx.fillRect(barX, barY, barWidth, barHeight);
+    
+    // Health
+    ctx.fillStyle = this.health > 2 ? '#00FF88' : '#FF3300';
+    ctx.fillRect(barX, barY, barWidth * healthPercent, barHeight);
 
     // Render all fireballs
     this.fireballs.forEach(fireball => fireball.render(ctx));
@@ -148,5 +168,36 @@ export class SpinningCactus {
 
   public clearFireballs(): void {
     this.fireballs = [];
+  }
+
+  public takeDamage(damage: number = 1): boolean {
+    if (!this.alive) return false;
+    
+    this.health -= damage;
+    console.log(`Spinning Cactus hit! Health: ${this.health}/5`);
+    
+    if (this.health <= 0) {
+      this.alive = false;
+      console.log('Spinning Cactus destroyed!');
+      return true; // Return true if destroyed
+    }
+    return false;
+  }
+
+  public isAlive(): boolean {
+    return this.alive;
+  }
+
+  public getHealth(): number {
+    return this.health;
+  }
+
+  public getBounds(): { x: number; y: number; width: number; height: number } {
+    return {
+      x: this.x,
+      y: this.y,
+      width: this.width,
+      height: this.height
+    };
   }
 }
