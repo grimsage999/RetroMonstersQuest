@@ -615,7 +615,7 @@ export class GameEngine {
     this.wasDashing = isDashing;
 
     // Update level (enemies, etc.)
-    this.currentLevel.update(deltaTime);
+    this.currentLevel.update(deltaTime, this.player.getX(), this.player.getY());
 
     // Game logic updates complete - no boss mechanics needed
 

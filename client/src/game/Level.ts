@@ -2,6 +2,7 @@ import { Enemy, EnemyType } from './Enemy';
 import { LEVEL_CONFIGS } from './GameConfig';
 import { OptimizedRenderer } from './OptimizedRenderer';
 import { DancingCactus, HazardConfig } from './DancingCactus';
+import { SpinningCactus } from './SpinningCactus';
 
 interface Cookie {
   x: number;
@@ -30,6 +31,7 @@ export class Level {
   private cookies: Cookie[] = [];
   private enemies: Enemy[] = [];
   private hazards: DancingCactus[] = [];
+  private spinningCacti: SpinningCactus[] = [];
   private finishLine: { x: number; y: number; width: number; height: number; } | null = null;
   private config: LevelConfig;
 
@@ -108,8 +110,9 @@ export class Level {
     
     // Initialize hazards
     this.hazards = [];
+    this.spinningCacti = [];
     if (this.config.hazards && this.config.hazards.length > 0) {
-      this.config.hazards.forEach(hazardConfig => {
+      this.config.hazards.forEach((hazardConfig: any) => {
         if (hazardConfig.type === 'dancing_cactus') {
           this.hazards.push(new DancingCactus(
             hazardConfig.position.x,
@@ -117,12 +120,22 @@ export class Level {
             hazardConfig.amplitude,
             hazardConfig.speed
           ));
+        } else if (hazardConfig.type === 'spinning_cactus') {
+          this.spinningCacti.push(new SpinningCactus({
+            x: hazardConfig.position.x,
+            y: hazardConfig.position.y,
+            spinSpeed: hazardConfig.spin_speed,
+            fireballInterval: hazardConfig.fireball.interval,
+            fireballSpeed: hazardConfig.fireball.speed,
+            fireballHoming: hazardConfig.fireball.homing,
+            fireballDamage: hazardConfig.fireball.damage
+          }));
         }
       });
     }
   }
 
-  public update(deltaTime: number) {
+  public update(deltaTime: number, playerX?: number, playerY?: number) {
     // Update all enemies at original speed
     this.enemies.forEach(enemy => {
       enemy.update(deltaTime, this.canvasWidth, this.canvasHeight);
@@ -132,6 +145,13 @@ export class Level {
     this.hazards.forEach(hazard => {
       hazard.update(deltaTime);
     });
+
+    // Update spinning cacti with player position for targeting
+    if (playerX !== undefined && playerY !== undefined) {
+      this.spinningCacti.forEach(cactus => {
+        cactus.update(deltaTime, playerX, playerY, this.canvasWidth, this.canvasHeight);
+      });
+    }
   }
 
   public render(ctx: CanvasRenderingContext2D) {
@@ -141,6 +161,11 @@ export class Level {
     // Render hazards (before cookies so they're in background layer)
     this.hazards.forEach(hazard => {
       hazard.render(ctx);
+    });
+
+    // Render spinning cacti and their fireballs
+    this.spinningCacti.forEach(cactus => {
+      cactus.render(ctx);
     });
     
     // Render cookies
@@ -747,9 +772,17 @@ export class Level {
   }
 
   public checkHazardCollisions(playerBounds: { x: number; y: number; width: number; height: number; }): boolean {
-    return this.hazards.some(hazard => 
+    // Check dancing cacti
+    const dancingCactusHit = this.hazards.some(hazard => 
       this.checkCollision(playerBounds, hazard.getBounds())
     );
+
+    // Check spinning cacti (including fireballs)
+    const spinningCactusHit = this.spinningCacti.some(cactus =>
+      cactus.checkCollision(playerBounds.x, playerBounds.y, playerBounds.width, playerBounds.height)
+    );
+
+    return dancingCactusHit || spinningCactusHit;
   }
 
   private checkCollision(rect1: { x: number; y: number; width: number; height: number; }, rect2: { x: number; y: number; width: number; height: number; }): boolean {

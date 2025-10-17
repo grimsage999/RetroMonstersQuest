@@ -114,7 +114,7 @@ export const GAME_CONFIG = {
   },
 
   // Level Progression Sequence
-  LEVEL_SEQUENCE: [1, 1.5, 2, 3, 4, 5] as const,
+  LEVEL_SEQUENCE: [1, 1.5, 1.75, 2, 3, 4, 5] as const,
 
   // Animation Configuration
   ANIMATION: {
@@ -203,6 +203,29 @@ export const LEVEL_CONFIGS = {
       { type: 'dancing_cactus', position: { x: 680, y: 280 }, amplitude: 44, speed: 2.8 }
     ]
   },
+  1.75: {
+    background: '#8B4513',
+    fbiAgents: 6,
+    armyMen: 0,
+    radioactiveRats: 0,
+    zombies: 0,
+    cookies: 10,
+    title: 'Level 1-3: Fireball Fiesta',
+    description: 'The spinning cactus spits fireballs! Dash to dodge the homing projectiles. Stay alert!',
+    hazards: [
+      { 
+        type: 'spinning_cactus', 
+        position: { x: 400, y: 300 }, 
+        spin_speed: 1.5,
+        fireball: {
+          interval: 2.0,
+          speed: 4.0,
+          homing: true,
+          damage: 1
+        }
+      }
+    ]
+  },
   2: {
     background: '#2F4F4F',
     fbiAgents: 10,
@@ -259,6 +282,11 @@ export const CUTSCENE_DATA = {
     levelNumber: 1.5,
     title: "Level 1-2: Dancing Desert",
     description: "Watch out for the dancing cacti!\n\nThese rhythmic desert dwellers sway side to side.\nTime your movements carefully to slip past their dance.\n\nNew Challenge: Avoid environmental hazards!"
+  },
+  1.75: {
+    levelNumber: 1.75,
+    title: "Level 1-3: Fireball Fiesta",
+    description: "The spinning cactus has a fiery surprise!\n\nEvery 2 seconds, it launches homing fireballs at you.\nUse your DASH (SHIFT) to dodge through them invulnerably.\n\nMaster the dash timing - your survival depends on it!"
   },
   2: {
     levelNumber: 2,
