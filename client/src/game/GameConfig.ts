@@ -286,7 +286,7 @@ export const CUTSCENE_DATA = {
   1.75: {
     levelNumber: 1.75,
     title: "Level 1-3: Fireball Fiesta",
-    description: "The spinning cactus has a fiery surprise!\n\nEvery 2 seconds, it launches homing fireballs at you.\nUse your DASH (SHIFT) to dodge through them invulnerably.\n\nMaster the dash timing - your survival depends on it!"
+    description: "Beware the spinning cactus! It spits fireballs that chase you—use your dash to dodge them!"
   },
   2: {
     levelNumber: 2,
