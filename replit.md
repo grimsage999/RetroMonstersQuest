@@ -136,6 +136,13 @@ Changelog:
   - Simplified complex background rendering (stars, sand dunes) for better FPS
   - Removed artificial frame rate limiting to allow natural browser vsync
   - Ensured consistent 60fps and movement speed across all levels
+- October 17, 2025. Level 1-2 "Dancing Desert" with Environmental Hazards:
+  - Created DancingCactus hazard class with sine-wave animation and collision detection
+  - Added Level 1.5 configuration with two animated cacti as environmental obstacles
+  - Integrated hazard collision detection into damage system with invincibility/respawn
+  - Implemented LEVEL_SEQUENCE config for proper progression (1 → 1.5 → 2 → 3 → 4 → 5)
+  - Added hazard support to Level class with update/render/collision systems
+  - Level 1-2 features timing-based dodging challenge with swaying cacti
 ```
 
 ## User Preferences
