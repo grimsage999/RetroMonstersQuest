@@ -211,7 +211,7 @@ export const LEVEL_CONFIGS = {
     zombies: 0,
     cookies: 10,
     title: 'Level 1-3: Fireball Fiesta',
-    description: 'The spinning cactus spits fireballs! Dash to dodge the homing projectiles. Stay alert!',
+    description: 'Beware the spinning cactus! It spits fireballs that chase you—use your dash to dodge them!',
     hazards: [
       { 
         type: 'spinning_cactus', 
