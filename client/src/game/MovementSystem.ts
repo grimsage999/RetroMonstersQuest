@@ -65,6 +65,7 @@ export class MovementSystem {
 
     // Handle dash
     if (isDashPressed && !this.isDashing && this.dashCooldownTimer <= 0 && (inputX !== 0 || inputY !== 0)) {
+      console.log(`🚀 DASH ACTIVATED! Speed: ${this.dashSpeed} px/frame`);
       this.startDash(inputX, inputY);
     }
 
@@ -78,13 +79,19 @@ export class MovementSystem {
 
     if (this.isDashing) {
       // During dash, use dash velocity
-      return {
+      const dashMovement = {
         dx: this.dashDirectionX * this.dashSpeed,
         dy: this.dashDirectionY * this.dashSpeed
       };
+      console.log(`⚡ DASHING: dx=${dashMovement.dx.toFixed(1)}, dy=${dashMovement.dy.toFixed(1)}`);
+      return dashMovement;
     } else {
       // Normal movement with acceleration
-      return this.updateNormalMovement(inputX, inputY, deltaTime);
+      const normalMovement = this.updateNormalMovement(inputX, inputY, deltaTime);
+      if (inputX !== 0 || inputY !== 0) {
+        console.log(`🚶 NORMAL: dx=${normalMovement.dx.toFixed(1)}, dy=${normalMovement.dy.toFixed(1)}`);
+      }
+      return normalMovement;
     }
   }
 
