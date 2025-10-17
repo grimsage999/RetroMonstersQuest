@@ -14,7 +14,8 @@ const GameCanvas: React.FC = () => {
     level: 1,
     phase: 'playing' as 'playing' | 'gameOver' | 'victory' | 'levelComplete',
     cookiesCollected: 0,
-    totalCookies: 0
+    totalCookies: 0,
+    canDash: true as boolean | undefined
   });
 
   useEffect(() => {

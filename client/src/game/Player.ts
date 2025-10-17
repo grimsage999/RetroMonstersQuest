@@ -106,6 +106,26 @@ export class Player {
   }
 
   public render(ctx: CanvasRenderingContext2D) {
+    const state = this.movementSystem.getState();
+    
+    // Draw dash trail effect if dashing
+    if (state.isDashing) {
+      ctx.save();
+      ctx.globalAlpha = 0.4;
+      
+      // Draw 2 afterimages behind the player using dash direction
+      for (let i = 1; i <= 2; i++) {
+        const trailOffset = i * 12; // Pixels behind
+        // Position trail opposite to dash direction
+        const trailX = this.x - (state.dashDirectionX * trailOffset);
+        const trailY = this.y - (state.dashDirectionY * trailOffset);
+        
+        ctx.fillStyle = '#39FF14'; // Bright alien green
+        ctx.fillRect(trailX, trailY, this.width, this.height);
+      }
+      ctx.restore();
+    }
+    
     ctx.save();
     ctx.imageSmoothingEnabled = false;
     
@@ -370,6 +390,14 @@ export class Player {
       width: this.width,
       height: this.height
     };
+  }
+
+  public isDashing(): boolean {
+    return this.movementSystem.getState().isDashing;
+  }
+
+  public canDash(): boolean {
+    return this.movementSystem.getState().canDash;
   }
 
   public reset(x: number, y: number) {

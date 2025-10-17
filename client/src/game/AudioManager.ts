@@ -144,6 +144,24 @@ export class AudioManager {
     }
   }
 
+  public playDash() {
+    if (this.successSound && !this.isMuted && this.isInitialized) {
+      // Use success sound with quick playback for dash effect
+      try {
+        const soundClone = this.successSound.cloneNode(true);
+        if (soundClone instanceof HTMLAudioElement) {
+          soundClone.volume = 0.3;
+          soundClone.playbackRate = 2.0; // Fast, zippy sound for dash
+          soundClone.play().catch(error => {
+            console.log('Dash sound play prevented:', error);
+          });
+        }
+      } catch (error) {
+        console.error('Audio clone failed for dash:', error);
+      }
+    }
+  }
+
   public playRayGun() {
     if (this.hitSound && !this.isMuted && this.isInitialized) {
       // Use hit sound with lower pitch for ray gun

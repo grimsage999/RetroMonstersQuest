@@ -14,6 +14,8 @@ interface MovementState {
   isDashing: boolean;
   canDash: boolean;
   speed: number;
+  dashDirectionX: number;
+  dashDirectionY: number;
 }
 
 interface MovementUpdate {
@@ -170,7 +172,9 @@ export class MovementSystem {
       velocityY: this.velocityY,
       isDashing: this.isDashing,
       canDash: this.dashCooldownTimer <= 0,
-      speed: Math.round(speed * 100) / 100
+      speed: Math.round(speed * 100) / 100,
+      dashDirectionX: this.dashDirectionX,
+      dashDirectionY: this.dashDirectionY
     };
   }
 

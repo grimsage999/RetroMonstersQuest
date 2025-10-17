@@ -25,6 +25,7 @@ export interface GameState {
   phase: 'playing' | 'gameOver' | 'victory' | 'levelComplete';
   cookiesCollected: number;
   totalCookies: number;
+  canDash?: boolean;
 }
 
 export class GameEngine {
@@ -37,6 +38,7 @@ export class GameEngine {
   private currentLevel: Level;
   private audioManager: AudioManager;
   private inputManager: InputManager;
+  private wasDashing: boolean = false;
 
   // Removed bullets and weapon cooldowns for performance
   private currentCutscene: Cutscene | null = null;
@@ -595,6 +597,14 @@ export class GameEngine {
     // Update player
     this.player.update(this.inputManager, deltaTime, this.canvas.width, this.canvas.height);
 
+    // Check if dash just started (for audio feedback)
+    const isDashing = this.player.isDashing();
+    if (isDashing && !this.wasDashing) {
+      // Dash just started - play sound!
+      this.audioManager.playDash();
+    }
+    this.wasDashing = isDashing;
+
     // Update level (enemies, etc.)
     this.currentLevel.update(deltaTime);
 
@@ -662,8 +672,8 @@ export class GameEngine {
       this.updateState();
     }
 
-    // Check enemy collisions with damage system
-    if (this.currentLevel.checkEnemyCollisions(playerBounds)) {
+    // Check enemy collisions with damage system (unless dashing - invulnerable!)
+    if (!this.player.isDashing() && this.currentLevel.checkEnemyCollisions(playerBounds)) {
       // Use damage system to handle hits properly
       const damageApplied = this.damageSystem.takeDamage('enemy', 1, {
         x: playerBounds.x,
@@ -683,8 +693,8 @@ export class GameEngine {
       }
     }
 
-    // Check hazard collisions (dancing cacti, etc.) with damage system
-    if (this.currentLevel.checkHazardCollisions(playerBounds)) {
+    // Check hazard collisions (dancing cacti, etc.) with damage system (unless dashing!)
+    if (!this.player.isDashing() && this.currentLevel.checkHazardCollisions(playerBounds)) {
       // Use damage system to handle hits from environmental hazards
       const damageApplied = this.damageSystem.takeDamage('hazard', 1, {
         x: playerBounds.x,
@@ -836,6 +846,9 @@ export class GameEngine {
   }
 
   private updateState() {
-    this.onStateChange({ ...this.gameState });
+    this.onStateChange({ 
+      ...this.gameState,
+      canDash: this.player.canDash()
+    });
   }
 }

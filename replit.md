@@ -138,11 +138,18 @@ Changelog:
   - Ensured consistent 60fps and movement speed across all levels
 - October 17, 2025. Level 1-2 "Dancing Desert" with Environmental Hazards:
   - Created DancingCactus hazard class with sine-wave animation and collision detection
-  - Added Level 1.5 configuration with two animated cacti as environmental obstacles
+  - Added Level 1.5 configuration with 5 evenly-spaced animated cacti as environmental obstacles
   - Integrated hazard collision detection into damage system with invincibility/respawn
   - Implemented LEVEL_SEQUENCE config for proper progression (1 → 1.5 → 2 → 3 → 4 → 5)
   - Added hazard support to Level class with update/render/collision systems
   - Level 1-2 features timing-based dodging challenge with swaying cacti
+- October 17, 2025. Dash Mechanic Implementation:
+  - Integrated existing dash system (Shift key) with invulnerability during dash
+  - Added dash audio feedback using sped-up success sound (2x playback rate)
+  - Created visual trail effect with green afterimages following dash direction
+  - Added UI dash cooldown indicator (⚡ DASH ✓/⏳) with real-time updates
+  - Player is invulnerable to both enemies and hazards while dashing
+  - Dash parameters: 250ms duration, 600ms cooldown, 12px/frame speed
 ```
 
 ## User Preferences

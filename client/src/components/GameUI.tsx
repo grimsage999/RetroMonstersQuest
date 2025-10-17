@@ -7,6 +7,7 @@ interface GameState {
   phase: string;
   cookiesCollected: number;
   totalCookies: number;
+  canDash?: boolean;
 }
 
 interface GameUIProps {
@@ -20,6 +21,9 @@ const GameUI: React.FC<GameUIProps> = ({ gameState }) => {
       <div className="stat-line">♥ {gameState.lives}</div>
       <div className="stat-line">🌍 {gameState.level}</div>
       <div className="stat-line">🍪 {gameState.cookiesCollected}/{gameState.totalCookies}</div>
+      <div className="stat-line" style={{ opacity: gameState.canDash ? 1 : 0.3 }}>
+        ⚡ DASH {gameState.canDash ? '✓' : '⏳'}
+      </div>
     </div>
   );
 };
