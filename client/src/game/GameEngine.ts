@@ -16,6 +16,7 @@ import { DiagnosticSystem } from './DiagnosticSystem';
 import { CommandInputSystem, GameCommand, InputCommand } from './CommandInputSystem';
 import { GameUtils } from './GameUtils'; // Assuming GameUtils contains createBounds
 import { COLLISION_CONFIG } from './GameConstants';
+import { GAME_CONFIG } from './GameConfig';
 
 export interface GameState {
   score: number;
@@ -434,9 +435,14 @@ export class GameEngine {
 
 
   public nextLevel() {
-    // Use transition manager for smooth level change
+    // Use level sequence to determine next level
     const currentLevel = this.gameState.level;
-    const nextLevel = currentLevel + 1;
+    const currentIndex = GAME_CONFIG.LEVEL_SEQUENCE.indexOf(currentLevel);
+    
+    // Get next level from sequence, or increment if not in sequence
+    const nextLevel = currentIndex >= 0 && currentIndex < GAME_CONFIG.LEVEL_SEQUENCE.length - 1
+      ? GAME_CONFIG.LEVEL_SEQUENCE[currentIndex + 1]
+      : currentLevel + 1;
 
     this.stateManager.transitionTo(GamePhase.LEVEL_TRANSITION);
 

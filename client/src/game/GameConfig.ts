@@ -113,6 +113,9 @@ export const GAME_CONFIG = {
     MIN_DELTA_TIME: 1,
   },
 
+  // Level Progression Sequence
+  LEVEL_SEQUENCE: [1, 1.5, 2, 3, 4, 5] as const,
+
   // Animation Configuration
   ANIMATION: {
     ENEMY_FRAME_DURATION: 400,
