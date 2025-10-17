@@ -196,8 +196,11 @@ export const LEVEL_CONFIGS = {
     title: 'Level 1-2: Dancing Desert',
     description: 'Watch out for the dancing cacti! Time your moves carefully to slip past their rhythm.',
     hazards: [
-      { type: 'dancing_cactus', position: { x: 160, y: 320 }, amplitude: 56, speed: 2.4 },
-      { type: 'dancing_cactus', position: { x: 272, y: 288 }, amplitude: 36, speed: 3.2 }
+      { type: 'dancing_cactus', position: { x: 120, y: 250 }, amplitude: 48, speed: 2.2 },
+      { type: 'dancing_cactus', position: { x: 280, y: 380 }, amplitude: 40, speed: 3.0 },
+      { type: 'dancing_cactus', position: { x: 400, y: 300 }, amplitude: 52, speed: 2.6 },
+      { type: 'dancing_cactus', position: { x: 520, y: 420 }, amplitude: 36, speed: 3.4 },
+      { type: 'dancing_cactus', position: { x: 680, y: 280 }, amplitude: 44, speed: 2.8 }
     ]
   },
   2: {
