@@ -194,7 +194,7 @@ export const LEVEL_CONFIGS = {
     zombies: 0,
     cookies: 8,
     title: 'Level 1-2: Dancing Desert',
-    description: 'Watch out for the dancing cacti! Time your moves carefully to slip past their rhythm.',
+    description: 'Dancing cacti block your path! Use SHIFT to dash through them while invulnerable. Time it right!',
     hazards: [
       { type: 'dancing_cactus', position: { x: 120, y: 250 }, amplitude: 48, speed: 2.2 },
       { type: 'dancing_cactus', position: { x: 280, y: 380 }, amplitude: 40, speed: 3.0 },

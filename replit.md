@@ -149,7 +149,10 @@ Changelog:
   - Created visual trail effect with green afterimages following dash direction
   - Added UI dash cooldown indicator (⚡ DASH ✓/⏳) with real-time updates
   - Player is invulnerable to both enemies and hazards while dashing
-  - Dash parameters: 250ms duration, 600ms cooldown, 12px/frame speed
+  - Optimized dash parameters: 100ms duration, ~60px distance, 10 px/frame speed (25% faster than running)
+  - Dash cooldown: 800ms to prevent spam while maintaining skillful play
+  - Dash respects level boundaries - cannot phase through walls
+  - Updated Level 1-2 tutorial to explain dash mechanic
 ```
 
 ## User Preferences
