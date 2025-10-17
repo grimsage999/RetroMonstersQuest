@@ -152,6 +152,9 @@ export class Level {
         cactus.update(deltaTime, playerX, playerY, this.canvasWidth, this.canvasHeight);
       });
     }
+
+    // Check fireball collisions with enemies and cactus
+    this.checkFireballCollisions();
   }
 
   public render(ctx: CanvasRenderingContext2D) {
@@ -790,6 +793,52 @@ export class Level {
            rect1.x + rect1.width > rect2.x &&
            rect1.y < rect2.y + rect2.height &&
            rect1.y + rect1.height > rect2.y;
+  }
+
+  private checkFireballCollisions(): void {
+    // For each spinning cactus, check its fireballs against enemies and itself
+    this.spinningCacti.forEach(cactus => {
+      if (!cactus.isAlive()) return;
+
+      const fireballs = cactus.getFireballs();
+      const cactusCenter = cactus.getPosition();
+
+      fireballs.forEach(fireball => {
+        if (!fireball.isAlive()) return;
+
+        const fbBounds = fireball.getBounds();
+
+        // Check collision with enemies
+        this.enemies = this.enemies.filter(enemy => {
+          if (!enemy.isActive()) return true; // Keep inactive enemies
+
+          const enemyBounds = enemy.getBounds();
+          const hit = this.checkCollision(fbBounds, enemyBounds);
+
+          if (hit) {
+            console.log('Fireball hit enemy! Enemy destroyed.');
+            fireball.kill();
+            return false; // Remove enemy
+          }
+          return true; // Keep enemy
+        });
+
+        // Check collision with the cactus itself
+        if (fireball.isAlive()) {
+          const cactusBounds = cactus.getBounds();
+          const hit = this.checkCollision(fbBounds, cactusBounds);
+
+          if (hit) {
+            console.log('Fireball hit cactus!');
+            fireball.kill();
+            cactus.takeDamage(1);
+          }
+        }
+      });
+    });
+
+    // Remove destroyed cacti
+    this.spinningCacti = this.spinningCacti.filter(cactus => cactus.isAlive());
   }
 
   public getTotalCookies(): number {
