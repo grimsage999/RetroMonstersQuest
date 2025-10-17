@@ -196,6 +196,7 @@ export class Level {
     switch (this.levelNumber) {
       case 1: // Desert - Area 51
       case 1.5: // Desert with dancing cacti
+      case 1.75: // Desert with spinning cactus
         this.renderDesertBackground(ctx);
         break;
       case 2: // Dystopian City
