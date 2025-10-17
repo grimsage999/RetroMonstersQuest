@@ -149,10 +149,20 @@ Changelog:
   - Created visual trail effect with green afterimages following dash direction
   - Added UI dash cooldown indicator (⚡ DASH ✓/⏳) with real-time updates
   - Player is invulnerable to both enemies and hazards while dashing
-  - Optimized dash parameters: 100ms duration, ~60px distance, 10 px/frame speed (25% faster than running)
+  - Final parameters: 100ms duration, ~60px distance, 18 px/frame speed (2.25x faster than running)
   - Dash cooldown: 800ms to prevent spam while maintaining skillful play
   - Dash respects level boundaries - cannot phase through walls
   - Updated Level 1-2 tutorial to explain dash mechanic
+  - Fixed dash key detection in CommandInputSystem (ShiftLeft/ShiftRight)
+- October 17, 2025. Level 1-3 "Fireball Fiesta" Addition:
+  - Created new level 1.75 between Level 1-2 and Level 2
+  - Implemented Fireball.ts class with homing projectile behavior
+  - Created SpinningCactus.ts hazard that spins and shoots fireballs every 2 seconds
+  - Fireballs home in on player position with 10% course correction per frame
+  - Fireballs have visual trail effects (orange/red gradient with fading afterimages)
+  - Updated LEVEL_SEQUENCE: 1 → 1.5 → 1.75 → 2 → 3 → 4 → 5
+  - Dash mechanic essential for dodging homing fireballs (invulnerability works)
+  - Level designed to teach skillful dash usage in combat situations
 ```
 
 ## User Preferences

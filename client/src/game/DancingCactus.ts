@@ -4,10 +4,17 @@
  */
 
 export interface HazardConfig {
-  type: 'dancing_cactus';
+  type: 'dancing_cactus' | 'spinning_cactus';
   position: { x: number; y: number };
-  amplitude: number;
-  speed: number;
+  amplitude?: number;
+  speed?: number;
+  spin_speed?: number;
+  fireball?: {
+    interval: number;
+    speed: number;
+    homing: boolean;
+    damage: number;
+  };
 }
 
 export class DancingCactus {

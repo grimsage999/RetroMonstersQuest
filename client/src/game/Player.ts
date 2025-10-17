@@ -392,6 +392,14 @@ export class Player {
     };
   }
 
+  public getX(): number {
+    return this.x;
+  }
+
+  public getY(): number {
+    return this.y;
+  }
+
   public isDashing(): boolean {
     return this.movementSystem.getState().isDashing;
   }
