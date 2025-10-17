@@ -196,6 +196,15 @@ export class GameEngine {
       else this.inputManager.handleKeyUp('ArrowRight');
     });
 
+    this.commandInputSystem.registerCommandExecutor(GameCommand.DASH, (cmd: InputCommand) => {
+      if (cmd.pressed) {
+        this.inputManager.handleKeyDown('ShiftLeft');
+        console.log('🚀 DASH KEY PRESSED!');
+      } else {
+        this.inputManager.handleKeyUp('ShiftLeft');
+      }
+    });
+
     this.commandInputSystem.registerCommandExecutor(GameCommand.FIRE_PRIMARY, (cmd: InputCommand) => {
       if (!cmd.pressed) return; // Only on key press, not release
 

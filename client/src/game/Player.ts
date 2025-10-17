@@ -72,8 +72,8 @@ export class Player {
       this.direction = 'right';
     }
     
-    // Check for dash input (Shift key)
-    const isDashPressed = inputManager.isKeyPressed('Shift');
+    // Check for dash input (Shift key - either left or right)
+    const isDashPressed = inputManager.isKeyPressed('ShiftLeft') || inputManager.isKeyPressed('ShiftRight') || inputManager.isKeyPressed('Shift');
     
     // Get movement from movement system
     const movement = this.movementSystem.update(inputX, inputY, isDashPressed, deltaTime);
