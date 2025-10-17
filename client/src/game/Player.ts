@@ -50,8 +50,8 @@ export class Player {
       maxSpeed: 8,
       acceleration: 0.35,
       deceleration: 0.2,
-      dashSpeed: 10, // Fast burst! 10 px/frame * 6 frames = ~60px total
-      dashDuration: 100, // 0.1s duration for quick, responsive dash
+      dashSpeed: 18, // Dramatic burst! 2.25x faster than running
+      dashDuration: 120, // Slightly longer for better perception
       dashCooldown: 800 // 0.8 seconds to prevent spam
     });
   }
