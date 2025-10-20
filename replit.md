@@ -172,6 +172,10 @@ Changelog:
   - Collision detection added for fireball-enemy and fireball-cactus interactions
   - Destroyed enemies are removed from level, destroyed cactus stops shooting
   - Creates strategic gameplay: dodge fireballs while leading them to enemies
+  - **Redirect Detection:** Fireballs only damage enemies/cactus AFTER passing within 70px of player
+  - This ensures player must skillfully dodge fireballs before they can redirect them
+  - Prevents boss from accidentally clearing enemies - requires player skill and timing
+  - Fireball spawns outside cactus bounds to prevent self-damage bug
 ```
 
 ## User Preferences
