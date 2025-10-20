@@ -165,17 +165,18 @@ Changelog:
   - Level designed to teach skillful dash usage in combat situations
 - October 17, 2025. Fireball Redirect Mechanic - Indirect Offense:
   - Implemented offensive mechanic through skillful movement and fireball redirection
-  - Fireballs can now hit and destroy enemies (1 fireball = 1 enemy killed)
+  - Fireballs hit and destroy enemies in their path as they chase the player (1 fireball = 1 enemy killed)
   - Fireballs can damage the Spinning Cactus mini-boss (5 fireballs = cactus destroyed)
   - SpinningCactus has health system (5 HP) with visual health bar and color fading
-  - Players must strategically position themselves to lead fireballs into targets
   - Collision detection added for fireball-enemy and fireball-cactus interactions
   - Destroyed enemies are removed from level, destroyed cactus stops shooting
-  - Creates strategic gameplay: dodge fireballs while leading them to enemies
-  - **Redirect Detection:** Fireballs only damage enemies/cactus AFTER passing within 70px of player
-  - This ensures player must skillfully dodge fireballs before they can redirect them
-  - Prevents boss from accidentally clearing enemies - requires player skill and timing
-  - Fireball spawns outside cactus bounds to prevent self-damage bug
+  - **Redirect Detection:** Fireballs only damage the CACTUS after passing within 70px of player
+  - Enemies can be hit by fireballs at any time (collateral damage as fireballs chase player)
+  - Cactus can only be damaged by redirected fireballs (player must dodge first)
+  - This ensures player must skillfully dodge fireballs to redirect them back at the boss
+  - Prevents boss from self-damaging - requires player skill and timing
+  - Fireball spawns outside cactus bounds to prevent immediate self-damage bug
+  - Creates strategic gameplay: dodge fireballs to redirect them at the boss, enemies get caught in crossfire
 ```
 
 ## User Preferences
