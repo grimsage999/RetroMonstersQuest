@@ -19,6 +19,7 @@ export class Fireball {
   private size: number = 16;
   private alive: boolean = true;
   private trailPositions: Array<{ x: number; y: number; alpha: number }> = [];
+  private redirected: boolean = false; // Becomes true when player dodges (gets close)
 
   constructor(config: FireballConfig) {
     this.x = config.x;
@@ -41,10 +42,23 @@ export class Fireball {
   public update(deltaTime: number, playerX: number, playerY: number, canvasWidth: number, canvasHeight: number): void {
     if (!this.alive) return;
 
+    // Check if fireball is close to player (dodge detection for redirect mechanic)
+    const playerCenterX = playerX + 24;
+    const playerCenterY = playerY + 24;
+    const distanceToPlayer = Math.sqrt(
+      Math.pow(this.x - playerCenterX, 2) + Math.pow(this.y - playerCenterY, 2)
+    );
+    
+    // If fireball gets within 70 pixels of player, it's been "redirected"
+    if (!this.redirected && distanceToPlayer < 70) {
+      this.redirected = true;
+      console.log('Fireball redirected! Can now damage enemies/cactus.');
+    }
+
     // Homing behavior - slightly adjust direction toward player
     if (this.homing) {
-      const dx = (playerX + 24) - this.x; // Target center of player
-      const dy = (playerY + 24) - this.y;
+      const dx = playerCenterX - this.x; // Target center of player
+      const dy = playerCenterY - this.y;
       const magnitude = Math.sqrt(dx * dx + dy * dy);
       
       if (magnitude > 0) {
@@ -151,5 +165,9 @@ export class Fireball {
 
   public getDamage(): number {
     return this.damage;
+  }
+
+  public isRedirected(): boolean {
+    return this.redirected;
   }
 }
