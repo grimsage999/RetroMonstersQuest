@@ -170,13 +170,10 @@ Changelog:
   - SpinningCactus has health system (5 HP) with visual health bar and color fading
   - Collision detection added for fireball-enemy and fireball-cactus interactions
   - Destroyed enemies are removed from level, destroyed cactus stops shooting
-  - **Redirect Detection:** Fireballs only damage the CACTUS after passing within 70px of player
-  - Enemies can be hit by fireballs at any time (collateral damage as fireballs chase player)
-  - Cactus can only be damaged by redirected fireballs (player must dodge first)
-  - This ensures player must skillfully dodge fireballs to redirect them back at the boss
-  - Prevents boss from self-damaging - requires player skill and timing
+  - Fireballs damage anything in their path as they chase the player
+  - If player dodges and something else is there (enemy or cactus), it gets hit
   - Fireball spawns outside cactus bounds to prevent immediate self-damage bug
-  - Creates strategic gameplay: dodge fireballs to redirect them at the boss, enemies get caught in crossfire
+  - Creates strategic gameplay: position yourself so fireballs hit enemies/cactus when you dodge
 ```
 
 ## User Preferences

@@ -809,7 +809,7 @@ export class Level {
 
         const fbBounds = fireball.getBounds();
 
-        // Fireballs can ALWAYS hit enemies in their path (no redirect needed)
+        // Fireballs hit enemies in their path as they chase the player
         this.enemies = this.enemies.filter(enemy => {
           if (!enemy.isActive()) return true; // Keep inactive enemies
 
@@ -817,20 +817,20 @@ export class Level {
           const hit = this.checkCollision(fbBounds, enemyBounds);
 
           if (hit) {
-            console.log('Fireball hit enemy in path! Enemy destroyed.');
+            console.log('Fireball hit enemy! Enemy destroyed.');
             fireball.kill();
             return false; // Remove enemy
           }
           return true; // Keep enemy
         });
 
-        // Fireballs can ONLY hit the cactus boss AFTER being redirected by player
-        if (fireball.isAlive() && fireball.isRedirected()) {
+        // Fireballs also hit the cactus if it's in their path (player dodged away)
+        if (fireball.isAlive()) {
           const cactusBounds = cactus.getBounds();
           const hit = this.checkCollision(fbBounds, cactusBounds);
 
           if (hit) {
-            console.log('Redirected fireball hit cactus!');
+            console.log('Fireball hit cactus! Damage dealt.');
             fireball.kill();
             cactus.takeDamage(1);
           }
