@@ -440,63 +440,101 @@ export class Level {
 
   private renderDesertEnvironment(ctx: CanvasRenderingContext2D) {
     // Crashed spacecraft in the center - Cosmo's origin story
-    const spacecraftX = this.canvasWidth / 2 - 40;
-    const spacecraftY = this.canvasHeight - 140;
+    const spacecraftX = this.canvasWidth / 2 - 80;
+    const spacecraftY = this.canvasHeight - 200;
     
     // Animated smoke particles rising from the crash site
     const time = Date.now() * 0.001;
-    for (let i = 0; i < 6; i++) {
-      const smokeX = spacecraftX + 30 + Math.sin(time + i) * 15;
-      const smokeY = spacecraftY - 20 - (time * 20 + i * 30) % 100;
-      const smokeSize = 8 + (time * 2 + i * 10) % 16;
-      const alpha = 1 - ((time * 20 + i * 30) % 100) / 100;
+    for (let i = 0; i < 8; i++) {
+      const smokeX = spacecraftX + 70 + Math.sin(time + i) * 20;
+      const smokeY = spacecraftY - 30 - (time * 15 + i * 25) % 120;
+      const smokeSize = 12 + (time * 2 + i * 10) % 20;
+      const alpha = 1 - ((time * 15 + i * 25) % 120) / 120;
       
-      ctx.fillStyle = `rgba(100, 100, 100, ${alpha * 0.4})`;
+      ctx.fillStyle = `rgba(100, 100, 100, ${alpha * 0.5})`;
       ctx.fillRect(smokeX - smokeSize / 2, smokeY, smokeSize, smokeSize);
     }
     
-    // Crashed spacecraft body (retro 50s style saucer)
+    // Crashed spacecraft body (retro 50s style saucer - large enough for pilot)
     ctx.save();
     
-    // Impact crater/scorch marks
+    // Large impact crater/scorch marks
     ctx.fillStyle = '#2F2F2F';
-    ctx.fillRect(spacecraftX - 20, spacecraftY + 50, 140, 8);
+    ctx.fillRect(spacecraftX - 40, spacecraftY + 90, 240, 12);
     ctx.fillStyle = '#1C1C1C';
-    ctx.fillRect(spacecraftX - 10, spacecraftY + 52, 120, 4);
+    ctx.fillRect(spacecraftX - 30, spacecraftY + 93, 220, 6);
     
     // Main saucer body (tilted/crashed)
-    ctx.translate(spacecraftX + 40, spacecraftY + 30);
-    ctx.rotate(-0.15); // Tilted from crash
+    ctx.translate(spacecraftX + 80, spacecraftY + 60);
+    ctx.rotate(-0.12); // Tilted from crash
     
-    // Bottom of saucer
+    // Bottom saucer base (wider)
     ctx.fillStyle = '#5A5A5A';
-    ctx.fillRect(-35, 0, 70, 12);
+    ctx.fillRect(-75, 0, 150, 20);
     
-    // Middle ring (yellow/orange band)
+    // Landing legs (broken/bent from crash)
+    ctx.fillStyle = '#3A3A3A';
+    ctx.fillRect(-60, 20, 6, 15);
+    ctx.fillRect(54, 20, 6, 12);
+    ctx.fillRect(0, 20, 6, 10);
+    
+    // Middle ring (yellow/orange band with panel details)
     ctx.fillStyle = '#FFD700';
-    ctx.fillRect(-38, -8, 76, 8);
+    ctx.fillRect(-80, -15, 160, 15);
     ctx.fillStyle = '#FFA500';
-    ctx.fillRect(-36, -6, 72, 4);
+    ctx.fillRect(-75, -12, 150, 9);
     
-    // Top dome (gray/silver with cyan windows)
-    ctx.fillStyle = '#8B8B8B';
-    ctx.fillRect(-24, -20, 48, 12);
-    ctx.fillRect(-16, -28, 32, 8);
+    // Panel lines/rivets on the band
+    ctx.fillStyle = '#CC8400';
+    for (let x = -70; x < 70; x += 20) {
+      ctx.fillRect(x, -14, 2, 13);
+    }
     
-    // Cockpit windows (cyan blue)
-    ctx.fillStyle = '#00CED1';
-    ctx.fillRect(-12, -24, 8, 6);
-    ctx.fillRect(4, -24, 8, 6);
-    
-    // Damage effects
-    ctx.fillStyle = '#1C1C1C'; // Burn marks
-    ctx.fillRect(20, -4, 12, 6);
-    ctx.fillRect(-28, 2, 8, 4);
-    
-    // Red fin/stabilizer (partially broken)
+    // Red accent lights/panels
     ctx.fillStyle = '#DC143C';
-    ctx.fillRect(32, -12, 16, 8);
-    ctx.fillRect(36, -16, 8, 4);
+    ctx.fillRect(-65, -11, 8, 6);
+    ctx.fillRect(57, -11, 8, 6);
+    
+    // Top dome (large enough for cockpit - gray/silver)
+    ctx.fillStyle = '#A8A8A8';
+    ctx.fillRect(-50, -45, 100, 30);
+    ctx.fillRect(-40, -55, 80, 10);
+    ctx.fillRect(-30, -62, 60, 7);
+    
+    // Dome shading for depth
+    ctx.fillStyle = '#8B8B8B';
+    ctx.fillRect(-48, -43, 96, 15);
+    
+    // Large cockpit windows (cyan blue) - big enough to see inside
+    ctx.fillStyle = '#00CED1';
+    ctx.fillRect(-35, -50, 20, 12);
+    ctx.fillRect(15, -50, 20, 12);
+    ctx.fillRect(-8, -52, 16, 10);
+    
+    // Window reflections
+    ctx.fillStyle = '#FFFFFF';
+    ctx.globalAlpha = 0.3;
+    ctx.fillRect(-33, -49, 8, 5);
+    ctx.fillRect(17, -49, 8, 5);
+    ctx.globalAlpha = 1;
+    
+    // Control panel visible through window
+    ctx.fillStyle = '#228B22';
+    ctx.fillRect(-6, -50, 3, 3);
+    ctx.fillStyle = '#FF0000';
+    ctx.fillRect(3, -50, 2, 2);
+    
+    // Damage effects (burn marks and impact damage)
+    ctx.fillStyle = '#1C1C1C';
+    ctx.fillRect(40, -8, 25, 12);
+    ctx.fillRect(-55, 3, 18, 8);
+    ctx.fillRect(20, -35, 15, 10);
+    
+    // Sparking damaged area (orange glow)
+    ctx.fillStyle = '#FF6600';
+    ctx.globalAlpha = 0.3 + Math.sin(time * 5) * 0.2;
+    ctx.fillRect(42, -6, 8, 6);
+    ctx.globalAlpha = 1;
     
     ctx.restore();
   }
