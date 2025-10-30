@@ -542,7 +542,61 @@ export class Level {
   }
 
   private renderCityEnvironment(ctx: CanvasRenderingContext2D) {
-    // Clean city environment - no non-interactive decorations
+    // Dystopian building silhouettes with pixel art detail
+    const buildings = [
+      { x: 0, height: 120, width: 80 },
+      { x: 80, height: 160, width: 90 },
+      { x: 170, height: 100, width: 70 },
+      { x: 240, height: 180, width: 85 },
+      { x: 325, height: 140, width: 75 },
+      { x: 400, height: 110, width: 80 },
+      { x: 480, height: 200, width: 95 },
+      { x: 575, height: 130, width: 70 },
+      { x: 645, height: 90, width: 65 },
+      { x: 710, height: 150, width: 90 }
+    ];
+
+    buildings.forEach(building => {
+      const y = this.canvasHeight - building.height;
+      
+      // Main building structure
+      ctx.fillStyle = '#2F2F2F';
+      ctx.fillRect(building.x, y, building.width, building.height);
+      
+      // Windows (some lit, some dark)
+      const windowSize = 6;
+      const windowSpacing = 12;
+      for (let wx = building.x + 8; wx < building.x + building.width - 8; wx += windowSpacing) {
+        for (let wy = y + 16; wy < y + building.height - 16; wy += windowSpacing) {
+          const isLit = Math.random() > 0.7;
+          ctx.fillStyle = isLit ? '#FFFF99' : '#1C1C1C';
+          ctx.fillRect(wx, wy, windowSize, windowSize);
+        }
+      }
+      
+      // Antenna or details on top
+      if (Math.random() > 0.5) {
+        ctx.fillStyle = '#FF0000';
+        ctx.fillRect(building.x + building.width/2, y - 8, 2, 8);
+      }
+    });
+
+    // Neon signs
+    ctx.fillStyle = '#FF1493'; // Deep pink neon
+    ctx.shadowColor = '#FF1493';
+    ctx.shadowBlur = 4;
+    ctx.fillRect(150, this.canvasHeight - 180, 32, 8);
+    ctx.fillStyle = '#00FFFF'; // Cyan neon
+    ctx.shadowColor = '#00FFFF';
+    ctx.fillRect(350, this.canvasHeight - 160, 24, 6);
+
+    // Debris on street
+    ctx.fillStyle = '#1C1C1C';
+    const debrisPositions = [120, 280, 420, 580];
+    debrisPositions.forEach(x => {
+      ctx.fillRect(x, this.canvasHeight - 40, 8, 4);
+      ctx.fillRect(x + 12, this.canvasHeight - 35, 6, 3);
+    });
   }
 
   private renderSubwayEnvironment(ctx: CanvasRenderingContext2D) {
