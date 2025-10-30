@@ -439,106 +439,11 @@ export class Level {
   }
 
   private renderDesertEnvironment(ctx: CanvasRenderingContext2D) {
-    // UFO wreckage scattered around
-    const wreckagePositions = [
-      { x: 100, y: this.canvasHeight - 120 },
-      { x: 300, y: this.canvasHeight - 100 },
-      { x: 600, y: this.canvasHeight - 110 }
-    ];
-
-    wreckagePositions.forEach(pos => {
-      // Crashed UFO parts (pixel art style)
-      ctx.fillStyle = '#4682B4'; // Steel blue
-      ctx.fillRect(pos.x, pos.y, 24, 8);
-      ctx.fillStyle = '#2F4F4F'; // Dark slate gray
-      ctx.fillRect(pos.x + 4, pos.y - 4, 16, 4);
-      
-      // Burn marks
-      ctx.fillStyle = '#1C1C1C';
-      ctx.fillRect(pos.x - 8, pos.y + 8, 40, 4);
-    });
-
-    // Desert cacti (8-bit style)
-    const cactiPositions = [150, 450, 700];
-    cactiPositions.forEach(x => {
-      const y = this.canvasHeight - 80;
-      // Main stem
-      ctx.fillStyle = '#228B22';
-      ctx.fillRect(x, y, 8, 32);
-      // Arms
-      ctx.fillRect(x - 8, y + 8, 8, 8);
-      ctx.fillRect(x + 8, y + 12, 8, 8);
-      // Spines
-      ctx.fillStyle = '#FFFF00';
-      for (let i = 0; i < 4; i++) {
-        ctx.fillRect(x + i * 2, y + i * 8, 1, 2);
-      }
-    });
-    
-    // Warning signs
-    ctx.fillStyle = '#FFD700';
-    ctx.fillRect(250, this.canvasHeight - 60, 16, 16);
-    ctx.fillStyle = '#FF0000';
-    ctx.font = 'bold 8px monospace';
-    ctx.fillText('!', 256, this.canvasHeight - 50);
+    // Clean desert environment - no non-interactive decorations
   }
 
   private renderCityEnvironment(ctx: CanvasRenderingContext2D) {
-    // Dystopian building silhouettes with pixel art detail
-    const buildings = [
-      { x: 0, height: 120, width: 80 },
-      { x: 80, height: 160, width: 90 },
-      { x: 170, height: 100, width: 70 },
-      { x: 240, height: 180, width: 85 },
-      { x: 325, height: 140, width: 75 },
-      { x: 400, height: 110, width: 80 },
-      { x: 480, height: 200, width: 95 },
-      { x: 575, height: 130, width: 70 },
-      { x: 645, height: 90, width: 65 },
-      { x: 710, height: 150, width: 90 }
-    ];
-
-    buildings.forEach(building => {
-      const y = this.canvasHeight - building.height;
-      
-      // Main building structure
-      ctx.fillStyle = '#2F2F2F';
-      ctx.fillRect(building.x, y, building.width, building.height);
-      
-      // Windows (some lit, some dark)
-      const windowSize = 6;
-      const windowSpacing = 12;
-      for (let wx = building.x + 8; wx < building.x + building.width - 8; wx += windowSpacing) {
-        for (let wy = y + 16; wy < y + building.height - 16; wy += windowSpacing) {
-          const isLit = Math.random() > 0.7;
-          ctx.fillStyle = isLit ? '#FFFF99' : '#1C1C1C';
-          ctx.fillRect(wx, wy, windowSize, windowSize);
-        }
-      }
-      
-      // Antenna or details on top
-      if (Math.random() > 0.5) {
-        ctx.fillStyle = '#FF0000';
-        ctx.fillRect(building.x + building.width/2, y - 8, 2, 8);
-      }
-    });
-
-    // Neon signs
-    ctx.fillStyle = '#FF1493'; // Deep pink neon
-    ctx.shadowColor = '#FF1493';
-    ctx.shadowBlur = 4;
-    ctx.fillRect(150, this.canvasHeight - 180, 32, 8);
-    ctx.fillStyle = '#00FFFF'; // Cyan neon
-    ctx.shadowColor = '#00FFFF';
-    ctx.fillRect(350, this.canvasHeight - 160, 24, 6);
-
-    // Debris on street
-    ctx.fillStyle = '#1C1C1C';
-    const debrisPositions = [120, 280, 420, 580];
-    debrisPositions.forEach(x => {
-      ctx.fillRect(x, this.canvasHeight - 40, 8, 4);
-      ctx.fillRect(x + 12, this.canvasHeight - 35, 6, 3);
-    });
+    // Clean city environment - no non-interactive decorations
   }
 
   private renderSubwayEnvironment(ctx: CanvasRenderingContext2D) {
