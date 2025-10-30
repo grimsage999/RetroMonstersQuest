@@ -439,7 +439,9 @@ export class Level {
   }
 
   private renderDesertEnvironment(ctx: CanvasRenderingContext2D) {
-    // Crashed spacecraft in the center - Cosmo's origin story
+    // Crashed spacecraft in the center - Cosmo's origin story (Level 1 only)
+    if (this.levelNumber !== 1) return;
+    
     const spacecraftX = this.canvasWidth / 2 - 80;
     const spacecraftY = this.canvasHeight - 200;
     
