@@ -181,6 +181,16 @@ Changelog:
   - Tilted crash position with scorch marks and burn damage to show impact
   - Animated smoke particles rising from crash site (drifting upward with fading opacity)
   - Non-interactive element serves as visual narrative showing Cosmo's origin/crash landing
+- October 30, 2025. Level 2-2 "Sewer Streets" with Manhole Hazards:
+  - Created Manhole.ts class with smooth opening/closing animations and timed cycles
+  - Added Level 2.5 configuration between Level 2 and Level 3
+  - Manholes open and close on configurable cycles (5 manholes with varying timings)
+  - Players fall in and lose a life only when manhole is open
+  - Collision detection integrated with damage system respecting open/closed state
+  - Updated LEVEL_SEQUENCE: 1 → 1.5 → 1.75 → 2 → 2.5 → 3 → 4 → 5
+  - Level uses same dystopian city backdrop/environment as Level 2
+  - Cutscene added explaining manhole hazard mechanic and timing challenge
+  - Teaches players to watch for environmental timing patterns
 ```
 
 ## User Preferences
