@@ -174,6 +174,13 @@ Changelog:
   - If player dodges and something else is there (enemy or cactus), it gets hit
   - Fireball spawns outside cactus bounds to prevent immediate self-damage bug
   - Creates strategic gameplay: position yourself so fireballs hit enemies/cactus when you dodge
+- October 30, 2025. Environment Cleanup & Storytelling Elements:
+  - Removed all non-interactive decorations from Levels 1 and 2 (UFO wreckage pieces, cacti, buildings, debris)
+  - Added crashed spacecraft wreckage in center of Level 1 as storytelling element
+  - Spacecraft features retro 50s flying saucer design with gray/silver dome, yellow/orange band, cyan windows
+  - Tilted crash position with scorch marks and burn damage to show impact
+  - Animated smoke particles rising from crash site (drifting upward with fading opacity)
+  - Non-interactive element serves as visual narrative showing Cosmo's origin/crash landing
 ```
 
 ## User Preferences

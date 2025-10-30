@@ -439,7 +439,66 @@ export class Level {
   }
 
   private renderDesertEnvironment(ctx: CanvasRenderingContext2D) {
-    // Clean desert environment - no non-interactive decorations
+    // Crashed spacecraft in the center - Cosmo's origin story
+    const spacecraftX = this.canvasWidth / 2 - 40;
+    const spacecraftY = this.canvasHeight - 140;
+    
+    // Animated smoke particles rising from the crash site
+    const time = Date.now() * 0.001;
+    for (let i = 0; i < 6; i++) {
+      const smokeX = spacecraftX + 30 + Math.sin(time + i) * 15;
+      const smokeY = spacecraftY - 20 - (time * 20 + i * 30) % 100;
+      const smokeSize = 8 + (time * 2 + i * 10) % 16;
+      const alpha = 1 - ((time * 20 + i * 30) % 100) / 100;
+      
+      ctx.fillStyle = `rgba(100, 100, 100, ${alpha * 0.4})`;
+      ctx.fillRect(smokeX - smokeSize / 2, smokeY, smokeSize, smokeSize);
+    }
+    
+    // Crashed spacecraft body (retro 50s style saucer)
+    ctx.save();
+    
+    // Impact crater/scorch marks
+    ctx.fillStyle = '#2F2F2F';
+    ctx.fillRect(spacecraftX - 20, spacecraftY + 50, 140, 8);
+    ctx.fillStyle = '#1C1C1C';
+    ctx.fillRect(spacecraftX - 10, spacecraftY + 52, 120, 4);
+    
+    // Main saucer body (tilted/crashed)
+    ctx.translate(spacecraftX + 40, spacecraftY + 30);
+    ctx.rotate(-0.15); // Tilted from crash
+    
+    // Bottom of saucer
+    ctx.fillStyle = '#5A5A5A';
+    ctx.fillRect(-35, 0, 70, 12);
+    
+    // Middle ring (yellow/orange band)
+    ctx.fillStyle = '#FFD700';
+    ctx.fillRect(-38, -8, 76, 8);
+    ctx.fillStyle = '#FFA500';
+    ctx.fillRect(-36, -6, 72, 4);
+    
+    // Top dome (gray/silver with cyan windows)
+    ctx.fillStyle = '#8B8B8B';
+    ctx.fillRect(-24, -20, 48, 12);
+    ctx.fillRect(-16, -28, 32, 8);
+    
+    // Cockpit windows (cyan blue)
+    ctx.fillStyle = '#00CED1';
+    ctx.fillRect(-12, -24, 8, 6);
+    ctx.fillRect(4, -24, 8, 6);
+    
+    // Damage effects
+    ctx.fillStyle = '#1C1C1C'; // Burn marks
+    ctx.fillRect(20, -4, 12, 6);
+    ctx.fillRect(-28, 2, 8, 4);
+    
+    // Red fin/stabilizer (partially broken)
+    ctx.fillStyle = '#DC143C';
+    ctx.fillRect(32, -12, 16, 8);
+    ctx.fillRect(36, -16, 8, 4);
+    
+    ctx.restore();
   }
 
   private renderCityEnvironment(ctx: CanvasRenderingContext2D) {
