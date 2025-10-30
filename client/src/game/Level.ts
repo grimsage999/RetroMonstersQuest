@@ -3,6 +3,7 @@ import { LEVEL_CONFIGS } from './GameConfig';
 import { OptimizedRenderer } from './OptimizedRenderer';
 import { DancingCactus, HazardConfig } from './DancingCactus';
 import { SpinningCactus } from './SpinningCactus';
+import { Manhole } from './Manhole';
 
 interface Cookie {
   x: number;
@@ -32,6 +33,7 @@ export class Level {
   private enemies: Enemy[] = [];
   private hazards: DancingCactus[] = [];
   private spinningCacti: SpinningCactus[] = [];
+  private manholes: Manhole[] = [];
   private finishLine: { x: number; y: number; width: number; height: number; } | null = null;
   private config: LevelConfig;
 
@@ -111,6 +113,7 @@ export class Level {
     // Initialize hazards
     this.hazards = [];
     this.spinningCacti = [];
+    this.manholes = [];
     if (this.config.hazards && this.config.hazards.length > 0) {
       this.config.hazards.forEach((hazardConfig: any) => {
         if (hazardConfig.type === 'dancing_cactus') {
@@ -130,6 +133,13 @@ export class Level {
             fireballHoming: hazardConfig.fireball.homing,
             fireballDamage: hazardConfig.fireball.damage
           }));
+        } else if (hazardConfig.type === 'manhole') {
+          this.manholes.push(new Manhole(
+            hazardConfig.position.x,
+            hazardConfig.position.y,
+            hazardConfig.openCycleDuration,
+            hazardConfig.openDuration
+          ));
         }
       });
     }
@@ -144,6 +154,11 @@ export class Level {
     // Update all hazards
     this.hazards.forEach(hazard => {
       hazard.update(deltaTime);
+    });
+
+    // Update manholes
+    this.manholes.forEach(manhole => {
+      manhole.update(deltaTime);
     });
 
     // Update spinning cacti with player position for targeting
@@ -161,6 +176,11 @@ export class Level {
     // Render background
     this.renderBackground(ctx);
     
+    // Render manholes (first, as ground-level hazards)
+    this.manholes.forEach(manhole => {
+      manhole.render(ctx);
+    });
+
     // Render hazards (before cookies so they're in background layer)
     this.hazards.forEach(hazard => {
       hazard.render(ctx);
@@ -200,6 +220,7 @@ export class Level {
         this.renderDesertBackground(ctx);
         break;
       case 2: // Dystopian City
+      case 2.5: // Sewer Streets (same city background)
         this.renderCityBackground(ctx);
         break;
       case 3: // Subway
@@ -419,6 +440,7 @@ export class Level {
         break;
         
       case 2: // City - Dystopian buildings and debris
+      case 2.5: // Sewer Streets - Same city environment
         this.renderCityEnvironment(ctx);
         break;
         
@@ -839,7 +861,12 @@ export class Level {
       cactus.checkCollision(playerBounds.x, playerBounds.y, playerBounds.width, playerBounds.height)
     );
 
-    return dancingCactusHit || spinningCactusHit;
+    // Check manholes (only dangerous when open)
+    const manholeHit = this.manholes.some(manhole =>
+      manhole.isDangerous() && this.checkCollision(playerBounds, manhole.getBounds())
+    );
+
+    return dancingCactusHit || spinningCactusHit || manholeHit;
   }
 
   private checkCollision(rect1: { x: number; y: number; width: number; height: number; }, rect2: { x: number; y: number; width: number; height: number; }): boolean {

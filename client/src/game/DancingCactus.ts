@@ -4,7 +4,7 @@
  */
 
 export interface HazardConfig {
-  type: 'dancing_cactus' | 'spinning_cactus';
+  type: 'dancing_cactus' | 'spinning_cactus' | 'manhole';
   position: { x: number; y: number };
   amplitude?: number;
   speed?: number;
@@ -15,6 +15,8 @@ export interface HazardConfig {
     homing: boolean;
     damage: number;
   };
+  openCycleDuration?: number;
+  openDuration?: number;
 }
 
 export class DancingCactus {

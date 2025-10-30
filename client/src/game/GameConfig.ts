@@ -114,7 +114,7 @@ export const GAME_CONFIG = {
   },
 
   // Level Progression Sequence
-  LEVEL_SEQUENCE: [1, 1.5, 1.75, 2, 3, 4, 5] as const,
+  LEVEL_SEQUENCE: [1, 1.5, 1.75, 2, 2.5, 3, 4, 5] as const,
 
   // Animation Configuration
   ANIMATION: {
@@ -237,6 +237,23 @@ export const LEVEL_CONFIGS = {
     description: 'Cracked pavement, crumbling skyscrapers, flickering neon signs, surveillance cameras',
     hazards: []
   },
+  2.5: {
+    background: '#2F4F4F',
+    fbiAgents: 10,
+    armyMen: 8,
+    radioactiveRats: 0,
+    zombies: 0,
+    cookies: 12,
+    title: 'Level 2-2: Sewer Streets',
+    description: 'Watch for opening manholes! Fall in and lose a life. Time your movements carefully!',
+    hazards: [
+      { type: 'manhole', position: { x: 150, y: 200 }, openCycleDuration: 4000, openDuration: 2000 },
+      { type: 'manhole', position: { x: 350, y: 380 }, openCycleDuration: 4500, openDuration: 2200 },
+      { type: 'manhole', position: { x: 550, y: 280 }, openCycleDuration: 4200, openDuration: 2000 },
+      { type: 'manhole', position: { x: 750, y: 420 }, openCycleDuration: 4800, openDuration: 2400 },
+      { type: 'manhole', position: { x: 450, y: 150 }, openCycleDuration: 4300, openDuration: 2100 }
+    ]
+  },
   3: {
     background: '#1C1C1C',
     fbiAgents: 8,
@@ -292,6 +309,11 @@ export const CUTSCENE_DATA = {
     levelNumber: 2,
     title: "Level 2: Dystopian City",
     description: "Government forces mobilize across crumbling streets.\nCracked pavement, neon signs, and surveillance everywhere.\nAmbient citizens watch from windows as you flee."
+  },
+  2.5: {
+    levelNumber: 2.5,
+    title: "Level 2-2: Sewer Streets",
+    description: "The city streets are filled with manholes!\n\nWatch out—they open and close periodically.\nFall in and you'll lose a life!\n\nNew Challenge: Time your movements to avoid falling!"
   },
   3: {
     levelNumber: 3,
