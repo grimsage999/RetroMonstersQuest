@@ -54,17 +54,18 @@ body {
 
 /* Compact stats overlay in corner */
 .stats-overlay {
-    position: absolute;
-    top: 15px;
-    right: 15px;
-    background: rgba(0, 0, 0, 0.85);
+    position: fixed;
+    top: 140px;
+    right: 10px;
+    background: rgba(0, 0, 0, 0.75);
     border: 2px solid #00ff00;
-    border-radius: 10px;
-    padding: 12px 15px;
-    box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
-    backdrop-filter: blur(8px);
+    border-radius: 8px;
+    padding: 10px 12px;
+    box-shadow: 0 0 15px rgba(0, 255, 0, 0.2);
+    backdrop-filter: blur(5px);
     z-index: 100;
-    min-width: 150px;
+    min-width: 130px;
+    opacity: 0.9;
 }
 
 /* Make canvas viewport-friendly */
@@ -123,8 +124,8 @@ body {
 }
 
 .compact-stats {
-  font-size: 16px;
-  gap: 6px;
+  font-size: 14px;
+  gap: 5px;
 }
 
 .stat-line {
