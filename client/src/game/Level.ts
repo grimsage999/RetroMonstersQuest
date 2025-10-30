@@ -414,6 +414,7 @@ export class Level {
     switch (this.levelNumber) {
       case 1: // Desert - Area 51 with UFO wreckage and structures
       case 1.5: // Desert with dancing cacti hazards
+      case 1.75: // Desert with spinning cactus
         this.renderDesertEnvironment(ctx);
         break;
         
@@ -473,12 +474,6 @@ export class Level {
         ctx.fillRect(x + i * 2, y + i * 8, 1, 2);
       }
     });
-
-    // Area 51 hangar in background
-    ctx.fillStyle = '#2F2F2F';
-    ctx.fillRect(50, this.canvasHeight * 0.4, 120, 80);
-    ctx.fillStyle = '#1C1C1C';
-    ctx.fillRect(60, this.canvasHeight * 0.4 + 10, 100, 60);
     
     // Warning signs
     ctx.fillStyle = '#FFD700';
