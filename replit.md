@@ -57,10 +57,9 @@ Preferred communication style: Simple, everyday language.
 - October 31, 2025. Weapon X - Bubble Shield Power-Up System:
   - **Created WeaponX.ts class** - collectible red ball with white stripe that unlocks bubble shield ability
   - **Created BubbleShield.ts class** - green bubble shield with enemy repulsion and paralysis effects
-  - **Added Levels 5.5 and 5.75** - Government Lab themed levels introducing Weapon X
-  - Updated LEVEL_SEQUENCE: 1 → 1.5 → 1.75 → 2 → 2.5 → 2.75 → 3 → 3.5 → 4 → 4.5 → 5 → 5.5 → 5.75
-  - **Level 5.5 "Weapon X Discovery"**: Government Lab environment with Weapon X collectible in center, no enemies
-  - **Level 5.75 "Lab Escape"**: Same Government Lab aesthetic as Level 5, tests new ability
+  - **Added Level 5.5** - Government Lab themed level introducing Weapon X
+  - Updated LEVEL_SEQUENCE: 1 → 1.5 → 1.75 → 2 → 2.5 → 2.75 → 3 → 3.5 → 4 → 4.5 → 5 → 5.5 → 6
+  - **Level 5.5 "Weapon X Discovery"**: Government Lab environment with Weapon X collectible in center, no enemies, leads to Level 6 (The Void)
   - **Weapon X mechanics**:
     - Red ball with white stripe collectible spawns in level center
     - Displays unlock message for 3 seconds: "You've found 'Weapon X' - Press X to use"

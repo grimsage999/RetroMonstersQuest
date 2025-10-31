@@ -114,7 +114,7 @@ export const GAME_CONFIG = {
   },
 
   // Level Progression Sequence
-  LEVEL_SEQUENCE: [1, 1.5, 1.75, 2, 2.5, 2.75, 3, 3.5, 4, 4.5, 5, 5.5, 5.75] as const,
+  LEVEL_SEQUENCE: [1, 1.5, 1.75, 2, 2.5, 2.75, 3, 3.5, 4, 4.5, 5, 5.5, 6] as const,
 
   // Animation Configuration
   ANIMATION: {
