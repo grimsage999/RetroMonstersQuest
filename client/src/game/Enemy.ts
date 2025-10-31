@@ -58,6 +58,12 @@ export class Enemy {
   private animationTimer: number = 0;
   private active: boolean = true;
   private id: string;
+  
+  // Paralysis effect from Weapon X bubble shield
+  private paralyzed: boolean = false;
+  private paralysisTimer: number = 0;
+  private paralysisFlashTimer: number = 0;
+  private paralyzedDuration: number = 2000; // 2 seconds paralysis
 
   constructor(x: number, y: number, type: EnemyType) {
     this.x = x;
@@ -106,6 +112,19 @@ export class Enemy {
   public update(deltaTime: number, canvasWidth: number, canvasHeight: number) {
     if (!this.active) return;
     
+    // Update paralysis state
+    if (this.paralyzed) {
+      this.paralysisTimer -= deltaTime * 1000;
+      this.paralysisFlashTimer += deltaTime;
+      
+      if (this.paralysisTimer <= 0) {
+        this.paralyzed = false;
+        this.paralysisTimer = 0;
+      }
+      
+      return;
+    }
+    
     // Restore original movement speed - no deltaTime normalization
     this.x += this.speedX;
     this.y += this.speedY;
@@ -136,8 +155,32 @@ export class Enemy {
     ctx.save();
     ctx.imageSmoothingEnabled = false;
     
+    // Paralysis visual effect - green tint with flickering
+    if (this.paralyzed) {
+      const flashPhase = Math.floor(this.paralysisFlashTimer * 10) % 2;
+      if (flashPhase === 0) {
+        ctx.filter = 'brightness(0.6) saturate(0.5)';
+      }
+      
+      ctx.shadowBlur = 15;
+      ctx.shadowColor = '#00ff00';
+    }
+    
     const spriteData = this.getSpriteData();
     this.renderEnemySprite(ctx, spriteData);
+    
+    // Draw paralysis indicator around enemy
+    if (this.paralyzed) {
+      const centerX = this.x + this.width / 2;
+      const centerY = this.y + this.height / 2;
+      const pulseSize = 5 + Math.sin(this.paralysisFlashTimer * 8) * 3;
+      
+      ctx.strokeStyle = `rgba(0, 255, 0, ${0.7 + Math.sin(this.paralysisFlashTimer * 10) * 0.3})`;
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, this.width / 2 + pulseSize, 0, Math.PI * 2);
+      ctx.stroke();
+    }
     
     ctx.restore();
   }
@@ -339,6 +382,31 @@ export class Enemy {
 
   public getId(): string {
     return this.id;
+  }
+  
+  public paralyze(): void {
+    if (!this.paralyzed) {
+      this.paralyzed = true;
+      this.paralysisTimer = this.paralyzedDuration;
+      this.paralysisFlashTimer = 0;
+    }
+  }
+  
+  public isParalyzed(): boolean {
+    return this.paralyzed;
+  }
+  
+  public applyRepulsionForce(dx: number, dy: number): void {
+    if (this.paralyzed) return;
+    
+    const canvasWidth = 800;
+    const canvasHeight = 600;
+    
+    this.x += dx * 0.016;
+    this.y += dy * 0.016;
+    
+    this.x = Math.max(0, Math.min(canvasWidth - this.width, this.x));
+    this.y = Math.max(0, Math.min(canvasHeight - this.height, this.y));
   }
 
   private getZombieWalkFrame1() {
