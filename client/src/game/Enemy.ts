@@ -114,7 +114,7 @@ export class Enemy {
     
     // Update paralysis state
     if (this.paralyzed) {
-      this.paralysisTimer -= deltaTime * 1000;
+      this.paralysisTimer -= deltaTime;
       this.paralysisFlashTimer += deltaTime;
       
       if (this.paralysisTimer <= 0) {
@@ -157,7 +157,7 @@ export class Enemy {
     
     // Paralysis visual effect - green tint with flickering
     if (this.paralyzed) {
-      const flashPhase = Math.floor(this.paralysisFlashTimer * 10) % 2;
+      const flashPhase = Math.floor(this.paralysisFlashTimer * 0.01) % 2;
       if (flashPhase === 0) {
         ctx.filter = 'brightness(0.6) saturate(0.5)';
       }
@@ -173,9 +173,9 @@ export class Enemy {
     if (this.paralyzed) {
       const centerX = this.x + this.width / 2;
       const centerY = this.y + this.height / 2;
-      const pulseSize = 5 + Math.sin(this.paralysisFlashTimer * 8) * 3;
+      const pulseSize = 5 + Math.sin(this.paralysisFlashTimer * 0.008) * 3;
       
-      ctx.strokeStyle = `rgba(0, 255, 0, ${0.7 + Math.sin(this.paralysisFlashTimer * 10) * 0.3})`;
+      ctx.strokeStyle = `rgba(0, 255, 0, ${0.7 + Math.sin(this.paralysisFlashTimer * 0.01) * 0.3})`;
       ctx.lineWidth = 3;
       ctx.beginPath();
       ctx.arc(centerX, centerY, this.width / 2 + pulseSize, 0, Math.PI * 2);

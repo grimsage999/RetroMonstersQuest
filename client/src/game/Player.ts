@@ -78,7 +78,10 @@ export class Player {
   public update(inputManager: InputManager, deltaTime: number, canvasWidth: number, canvasHeight: number) {
     // Update Weapon X message timer
     if (this.weaponXMessageTimer > 0) {
-      this.weaponXMessageTimer -= deltaTime * 1000;
+      this.weaponXMessageTimer -= deltaTime;
+      if (this.weaponXMessageTimer < 0) {
+        this.weaponXMessageTimer = 0;
+      }
     }
     
     // Update bubble shield
@@ -716,7 +719,7 @@ export class Player {
   private renderWeaponXMessage(ctx: CanvasRenderingContext2D): void {
     ctx.save();
     
-    const alpha = Math.min(1, this.weaponXMessageTimer / 500);
+    const alpha = Math.max(0, Math.min(1, this.weaponXMessageTimer / this.weaponXMessageDuration));
     ctx.globalAlpha = alpha;
     
     const centerX = this.x + this.width / 2;

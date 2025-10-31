@@ -39,17 +39,16 @@ export class BubbleShield {
   }
 
   public update(deltaTime: number): void {
-    const dt = deltaTime * 1000;
-
+    // deltaTime is already in milliseconds (consistent with rest of game engine)
     if (this.active) {
-      this.activeTime -= dt;
-      this.pulseOffset += deltaTime * 3;
+      this.activeTime -= deltaTime;
+      this.pulseOffset += deltaTime * 0.003;
       
-      this.expandRadius = Math.min(this.expandRadius + deltaTime * 200, this.radius);
+      this.expandRadius = Math.min(this.expandRadius + deltaTime * 0.2, this.radius);
 
       this.sparkles.forEach(sparkle => {
-        sparkle.angle += deltaTime * 2;
-        sparkle.life = Math.max(0, sparkle.life - deltaTime * 0.3);
+        sparkle.angle += deltaTime * 0.002;
+        sparkle.life = Math.max(0, sparkle.life - deltaTime * 0.0003);
       });
 
       if (this.activeTime <= 0) {
@@ -58,7 +57,7 @@ export class BubbleShield {
     }
 
     if (this.cooldownTime > 0) {
-      this.cooldownTime -= dt;
+      this.cooldownTime -= deltaTime;
       if (this.cooldownTime <= 0) {
         this.cooldownTime = 0;
         logger.info('🛡️ Bubble Shield ready!');
