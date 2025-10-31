@@ -773,13 +773,192 @@ export class Level {
   }
 
   private renderSubwayBackground(ctx: CanvasRenderingContext2D) {
-    // PERFORMANCE FIX: Solid colors instead of gradients and tile loops
-    ctx.fillStyle = '#4A4A4A'; // Gray walls
-    ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight * 0.8);
+    // Dark blue-gray ambient color scheme
+    const darkWall = '#2C3E50';
+    const lightWall = '#34495E';
+    const tileGrout = '#1C2833';
+    const platformGray = '#5D6D7E';
     
-    // Simple floor
-    ctx.fillStyle = '#4169E1'; // Blue floor
+    // Ceiling with tile pattern
+    ctx.fillStyle = '#1C2833';
+    ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight * 0.25);
+    
+    // Ceiling tiles pattern
+    ctx.strokeStyle = '#0F1419';
+    ctx.lineWidth = 1;
+    for (let x = 0; x < this.canvasWidth; x += 40) {
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, this.canvasHeight * 0.25);
+      ctx.stroke();
+    }
+    for (let y = 0; y < this.canvasHeight * 0.25; y += 20) {
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(this.canvasWidth, y);
+      ctx.stroke();
+    }
+    
+    // Hanging fluorescent lights
+    const lights = [
+      { x: 100, y: this.canvasHeight * 0.15 },
+      { x: 220, y: this.canvasHeight * 0.15 },
+      { x: 340, y: this.canvasHeight * 0.15 },
+      { x: 460, y: this.canvasHeight * 0.15 },
+      { x: 580, y: this.canvasHeight * 0.15 },
+      { x: 700, y: this.canvasHeight * 0.15 },
+    ];
+    
+    lights.forEach(light => {
+      // Light fixture housing
+      ctx.fillStyle = '#555555';
+      ctx.fillRect(light.x - 30, light.y - 4, 60, 8);
+      // Light glow
+      ctx.fillStyle = '#FFF8DC';
+      ctx.fillRect(light.x - 28, light.y - 2, 56, 4);
+      // Light beam (subtle)
+      const gradient = ctx.createLinearGradient(light.x, light.y, light.x, light.y + 100);
+      gradient.addColorStop(0, 'rgba(255, 248, 220, 0.2)');
+      gradient.addColorStop(1, 'rgba(255, 248, 220, 0)');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(light.x - 35, light.y, 70, 100);
+    });
+    
+    // Tiled walls with brick pattern
+    this.renderSubwayWalls(ctx);
+    
+    // Support pillars
+    this.renderSubwayPillars(ctx);
+    
+    // Station signs
+    this.renderStationSigns(ctx);
+    
+    // Platform floor
+    ctx.fillStyle = platformGray;
+    ctx.fillRect(0, this.canvasHeight * 0.7, this.canvasWidth, this.canvasHeight * 0.1);
+    
+    // Platform edge (yellow warning line)
+    ctx.fillStyle = '#F1C40F';
+    ctx.fillRect(0, this.canvasHeight * 0.79, this.canvasWidth, 3);
+    
+    // Track area (darker)
+    ctx.fillStyle = '#1C1C1C';
     ctx.fillRect(0, this.canvasHeight * 0.8, this.canvasWidth, this.canvasHeight * 0.2);
+    
+    // Subway tracks
+    this.renderSubwayTracks(ctx);
+  }
+  
+  private renderSubwayWalls(ctx: CanvasRenderingContext2D) {
+    const wallTop = this.canvasHeight * 0.25;
+    const wallHeight = this.canvasHeight * 0.45;
+    const tileSize = 16;
+    
+    // Left wall
+    ctx.fillStyle = '#34495E';
+    ctx.fillRect(0, wallTop, this.canvasWidth * 0.2, wallHeight);
+    
+    // Tile pattern on left wall
+    ctx.strokeStyle = '#2C3E50';
+    ctx.lineWidth = 1;
+    for (let x = 0; x < this.canvasWidth * 0.2; x += tileSize) {
+      for (let y = wallTop; y < wallTop + wallHeight; y += tileSize) {
+        ctx.strokeRect(x, y, tileSize, tileSize);
+      }
+    }
+    
+    // Right wall
+    ctx.fillStyle = '#34495E';
+    ctx.fillRect(this.canvasWidth * 0.8, wallTop, this.canvasWidth * 0.2, wallHeight);
+    
+    // Tile pattern on right wall
+    for (let x = this.canvasWidth * 0.8; x < this.canvasWidth; x += tileSize) {
+      for (let y = wallTop; y < wallTop + wallHeight; y += tileSize) {
+        ctx.strokeRect(x, y, tileSize, tileSize);
+      }
+    }
+  }
+  
+  private renderSubwayPillars(ctx: CanvasRenderingContext2D) {
+    const pillars = [
+      { x: this.canvasWidth * 0.15 },
+      { x: this.canvasWidth * 0.35 },
+      { x: this.canvasWidth * 0.55 },
+      { x: this.canvasWidth * 0.75 },
+    ];
+    
+    pillars.forEach(pillar => {
+      const pillarWidth = 20;
+      const pillarTop = this.canvasHeight * 0.25;
+      const pillarHeight = this.canvasHeight * 0.45;
+      
+      // Pillar body
+      ctx.fillStyle = '#2C3E50';
+      ctx.fillRect(pillar.x - pillarWidth / 2, pillarTop, pillarWidth, pillarHeight);
+      
+      // Pillar highlight (3D effect)
+      ctx.fillStyle = '#34495E';
+      ctx.fillRect(pillar.x - pillarWidth / 2, pillarTop, pillarWidth / 3, pillarHeight);
+      
+      // Pillar shadow
+      ctx.fillStyle = '#1C2833';
+      ctx.fillRect(pillar.x + pillarWidth / 6, pillarTop, pillarWidth / 3, pillarHeight);
+    });
+  }
+  
+  private renderStationSigns(ctx: CanvasRenderingContext2D) {
+    // Times Square sign (left)
+    const leftSignX = this.canvasWidth * 0.15;
+    const leftSignY = this.canvasHeight * 0.35;
+    
+    ctx.fillStyle = '#1C2833';
+    ctx.fillRect(leftSignX - 60, leftSignY, 120, 30);
+    ctx.strokeStyle = '#FFFFFF';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(leftSignX - 60, leftSignY, 120, 30);
+    
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = 'bold 12px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('TIMES SQUARE', leftSignX, leftSignY + 20);
+    
+    // Downtown sign (right)
+    const rightSignX = this.canvasWidth * 0.85;
+    const rightSignY = this.canvasHeight * 0.35;
+    
+    ctx.fillStyle = '#1C2833';
+    ctx.fillRect(rightSignX - 60, rightSignY, 120, 30);
+    ctx.strokeStyle = '#FFFFFF';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(rightSignX - 60, rightSignY, 120, 30);
+    
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillText('DOWNTOWN', rightSignX, rightSignY + 20);
+    
+    ctx.textAlign = 'left';
+  }
+  
+  private renderSubwayTracks(ctx: CanvasRenderingContext2D) {
+    const trackY = this.canvasHeight * 0.85;
+    
+    // Track rails (metallic silver)
+    ctx.fillStyle = '#808080';
+    
+    // Left track
+    ctx.fillRect(this.canvasWidth * 0.3, trackY, this.canvasWidth * 0.15, 4);
+    // Right track  
+    ctx.fillRect(this.canvasWidth * 0.55, trackY, this.canvasWidth * 0.15, 4);
+    
+    // Rail ties (wooden planks)
+    ctx.fillStyle = '#4A4A4A';
+    for (let x = 0; x < this.canvasWidth; x += 20) {
+      ctx.fillRect(this.canvasWidth * 0.28 + x * 0.2, trackY - 3, 12, 10);
+    }
+    
+    // Track highlights
+    ctx.fillStyle = '#A0A0A0';
+    ctx.fillRect(this.canvasWidth * 0.3, trackY, this.canvasWidth * 0.15, 1);
+    ctx.fillRect(this.canvasWidth * 0.55, trackY, this.canvasWidth * 0.15, 1);
   }
 
   private renderGraveyardBackground(ctx: CanvasRenderingContext2D) {
