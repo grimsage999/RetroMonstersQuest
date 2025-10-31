@@ -225,7 +225,7 @@ export class LevelTransitionManager {
     const tips = [
       'Tip: Press Shift to dash!',
       'Tip: Collect all cookies to proceed',
-      'Tip: Ray Gun unlocks at Level 3',
+      'Tip: Press Space to teleport to a random location!',
       'Tip: Watch out for enemy patterns',
       'Tip: The Adjudicator awaits in Level 5'
     ];
