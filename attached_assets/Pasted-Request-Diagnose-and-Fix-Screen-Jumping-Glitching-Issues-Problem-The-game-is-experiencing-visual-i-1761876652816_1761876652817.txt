@@ -1,0 +1,209 @@
+Request: Diagnose and Fix Screen Jumping/Glitching Issues
+Problem: The game is experiencing visual instability—the screen jumps, glitches, and sometimes shifts to different sides unexpectedly during gameplay.
+Symptoms Observed
+
+Screen jumps or jolts during gameplay
+Visual glitching/stuttering
+Game view randomly shifts left/right
+Display appears unstable or jittery
+
+Investigation Priorities
+1. Camera/Viewport Issues
+
+Check if camera tracking is causing jerky movements
+Look for conflicting scroll or position updates
+Verify camera boundaries are properly set
+Examine camera follow logic for player movement
+Check if viewport is being repositioned incorrectly
+
+2. Canvas/Rendering Problems
+
+Inspect canvas position and size calculations
+Look for conflicting CSS positioning (absolute, fixed, relative)
+Check if canvas is being moved or resized dynamically
+Verify rendering loop is stable and consistent
+Look for double-rendering or competing render calls
+
+3. Collision Detection Issues
+
+Check if player is getting stuck in walls/obstacles
+Look for collision resolution pushing player unexpectedly
+Verify hitbox calculations aren't causing position jumps
+Examine edge-case collisions that might teleport player
+
+4. Game Loop & Frame Rate
+
+Verify requestAnimationFrame is being used correctly
+Check for multiple game loops running simultaneously
+Look for timing issues causing frame skips
+Examine delta time calculations
+Check if frame rate is inconsistent
+
+5. Player Movement & Physics
+
+Review player position update logic
+Check for teleportation bugs in movement code
+Look for conflicting position assignments
+Verify velocity/acceleration calculations
+Check if player position is being reset unexpectedly
+
+6. Coordinate System Issues
+
+Check for coordinate system conflicts (screen vs. world coordinates)
+Verify all position calculations use same reference frame
+Look for mixing pixel and tile coordinates
+Examine any coordinate transformations
+
+
+Code Review Checklist
+Core Systems to Inspect:
+✓ Main game loop
+
+Is there only ONE active game loop?
+Is requestAnimationFrame being used properly?
+Are there any setInterval/setTimeout competing with main loop?
+
+✓ Camera/scroll logic
+
+How is the camera following the player?
+Are there multiple camera update functions?
+Is scrolling being calculated correctly?
+Are camera boundaries enforced properly?
+
+✓ Rendering pipeline
+
+Where and how often is the canvas cleared?
+Are all draw calls happening in the correct order?
+Is anything being rendered outside the main loop?
+
+✓ Player position updates
+
+How many places modify player.x and player.y?
+Are position updates happening in multiple functions?
+Is there a single source of truth for player position?
+
+✓ Event listeners
+
+Are keyboard/mouse events properly managed?
+Are there duplicate event listeners?
+Could events be firing multiple times?
+
+✓ Level transitions
+
+Does screen jumping happen during level changes?
+Is the viewport properly reset between levels?
+Are level boundaries correctly defined?
+
+
+Debugging Steps
+Step 1: Console Logging
+Add temporary logging to track:
+javascript// Player position tracking
+console.log('Player X:', player.x, 'Player Y:', player.y);
+
+// Camera position tracking  
+console.log('Camera X:', camera.x, 'Camera Y:', camera.y);
+
+// Canvas position
+console.log('Canvas offset:', canvas.offsetLeft, canvas.offsetTop);
+Step 2: Check for Multiple Updates
+
+Search codebase for all instances of player.x = and player.y =
+Look for conflicting position assignments
+Verify only one system controls player position per frame
+
+Step 3: Isolate the Issue
+
+Does jumping happen on all levels or specific ones?
+Does it occur during certain actions (jumping, collecting cookies, attacks)?
+Is it constant or intermittent?
+Does it happen with Level 2.75's alligator mini-boss specifically?
+
+Step 4: Frame Rate Analysis
+
+Check browser console for frame rate
+Look for performance warnings or errors
+Monitor CPU usage during gameplay
+
+
+Common Causes & Solutions
+Likely Issue #1: Conflicting Camera Logic
+
+Symptom: Screen follows player but jerks/jumps
+Check: Multiple camera update functions competing
+Fix: Consolidate all camera logic into single function
+
+Likely Issue #2: Canvas Position CSS Conflicts
+
+Symptom: Entire game shifts left/right on screen
+Check: CSS positioning rules conflicting
+Fix: Ensure canvas has stable, consistent positioning
+
+Likely Issue #3: Collision Pushback
+
+Symptom: Player jumps when hitting walls/obstacles
+Check: Collision resolution overshooting corrections
+Fix: Smooth collision response calculations
+
+Likely Issue #4: Multiple Game Loops
+
+Symptom: Everything glitches, unstable frame rate
+Check: requestAnimationFrame called multiple times
+Fix: Ensure only one game loop is active
+
+Likely Issue #5: Coordinate System Mix-up
+
+Symptom: Random position jumps
+Check: Mixing world coordinates with screen coordinates
+Fix: Use consistent coordinate system throughout
+
+Likely Issue #6: Level 2.75 Mini-Boss Spawning
+
+Symptom: Jumps happen when alligator attacks
+Check: Mini-boss spawn/attack causing camera shift
+Fix: Ensure mini-boss animations don't affect viewport
+
+
+Immediate Actions Needed
+
+Search for these patterns in code:
+
+requestAnimationFrame (should appear only once in main loop)
+player.x = and player.y = (count all occurrences)
+camera or scroll (review all camera-related code)
+canvas.style (check for dynamic positioning)
+
+
+Add diagnostic logging:
+
+Log player position every frame temporarily
+Log camera position every frame temporarily
+Note when jumps occur in console
+
+
+Test systematically:
+
+Play Level 1 - does jumping occur?
+Play Level 2.2 - does jumping occur?
+Play Level 2.75 - does it worsen with mini-boss?
+Use dev tools to skip levels and compare
+
+
+
+
+Expected Outcome
+
+Root cause identified through code review
+Specific problem areas pinpointed (camera, collision, rendering, etc.)
+Bugs fixed to eliminate jumping/glitching
+Smooth, stable gameplay with consistent frame rate
+Explanation of what was causing the issue
+
+
+Please investigate these systems and report back:
+
+What specific code is causing the screen jumping?
+Are there multiple systems trying to control the camera/viewport?
+Is the issue tied to specific levels or game events?
+What fixes were applied?
+Does the game run smoothly after corrections?
