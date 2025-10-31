@@ -166,7 +166,7 @@ export class SpinningCactus {
 
     // Check collision with fireballs - fireballs ALWAYS damage the player
     for (const fireball of this.fireballs) {
-      if (!fireball.isAlive()) continue;
+      if (!fireball.isAlive() || fireball.hasHitPlayer()) continue;
 
       const fbBounds = fireball.getBounds();
       if (playerX < fbBounds.x + fbBounds.width &&
@@ -174,7 +174,8 @@ export class SpinningCactus {
           playerY < fbBounds.y + fbBounds.height &&
           playerY + playerHeight > fbBounds.y) {
         logger.info('🔥 FIREBALL HIT PLAYER! Taking 1 damage.');
-        fireball.kill();
+        // Mark for removal but don't kill yet - let it check enemy collisions first
+        fireball.markHitPlayer();
         return true;
       }
     }

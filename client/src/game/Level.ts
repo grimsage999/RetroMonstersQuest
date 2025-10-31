@@ -1196,7 +1196,8 @@ export class Level {
         const fbBounds = fireball.getBounds();
 
         // CRITICAL: Fireballs only damage enemies/cactus AFTER being redirected by player
-        if (fireball.isRedirected()) {
+        // AND only if they haven't already hit the player
+        if (fireball.isRedirected() && !fireball.hasHitPlayer()) {
           // Redirected fireballs hit enemies in their path
           this.enemies = this.enemies.filter(enemy => {
             if (!enemy.isActive()) return true; // Keep inactive enemies
@@ -1205,7 +1206,7 @@ export class Level {
             const hit = this.checkCollision(fbBounds, enemyBounds);
 
             if (hit) {
-              logger.info('Redirected fireball hit enemy! Enemy destroyed.');
+              logger.info('💥 Redirected fireball hit enemy! Enemy destroyed.');
               fireball.kill();
               return false; // Remove enemy
             }
@@ -1218,11 +1219,16 @@ export class Level {
             const hit = this.checkCollision(fbBounds, cactusBounds);
 
             if (hit) {
-              logger.info('Redirected fireball hit cactus! Damage dealt.');
+              logger.info('💥 Redirected fireball hit cactus! Damage dealt.');
               fireball.kill();
               cactus.takeDamage(1);
             }
           }
+        }
+
+        // Clean up fireballs that hit the player
+        if (fireball.hasHitPlayer()) {
+          fireball.kill();
         }
       });
     });

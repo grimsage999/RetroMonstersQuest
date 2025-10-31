@@ -21,6 +21,7 @@ export class Fireball {
   private alive: boolean = true;
   private trailPositions: Array<{ x: number; y: number; alpha: number }> = [];
   private redirected: boolean = false; // Becomes true when player dodges (gets close)
+  private hitPlayer: boolean = false; // Track if fireball hit player this frame
 
   constructor(config: FireballConfig) {
     this.x = config.x;
@@ -170,5 +171,13 @@ export class Fireball {
 
   public isRedirected(): boolean {
     return this.redirected;
+  }
+
+  public markHitPlayer(): void {
+    this.hitPlayer = true;
+  }
+
+  public hasHitPlayer(): boolean {
+    return this.hitPlayer;
   }
 }
