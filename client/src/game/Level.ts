@@ -456,10 +456,12 @@ export class Level {
         break;
         
       case 3: // Subway - Underground infrastructure
+      case 3.5: // Sewer Boss - Same subway environment
         this.renderSubwayEnvironment(ctx);
         break;
         
       case 4: // Graveyard - Tombstones and dead trees
+      case 4.5: // Necromancer's Curse - Same graveyard environment
         this.renderGraveyardEnvironment(ctx);
         break;
         
