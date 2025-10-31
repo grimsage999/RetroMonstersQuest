@@ -54,6 +54,39 @@ Preferred communication style: Simple, everyday language.
 ## Recent Changes
 
 ```
+- October 31, 2025. Level 3.5 "Sewer Boss" with Free-Roaming Alligator Boss:
+  - Created AlligatorBoss.ts class - free-roaming version of the alligator that moves on ground
+  - Added Level 3.5 configuration between Level 3 and Level 4
+  - Updated LEVEL_SEQUENCE: 1 → 1.5 → 1.75 → 2 → 2.5 → 2.75 → 3 → 3.5 → 4 → 4.5 → 5
+  - Alligator boss positioned in the center of the sewer (400, 350)
+  - NOT limited by manholes - roams freely throughout the level
+  - Wears a greasy white tank top with visible stains
+  - **Attack patterns**:
+    - Bite attack: Lunges toward player with snapping jaws
+    - Eat and spit: Consumes nearby enemies and spits them as projectiles at player
+  - **Enemy-eating mechanic**:
+    - Alligator can eat enemies within 100-pixel range during attack phase
+    - Spits up to 3 eaten enemies as projectiles toward player
+    - Projectiles travel at 8x speed with slight spread for difficulty
+  - **Movement behavior**:
+    - Actively chases player with 2.5 speed
+    - Slows down during warning phase
+    - Lunges at 3x speed during bite attacks
+  - **Attack frequency** (scales with cookie count):
+    - High cookies (>70%): 4-5 seconds between attacks
+    - Medium cookies (30-70%): 3-4 seconds between attacks
+    - Low cookies (<30%): 2-3 seconds between attacks
+  - ONE-HIT KILL mechanic - both bite and spit projectiles are instant death (dash provides invulnerability)
+  - **Audio system**:
+    - Intro laugh (0.4x playback rate)
+    - Attack warning sound (0.6x playback rate)
+    - Eating sound (0.5x playback rate)
+  - **Visual design**: Green alligator body with beige underbelly, white tank top, red eyes, humanoid stance
+  - Red warning aura appears 1 second before each attack
+  - Introduction sequence: 2.5 second dramatic pause with laugh before attacks begin
+  - Level uses same subway/sewer backdrop as Level 3 ('#1C1C1C')
+  - Includes 10 CIA agents, 6 army men, 8 radioactive rats
+
 - October 31, 2025. Level 4.5 "Necromancer's Curse" with Necromancer Mini-Boss:
   - Created Ghost.ts class - ethereal projectiles that chase the player
   - Created Necromancer.ts class - evil witch mini-boss that haunts the graveyard

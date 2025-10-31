@@ -126,7 +126,7 @@ export class AlligatorBoss {
     deltaTime: number, 
     playerX?: number, 
     playerY?: number,
-    enemies?: Array<{ x: number; y: number; width: number; height: number; active: boolean; id?: string }>
+    enemies?: Array<{ getBounds(): { x: number; y: number; width: number; height: number }; isActive(): boolean; destroy(): void }>
   ): void {
     if (!this.isIntroComplete) {
       return;
@@ -198,13 +198,14 @@ export class AlligatorBoss {
           // Eat nearby enemies
           if (this.stateTimer < this.ATTACK_DURATION * 0.4 && enemies) {
             enemies.forEach(enemy => {
-              if (enemy.active) {
-                const dx = enemy.x - this.x;
-                const dy = enemy.y - this.y;
+              if (enemy.isActive()) {
+                const bounds = enemy.getBounds();
+                const dx = bounds.x - this.x;
+                const dy = bounds.y - this.y;
                 const distance = Math.sqrt(dx * dx + dy * dy);
                 
                 if (distance < this.EAT_RANGE) {
-                  enemy.active = false;
+                  enemy.destroy();
                   this.playEatSound();
                 }
               }
@@ -213,7 +214,7 @@ export class AlligatorBoss {
           
           // Spit enemies toward player at halfway point
           if (this.stateTimer > this.ATTACK_DURATION * 0.5 && this.stateTimer < this.ATTACK_DURATION * 0.6) {
-            const inactiveEnemies = enemies?.filter(e => !e.active) || [];
+            const inactiveEnemies = enemies?.filter(e => !e.isActive()) || [];
             const enemiesToSpit = Math.min(3, inactiveEnemies.length);
             
             for (let i = 0; i < enemiesToSpit; i++) {
