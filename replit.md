@@ -61,27 +61,24 @@ Preferred communication style: Simple, everyday language.
   - Alligator boss positioned in the center of the sewer (400, 350)
   - NOT limited by manholes - roams freely throughout the level
   - Wears a greasy white tank top with visible stains
-  - **Attack patterns**:
-    - Bite attack: Lunges toward player with snapping jaws
-    - Eat and spit: Consumes nearby enemies and spits them as projectiles at player
-  - **Enemy-eating mechanic**:
-    - Alligator can eat enemies within 100-pixel range during attack phase
-    - Spits up to 3 eaten enemies as projectiles toward player
-    - Projectiles travel at 8x speed with slight spread for difficulty
+  - **Attack pattern**: Bite attack with extending neck
+    - Walks slowly around the level trying to catch the player
+    - When attacking, extends neck toward player and snaps jaws
+    - Neck extends ~35 pixels with 4 animated segments (green scales + beige underbelly)
+    - Mouth opens during bite attacks with visible white teeth
   - **Movement behavior**:
-    - Actively chases player with 2.5 speed
+    - Chases player slowly at 1.5 speed
     - Slows down during warning phase
-    - Lunges at 3x speed during bite attacks
+    - Lunges forward during bite attacks
   - **Attack frequency** (scales with cookie count):
     - High cookies (>70%): 4-5 seconds between attacks
     - Medium cookies (30-70%): 3-4 seconds between attacks
     - Low cookies (<30%): 2-3 seconds between attacks
-  - ONE-HIT KILL mechanic - both bite and spit projectiles are instant death (dash provides invulnerability)
+  - ONE-HIT KILL mechanic - bite attack is instant death (dash provides invulnerability)
   - **Audio system**:
     - Intro laugh (0.4x playback rate)
     - Attack warning sound (0.6x playback rate)
-    - Eating sound (0.5x playback rate)
-  - **Visual design**: Green alligator body with beige underbelly, white tank top, red eyes, humanoid stance
+  - **Visual design**: Detailed pixel art at 2x scale - green alligator body with beige belly, white tank top with grease stains, red glowing eyes, humanoid stance
   - Red warning aura appears 1 second before each attack
   - Introduction sequence: 2.5 second dramatic pause with laugh before attacks begin
   - Level uses same subway/sewer backdrop as Level 3 ('#1C1C1C')
