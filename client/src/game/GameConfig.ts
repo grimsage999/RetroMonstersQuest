@@ -114,7 +114,7 @@ export const GAME_CONFIG = {
   },
 
   // Level Progression Sequence
-  LEVEL_SEQUENCE: [1, 1.5, 1.75, 2, 2.5, 3, 4, 5] as const,
+  LEVEL_SEQUENCE: [1, 1.5, 1.75, 2, 2.5, 2.75, 3, 4, 5] as const,
 
   // Animation Configuration
   ANIMATION: {
@@ -254,6 +254,33 @@ export const LEVEL_CONFIGS = {
       { type: 'manhole', position: { x: 450, y: 150 }, openCycleDuration: 4300, openDuration: 2100 }
     ]
   },
+  2.75: {
+    background: '#2F4F4F',
+    fbiAgents: 10,
+    armyMen: 8,
+    radioactiveRats: 0,
+    zombies: 0,
+    cookies: 12,
+    title: 'Level 2-3: Grease Gator',
+    description: 'Something lurks in the sewers... Beware the alligator that hunts from the manholes!',
+    hazards: [
+      { type: 'manhole', position: { x: 150, y: 200 }, openCycleDuration: 4000, openDuration: 2000 },
+      { type: 'manhole', position: { x: 350, y: 380 }, openCycleDuration: 4500, openDuration: 2200 },
+      { type: 'manhole', position: { x: 550, y: 280 }, openCycleDuration: 4200, openDuration: 2000 },
+      { type: 'manhole', position: { x: 750, y: 420 }, openCycleDuration: 4800, openDuration: 2400 },
+      { type: 'manhole', position: { x: 450, y: 150 }, openCycleDuration: 4300, openDuration: 2100 }
+    ],
+    miniBoss: {
+      type: 'alligator',
+      manholePositions: [
+        { x: 150, y: 200 },
+        { x: 350, y: 380 },
+        { x: 550, y: 280 },
+        { x: 750, y: 420 },
+        { x: 450, y: 150 }
+      ]
+    }
+  },
   3: {
     background: '#1C1C1C',
     fbiAgents: 8,
@@ -314,6 +341,11 @@ export const CUTSCENE_DATA = {
     levelNumber: 2.5,
     title: "Level 2-2: Sewer Streets",
     description: "The city streets are filled with manholes!\n\nWatch out—they open and close periodically.\nFall in and you'll lose a life!\n\nNew Challenge: Time your movements to avoid falling!"
+  },
+  2.75: {
+    levelNumber: 2.75,
+    title: "Level 2-3: GREASE GATOR",
+    description: "Something sinister lurks in the sewers...\n\nA massive alligator hunts from the manholes!\nIt strikes without warning - ONE HIT and you're finished!\n\nWatch for glowing manholes and listen for its laugh.\nCollect cookies carefully - the fewer you have, the faster it attacks!"
   },
   3: {
     levelNumber: 3,

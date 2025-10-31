@@ -209,6 +209,20 @@ Changelog:
   - Orange glow effect appears around hole when opening (matches reference art)
   - Dark circular hole with depth shadows revealed underneath
   - Maintains existing collision detection and timing mechanics
+- October 31, 2025. Level 2-3 "Grease Gator" with Alligator Mini-Boss:
+  - Created Alligator.ts class - menacing mini-boss that hunts from manholes
+  - Added Level 2.75 configuration between Level 2.5 and Level 3
+  - Updated LEVEL_SEQUENCE: 1 → 1.5 → 1.75 → 2 → 2.5 → 2.75 → 3 → 4 → 5
+  - Alligator emerges from any manhole (5 spawn points) with humanoid design
+  - Attack patterns: Bite and grab attacks (mostly random with occasional runs)
+  - ONE-HIT KILL mechanic - instant death if caught (dash provides invulnerability)
+  - Audio system: Sinister intro laugh, ambient laughs (10-20s intervals), attack warning laughs
+  - Visual telegraph: Manhole shake/rattle + orange glow before each attack
+  - Dynamic difficulty: Attack frequency scales with cookie count (more cookies = slower attacks)
+  - Cookie-based cooldown: 8-10s (high cookies) → 6-8s (medium) → 5-7s (low/none)
+  - Introduction sequence: 2.5 second dramatic pause with sinister laugh before attacks begin
+  - Level uses same dystopian city backdrop/environment as Level 2/2.5
+  - Cutscene explains the threat and ONE-HIT KILL mechanic with audio/visual warnings
 ```
 
 ## User Preferences

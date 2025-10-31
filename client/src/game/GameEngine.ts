@@ -89,8 +89,8 @@ export class GameEngine {
 
     // Initialize game components
     this.player = new Player(canvas.width / 2, canvas.height - 50);
-    this.currentLevel = new Level(1, canvas.width, canvas.height);
     this.audioManager = new AudioManager();
+    this.currentLevel = new Level(1, canvas.width, canvas.height, this.audioManager);
     this.inputManager = new InputManager();
 
     // Initialize optimization systems
@@ -403,7 +403,7 @@ export class GameEngine {
     this.inputManager.reset();
 
     // Create fresh level
-    this.currentLevel = new Level(1, this.canvas.width, this.canvas.height);
+    this.currentLevel = new Level(1, this.canvas.width, this.canvas.height, this.audioManager);
     this.gameState.totalCookies = this.currentLevel.getTotalCookies();
 
     // Clear canvas to prevent visual artifacts
@@ -553,7 +553,7 @@ export class GameEngine {
     // No weapons in simplified game for better performance
 
     this.player.reset(this.canvas.width / 2, this.canvas.height - 50);
-    this.currentLevel = new Level(this.gameState.level, this.canvas.width, this.canvas.height);
+    this.currentLevel = new Level(this.gameState.level, this.canvas.width, this.canvas.height, this.audioManager);
 
     // Level initialization complete - no boss mechanics needed
 
@@ -561,6 +561,21 @@ export class GameEngine {
     this.gameState.phase = 'playing';
     // No bullets in simplified game
     this.updateState();
+
+    // Check if level has alligator mini-boss and play intro sequence
+    const alligator = this.currentLevel.getAlligator();
+    if (alligator && alligator.isIntroReady()) {
+      console.log('GameEngine: Level has alligator mini-boss - playing intro sequence');
+      this.currentLevel.playAlligatorIntro();
+      
+      // Complete intro after dramatic pause (2-3 seconds)
+      const introTimeout = window.setTimeout(() => {
+        this.currentLevel.completeAlligatorIntro();
+        console.log('GameEngine: Alligator intro complete - mini-boss now active');
+        this.activeTimeouts.delete(introTimeout);
+      }, 2500);
+      this.activeTimeouts.add(introTimeout);
+    }
 
     console.log(`GameEngine: Level ${this.gameState.level} initialized with ${this.gameState.totalCookies} cookies`);
   }
@@ -635,7 +650,7 @@ export class GameEngine {
     this.wasDashing = isDashing;
 
     // Update level (enemies, etc.)
-    this.currentLevel.update(deltaTime, this.player.getX(), this.player.getY());
+    this.currentLevel.update(deltaTime, this.player.getX(), this.player.getY(), this.gameState.cookiesCollected);
 
     // Game logic updates complete - no boss mechanics needed
 
@@ -741,6 +756,17 @@ export class GameEngine {
           this.player.reset(this.canvas.width / 2, this.canvas.height - 50);
         }
       }
+    }
+
+    // Check alligator mini-boss collision (ONE-HIT KILL - unless dashing!)
+    if (!this.player.isDashing() && this.currentLevel.checkAlligatorCollision(playerBounds)) {
+      // Alligator is instant death
+      this.audioManager.playHit();
+      this.damageSystem.takeDamage('alligator', 999, {
+        x: playerBounds.x,
+        y: playerBounds.y
+      });
+      this.handleGameOver();
     }
   }
 

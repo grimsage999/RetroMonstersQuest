@@ -4,6 +4,7 @@ import { OptimizedRenderer } from './OptimizedRenderer';
 import { DancingCactus, HazardConfig } from './DancingCactus';
 import { SpinningCactus } from './SpinningCactus';
 import { Manhole } from './Manhole';
+import { Alligator, ManholeSpawnPoint } from './Alligator';
 
 interface Cookie {
   x: number;
@@ -34,17 +35,20 @@ export class Level {
   private hazards: DancingCactus[] = [];
   private spinningCacti: SpinningCactus[] = [];
   private manholes: Manhole[] = [];
+  private alligator: Alligator | null = null;
   private finishLine: { x: number; y: number; width: number; height: number; } | null = null;
   private config: LevelConfig;
+  private audioManager: any;
 
   private levelConfigs = LEVEL_CONFIGS;
 
-  constructor(levelNumber: number, canvasWidth: number, canvasHeight: number) {
+  constructor(levelNumber: number, canvasWidth: number, canvasHeight: number, audioManager?: any) {
     this.levelNumber = levelNumber;
     // Validate canvas dimensions to prevent edge cases
     this.canvasWidth = Math.max(canvasWidth, 800);
     this.canvasHeight = Math.max(canvasHeight, 600);
     this.config = this.levelConfigs[levelNumber as keyof typeof LEVEL_CONFIGS] || this.levelConfigs[1];
+    this.audioManager = audioManager;
     
     this.initializeLevel();
   }
@@ -143,9 +147,20 @@ export class Level {
         }
       });
     }
+
+    // Initialize alligator mini-boss if present in config
+    this.alligator = null;
+    if ((this.config as any).miniBoss && (this.config as any).miniBoss.type === 'alligator') {
+      const miniBossConfig = (this.config as any).miniBoss;
+      this.alligator = new Alligator(
+        miniBossConfig.manholePositions,
+        this.audioManager,
+        this.config.cookies
+      );
+    }
   }
 
-  public update(deltaTime: number, playerX?: number, playerY?: number) {
+  public update(deltaTime: number, playerX?: number, playerY?: number, cookiesCollected?: number) {
     // Update all enemies at original speed
     this.enemies.forEach(enemy => {
       enemy.update(deltaTime, this.canvasWidth, this.canvasHeight);
@@ -166,6 +181,12 @@ export class Level {
       this.spinningCacti.forEach(cactus => {
         cactus.update(deltaTime, playerX, playerY, this.canvasWidth, this.canvasHeight);
       });
+    }
+
+    // Update alligator mini-boss
+    if (this.alligator && cookiesCollected !== undefined) {
+      this.alligator.updateCookieCount(cookiesCollected);
+      this.alligator.update(deltaTime);
     }
 
     // Check fireball collisions with enemies and cactus
@@ -202,6 +223,11 @@ export class Level {
     this.enemies.forEach(enemy => {
       enemy.render(ctx);
     });
+
+    // Render alligator mini-boss (on top of everything)
+    if (this.alligator) {
+      this.alligator.render(ctx);
+    }
     
     // All level elements rendered
     
@@ -221,6 +247,7 @@ export class Level {
         break;
       case 2: // Dystopian City
       case 2.5: // Sewer Streets (same city background)
+      case 2.75: // Grease Gator (same city background)
         this.renderCityBackground(ctx);
         break;
       case 3: // Subway
@@ -867,6 +894,29 @@ export class Level {
     );
 
     return dancingCactusHit || spinningCactusHit || manholeHit;
+  }
+
+  public checkAlligatorCollision(playerBounds: { x: number; y: number; width: number; height: number; }): boolean {
+    if (!this.alligator) {
+      return false;
+    }
+    return this.alligator.checkPlayerCollision(playerBounds.x, playerBounds.y, playerBounds.width);
+  }
+
+  public getAlligator(): Alligator | null {
+    return this.alligator;
+  }
+
+  public playAlligatorIntro(): void {
+    if (this.alligator) {
+      this.alligator.playIntroSequence();
+    }
+  }
+
+  public completeAlligatorIntro(): void {
+    if (this.alligator) {
+      this.alligator.completeIntro();
+    }
   }
 
   private checkCollision(rect1: { x: number; y: number; width: number; height: number; }, rect2: { x: number; y: number; width: number; height: number; }): boolean {
