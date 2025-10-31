@@ -1,21 +1,26 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { GameEngine } from '../game/GameEngine';
-import { DiagnosticDashboard } from './DiagnosticDashboard';
 import GameUI from './GameUI';
 
 const GameCanvas: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const gameEngineRef = useRef<GameEngine | null>(null);
   const [isStarted, setIsStarted] = useState(false);
-  const [showDiagnostics, setShowDiagnostics] = useState(false);
-  const [gameState, setGameState] = useState({
+  const [gameState, setGameState] = useState<{
+    score: number;
+    lives: number;
+    level: number;
+    phase: 'playing' | 'gameOver' | 'victory' | 'levelComplete';
+    cookiesCollected: number;
+    totalCookies: number;
+    canDash?: boolean;
+  }>({
     score: 0,
     lives: 3,
     level: 1,
-    phase: 'playing' as 'playing' | 'gameOver' | 'victory' | 'levelComplete',
+    phase: 'playing',
     cookiesCollected: 0,
-    totalCookies: 0,
-    canDash: true as boolean | undefined
+    totalCookies: 0
   });
 
   useEffect(() => {
@@ -39,14 +44,11 @@ const GameCanvas: React.FC = () => {
 
   const handleStart = async () => {
     if (gameEngineRef.current && !isStarted) {
-      console.log('GameCanvas: Starting game...');
       try {
-        // Start game immediately (non-blocking)
         gameEngineRef.current.start();
         setIsStarted(true);
-        console.log('GameCanvas: Game started successfully');
       } catch (error) {
-        console.error('GameCanvas: Error starting game:', error);
+        // Silent error handling
       }
     }
   };
@@ -54,12 +56,10 @@ const GameCanvas: React.FC = () => {
   const handleRestart = () => {
     if (gameEngineRef.current) {
       try {
-        // Reset game completely and return to start screen
         gameEngineRef.current.restart();
-        setIsStarted(false); // Show start screen again
-        console.log('GameCanvas: Reset to start screen');
+        setIsStarted(false);
       } catch (error) {
-        console.error('GameCanvas: Error restarting game:', error);
+        // Silent error handling
       }
     }
   };
@@ -67,20 +67,6 @@ const GameCanvas: React.FC = () => {
   const handleNextLevel = () => {
     if (gameEngineRef.current) {
       gameEngineRef.current.nextLevel();
-    }
-  };
-
-  // Dev tools: Skip to next level
-  const handleDevSkipLevel = () => {
-    if (gameEngineRef.current && isStarted) {
-      gameEngineRef.current.nextLevel();
-    }
-  };
-
-  // Dev tools: Reset to Level 1
-  const handleDevResetToLevel1 = () => {
-    if (gameEngineRef.current && isStarted) {
-      gameEngineRef.current.jumpToLevel(1);
     }
   };
 
@@ -105,73 +91,6 @@ const GameCanvas: React.FC = () => {
         {isStarted && (
           <div className="stats-overlay">
             <GameUI gameState={gameState} />
-          </div>
-        )}
-
-        {/* Dev Tools - Level Navigation */}
-        {isStarted && (
-          <div style={{
-            position: 'absolute',
-            top: '10px',
-            right: '10px',
-            display: 'flex',
-            gap: '10px',
-            zIndex: 1000
-          }}>
-            <button
-              onClick={handleDevSkipLevel}
-              style={{
-                padding: '8px 12px',
-                fontSize: '12px',
-                fontFamily: 'monospace',
-                backgroundColor: '#FF9800',
-                color: '#000',
-                border: '2px solid #FFB74D',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                fontWeight: 'bold',
-                boxShadow: '0 2px 4px rgba(0,0,0,0.3)',
-                transition: 'all 0.2s'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#FFB74D';
-                e.currentTarget.style.transform = 'scale(1.05)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = '#FF9800';
-                e.currentTarget.style.transform = 'scale(1)';
-              }}
-              title="Dev Tool: Skip to next level"
-            >
-              ⏭️ Next Level
-            </button>
-            <button
-              onClick={handleDevResetToLevel1}
-              style={{
-                padding: '8px 12px',
-                fontSize: '12px',
-                fontFamily: 'monospace',
-                backgroundColor: '#2196F3',
-                color: '#FFF',
-                border: '2px solid #64B5F6',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                fontWeight: 'bold',
-                boxShadow: '0 2px 4px rgba(0,0,0,0.3)',
-                transition: 'all 0.2s'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#64B5F6';
-                e.currentTarget.style.transform = 'scale(1.05)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = '#2196F3';
-                e.currentTarget.style.transform = 'scale(1)';
-              }}
-              title="Dev Tool: Reset to Level 1"
-            >
-              🔄 Reset to L1
-            </button>
           </div>
         )}
         
@@ -220,8 +139,6 @@ const GameCanvas: React.FC = () => {
             </p>
           </div>
         )}
-        
-        <DiagnosticDashboard isVisible={showDiagnostics} gameEngine={gameEngineRef.current} />
         
         {/* Mobile Controls */}
         <div className="mobile-controls">

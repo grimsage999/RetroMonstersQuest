@@ -179,10 +179,4 @@ export class GameStateManager {
     this.notifyListeners();
   }
 
-  /**
-   * Get state info for debugging
-   */
-  getDebugInfo(): string {
-    return `Current: ${this.currentPhase}, Previous: ${this.previousPhase}, Transitioning: ${this.transitionInProgress}`;
-  }
 }

@@ -59,30 +59,8 @@ class Logger {
   }
 
   private log(level: LogLevel, message: string, ...args: any[]): void {
-    if (level < this.config.level) {
-      return;
-    }
-
-    const timestamp = this.config.enableTimestamps ? `[${new Date().toISOString()}]` : '';
-    const levelStr = this.getLevelString(level);
-    const sanitizedArgs = this.sanitizeArgs(args);
-
-    const logMessage = `${timestamp}${levelStr} ${message}`;
-
-    switch (level) {
-      case LogLevel.DEBUG:
-      case LogLevel.INFO:
-        if (this.isDevelopment) {
-          console.log(logMessage, ...sanitizedArgs);
-        }
-        break;
-      case LogLevel.WARN:
-        console.warn(logMessage, ...sanitizedArgs);
-        break;
-      case LogLevel.ERROR:
-        console.error(logMessage, ...sanitizedArgs);
-        break;
-    }
+    // All logging disabled for clean player experience
+    return;
   }
 
   private getLevelString(level: LogLevel): string {

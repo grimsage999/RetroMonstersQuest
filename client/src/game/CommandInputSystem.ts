@@ -17,8 +17,7 @@ export enum GameCommand {
   FIRE_PRIMARY = 'fire_primary',
   FIRE_SECONDARY = 'fire_secondary',
   PAUSE = 'pause',
-  SKIP_CUTSCENE = 'skip_cutscene',
-  DEBUG_DIAGNOSTIC = 'debug_diagnostic'
+  SKIP_CUTSCENE = 'skip_cutscene'
 }
 
 export interface InputCommand {
@@ -44,8 +43,7 @@ class CutsceneInputFilter implements InputFilter {
   
   accepts(command: InputCommand): boolean {
     // During cutscenes, only allow skip commands
-    return command.command === GameCommand.SKIP_CUTSCENE ||
-           command.command === GameCommand.DEBUG_DIAGNOSTIC;
+    return command.command === GameCommand.SKIP_CUTSCENE;
   }
 }
 
@@ -63,8 +61,7 @@ class PlayingInputFilter implements InputFilter {
       GameCommand.DASH,
       GameCommand.FIRE_PRIMARY,
       GameCommand.FIRE_SECONDARY,
-      GameCommand.PAUSE,
-      GameCommand.DEBUG_DIAGNOSTIC
+      GameCommand.PAUSE
     ].includes(command.command);
   }
 }
@@ -74,8 +71,8 @@ class TransitionInputFilter implements InputFilter {
   name = 'transition';
   
   accepts(command: InputCommand): boolean {
-    // During transitions, only allow debug commands
-    return command.command === GameCommand.DEBUG_DIAGNOSTIC;
+    // During transitions, block all commands
+    return false;
   }
 }
 
@@ -88,8 +85,7 @@ class MenuInputFilter implements InputFilter {
     return [
       GameCommand.MOVE_UP,
       GameCommand.MOVE_DOWN,
-      GameCommand.FIRE_PRIMARY, // Select
-      GameCommand.DEBUG_DIAGNOSTIC
+      GameCommand.FIRE_PRIMARY // Select
     ].includes(command.command);
   }
 }
@@ -125,8 +121,7 @@ export class CommandInputSystem {
     ['Space', GameCommand.FIRE_PRIMARY],
     ['KeyX', GameCommand.FIRE_SECONDARY],
     ['Escape', GameCommand.PAUSE],
-    ['Enter', GameCommand.SKIP_CUTSCENE],
-    ['KeyC', GameCommand.DEBUG_DIAGNOSTIC]
+    ['Enter', GameCommand.SKIP_CUTSCENE]
   ]);
   
   private currentGamePhase: GamePhase = GamePhase.TITLE;
@@ -156,13 +151,20 @@ export class CommandInputSystem {
       this.captureKeyboardInput(e, false);
     };
     
-    // Global keyboard capture
+    // Global keyboard capture with graceful error handling
     try {
-      document.addEventListener('keydown', this.keyDownHandler);
-      document.addEventListener('keyup', this.keyUpHandler);
+      if (typeof document !== 'undefined' && document.addEventListener) {
+        document.addEventListener('keydown', this.keyDownHandler);
+        document.addEventListener('keyup', this.keyUpHandler);
+      } else {
+        // SSR or restricted environment - game will rely on mobile controls
+        this.keyDownHandler = undefined;
+        this.keyUpHandler = undefined;
+      }
     } catch (error) {
-      logger.error('CommandInputSystem: Failed to add event listeners:', error);
-      throw error; // Re-throw as this is critical for input functionality
+      // Failed to add listeners - game may still work with mobile/touch controls
+      this.keyDownHandler = undefined;
+      this.keyUpHandler = undefined;
     }
   }
   
@@ -194,7 +196,7 @@ export class CommandInputSystem {
           }
         }
       } catch (error) {
-        logger.error('CommandInputSystem: Error capturing input:', error);
+        // Silent error handling for production
       }
     }
   }
@@ -272,67 +274,6 @@ export class CommandInputSystem {
     const existingFilters = this.inputFilters.get(phase) || [];
     existingFilters.push(filter);
     this.inputFilters.set(phase, existingFilters);
-  }
-  
-  /**
-   * Get current input state for debugging
-   */
-  public getDebugInfo(): { 
-    currentPhase: GamePhase;
-    queueSize: number;
-    historySize: number;
-    activeFilters: string[];
-  } {
-    return {
-      currentPhase: this.currentGamePhase,
-      queueSize: this.eventQueue.length,
-      historySize: this.commandHistory.length,
-      activeFilters: this.inputFilters.get(this.currentGamePhase)?.map(f => f.name) || []
-    };
-  }
-  
-  /**
-   * Get command history for debugging
-   */
-  public getCommandHistory(count: number = 20): InputCommand[] {
-    return this.commandHistory.slice(-count);
-  }
-  
-  /**
-   * Detect input leaking issues
-   */
-  public detectInputLeakage(): string[] {
-    const issues: string[] = [];
-    
-    // Check for large queue buildup
-    if (this.eventQueue.length > 10) {
-      issues.push(`Large input queue: ${this.eventQueue.length} commands pending`);
-    }
-    
-    // Check for rapid repeated commands (might indicate stuck keys)
-    const recentCommands = this.commandHistory.slice(-10);
-    const commandCounts = new Map<GameCommand, number>();
-    
-    recentCommands.forEach(cmd => {
-      commandCounts.set(cmd.command, (commandCounts.get(cmd.command) || 0) + 1);
-    });
-    
-    commandCounts.forEach((count, command) => {
-      if (count > 5) { // Same command more than 5 times in last 10
-        issues.push(`Possible stuck key: ${command} repeated ${count} times`);
-      }
-    });
-    
-    return issues;
-  }
-  
-  /**
-   * Emergency reset - clear all queued input
-   */
-  public emergencyReset(): void {
-    logger.warn('CommandInputSystem: Emergency reset initiated');
-    this.eventQueue = [];
-    this.commandHistory = [];
   }
   
   /**

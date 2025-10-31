@@ -12,7 +12,6 @@ import { GameStateManager, GamePhase } from './GameStateManager';
 import { LevelTransitionManager } from './LevelTransitionManager';
 import { DamageSystem } from './DamageSystem';
 import { UIStateController } from './UIStateController';
-import { DiagnosticSystem } from './DiagnosticSystem';
 import { CommandInputSystem, GameCommand, InputCommand } from './CommandInputSystem';
 import { GameUtils } from './GameUtils'; // Assuming GameUtils contains createBounds
 import { COLLISION_CONFIG } from './GameConstants';
@@ -74,7 +73,6 @@ export class GameEngine {
   private transitionManager: LevelTransitionManager;
   private damageSystem: DamageSystem;
   private uiController: UIStateController;
-  private diagnosticSystem: DiagnosticSystem;
   private commandInputSystem: CommandInputSystem;
 
   constructor(canvas: HTMLCanvasElement, onStateChange: (state: GameState) => void) {
@@ -113,15 +111,6 @@ export class GameEngine {
     this.transitionManager = new LevelTransitionManager(canvas);
     this.damageSystem = new DamageSystem(3);
     this.uiController = new UIStateController();
-
-    // Initialize diagnostic system
-    this.diagnosticSystem = new DiagnosticSystem(
-      this.stateManager,
-      this.uiController,
-      this.transitionManager,
-      this.damageSystem,
-      this.audioManager
-    );
 
     // Initialize command input system with proper filtering
     this.commandInputSystem = new CommandInputSystem();
@@ -240,11 +229,6 @@ export class GameEngine {
       if (!cmd.pressed) return;
       // Handled by cutscene directly
     });
-
-    this.commandInputSystem.registerCommandExecutor(GameCommand.DEBUG_DIAGNOSTIC, (cmd: InputCommand) => {
-      if (!cmd.pressed) return;
-      this.runDiagnostic();
-    });
   }
 
   private setupEventListeners() {
@@ -294,37 +278,6 @@ export class GameEngine {
       });
 
       logger.info('Game started, showing level title card');
-    }
-  }
-
-  /**
-   * Run diagnostic check
-   */
-  public runDiagnostic() {
-    // Include spatial grid optimization metrics
-    const enhancedGameState = {
-      ...this.gameState,
-      spatialGridEntities: this.spatialGridEntities,
-      collisionChecks: this.collisionChecks
-    };
-    const report = this.diagnosticSystem.runDiagnostic(enhancedGameState as any, this.currentFPS);
-    this.diagnosticSystem.logDiagnostic(report);
-
-    // Auto-fix critical issues
-    if (report.issues.length > 0) {
-      logger.warn('Attempting auto-fix for critical issues');
-
-      // Check for overlapping transitions
-      if (report.issues.some(issue => issue.includes('overlapping'))) {
-        logger.debug('Fixing: Resetting UI controller');
-        this.uiController.forceReset();
-      }
-
-      // Check for invalid states
-      if (report.issues.some(issue => issue.includes('Invalid transition'))) {
-        logger.debug('Fixing: Resetting state manager');
-        this.stateManager.forceTransitionTo(GamePhase.TITLE);
-      }
     }
   }
 
@@ -414,7 +367,6 @@ export class GameEngine {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
     // Reset input system state without cleaning up listeners
-    this.commandInputSystem.emergencyReset();
     this.commandInputSystem.setGamePhase(GamePhase.TITLE);
 
     // Update state for React UI
@@ -651,12 +603,7 @@ export class GameEngine {
       this.frameCount = 0;
       this.fpsTimer = 0;
 
-      // Only log critical performance issues 
-      if (this.currentFPS < 30) { // Only warn for truly poor performance
-        logger.warn(`Critical FPS: ${this.currentFPS}`);
-        // Run diagnostic only for severe performance issues
-        this.runDiagnostic();
-      }
+      // Performance monitoring disabled for production
     }
 
     // Update damage system
