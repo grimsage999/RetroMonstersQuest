@@ -20,6 +20,8 @@ export class Alligator {
   private audioManager: any;
   private cookieCount: number = 0;
   private totalCookies: number = 0;
+  private playerX: number = 0;
+  private playerY: number = 0;
 
   private readonly WARNING_DURATION = 1500;
   private readonly EMERGENCE_DURATION = 400;
@@ -121,6 +123,12 @@ export class Alligator {
   public update(deltaTime: number, playerX?: number, playerY?: number): void {
     if (!this.isIntroComplete) {
       return;
+    }
+
+    // Track player position for neck direction
+    if (playerX !== undefined && playerY !== undefined) {
+      this.playerX = playerX;
+      this.playerY = playerY;
     }
 
     this.ambientLaughTimer += deltaTime;
@@ -258,39 +266,57 @@ export class Alligator {
     if (this.emergenceProgress > 0.5) {
       const baseHeadY = bodyY - 20;
       let headY = baseHeadY;
+      let headX = centerX;
       let neckExtension = 0;
       
       if (this.attackState === 'attacking') {
         const attackProgress = Math.min(1, this.stateTimer / (this.ATTACK_DURATION * 0.6));
         neckExtension = Math.sin(attackProgress * Math.PI) * 35;
-        headY = baseHeadY - neckExtension;
+        
+        // Calculate direction toward player
+        const dx = this.playerX - centerX;
+        const dy = this.playerY - baseHeadY;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        
+        if (distance > 0) {
+          // Normalize and apply extension
+          const dirX = dx / distance;
+          const dirY = dy / distance;
+          headX = centerX + dirX * neckExtension * 0.5;
+          headY = baseHeadY + dirY * neckExtension * 0.8;
+        } else {
+          headY = baseHeadY - neckExtension;
+        }
         
         if (neckExtension > 5) {
           ctx.fillStyle = '#5A7D4A';
           const neckSegments = 4;
           for (let i = 0; i < neckSegments; i++) {
-            const segmentY = baseHeadY - (neckExtension * (i / neckSegments));
+            const t = i / neckSegments;
+            const segmentX = centerX + (headX - centerX) * t;
+            const segmentY = baseHeadY + (headY - baseHeadY) * t;
             const segmentWidth = 16 - (i * 2);
-            ctx.fillRect(centerX - segmentWidth / 2, segmentY, segmentWidth, neckExtension / neckSegments + 2);
+            ctx.fillRect(segmentX - segmentWidth / 2, segmentY, segmentWidth, neckExtension / neckSegments + 2);
             
             ctx.fillStyle = '#E8D4A0';
-            ctx.fillRect(centerX - (segmentWidth / 2 - 2), segmentY + 2, segmentWidth - 4, neckExtension / neckSegments - 2);
+            ctx.fillRect(segmentX - (segmentWidth / 2 - 2), segmentY + 2, segmentWidth - 4, neckExtension / neckSegments - 2);
             ctx.fillStyle = '#5A7D4A';
           }
         }
       }
       
       ctx.fillStyle = '#4A5F3A';
-      ctx.fillRect(centerX - 22, headY, 44, 24);
+      ctx.fillRect(headX - 22, headY, 44, 24);
 
       ctx.fillStyle = '#FF0000';
-      ctx.fillRect(centerX - 16, headY + 6, 6, 6);
-      ctx.fillRect(centerX + 10, headY + 6, 6, 6);
+      ctx.fillRect(headX - 16, headY + 6, 6, 6);
+      ctx.fillRect(headX + 10, headY + 6, 6, 6);
 
       if (this.attackType === 'bite' && this.attackState === 'attacking') {
+        const jawOpen = Math.sin(this.stateTimer * 0.02) * 6;
         ctx.fillStyle = '#FFFFFF';
         for (let i = 0; i < 5; i++) {
-          ctx.fillRect(centerX - 18 + i * 8, headY + 18, 4, 6);
+          ctx.fillRect(headX - 18 + i * 8, headY + 18 + jawOpen, 4, 6);
         }
       }
 
@@ -299,13 +325,13 @@ export class Alligator {
         ctx.lineWidth = 4;
         
         ctx.beginPath();
-        ctx.moveTo(centerX - 24, headY + 24);
-        ctx.lineTo(centerX - 32, headY + 24 + neckExtension * 0.3);
+        ctx.moveTo(headX - 24, headY + 24);
+        ctx.lineTo(headX - 32, headY + 24 + neckExtension * 0.3);
         ctx.stroke();
 
         ctx.beginPath();
-        ctx.moveTo(centerX + 24, headY + 24);
-        ctx.lineTo(centerX + 32, headY + 24 + neckExtension * 0.3);
+        ctx.moveTo(headX + 24, headY + 24);
+        ctx.lineTo(headX + 32, headY + 24 + neckExtension * 0.3);
         ctx.stroke();
       }
     }
@@ -327,15 +353,31 @@ export class Alligator {
     
     const attackProgress = Math.min(1, this.stateTimer / (this.ATTACK_DURATION * 0.6));
     const neckExtension = Math.sin(attackProgress * Math.PI) * 35;
-    const headY = baseHeadY - neckExtension;
+    
+    // Calculate head position toward player
+    let headX = centerX;
+    let headY = baseHeadY;
+    
+    const dx = this.playerX - centerX;
+    const dy = this.playerY - baseHeadY;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    
+    if (distance > 0) {
+      const dirX = dx / distance;
+      const dirY = dy / distance;
+      headX = centerX + dirX * neckExtension * 0.5;
+      headY = baseHeadY + dirY * neckExtension * 0.8;
+    } else {
+      headY = baseHeadY - neckExtension;
+    }
 
     const attackRadius = this.attackType === 'grab' ? 50 : 40;
 
-    const dx = (playerX + playerSize / 2) - centerX;
-    const dy = (playerY + playerSize / 2) - headY;
-    const distance = Math.sqrt(dx * dx + dy * dy);
+    const dxPlayer = (playerX + playerSize / 2) - headX;
+    const dyPlayer = (playerY + playerSize / 2) - headY;
+    const distanceToPlayer = Math.sqrt(dxPlayer * dxPlayer + dyPlayer * dyPlayer);
 
-    return distance < attackRadius;
+    return distanceToPlayer < attackRadius;
   }
 
   public isIntroReady(): boolean {
