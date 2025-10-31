@@ -99,7 +99,6 @@ export class CommandInputSystem {
   private maxHistorySize = 100;
   private keyDownHandler?: (e: KeyboardEvent) => void;
   private keyUpHandler?: (e: KeyboardEvent) => void;
-  private preventDefaultHandler?: (e: KeyboardEvent) => void;
   
   private inputFilters: Map<GamePhase, InputFilter[]> = new Map([
     [GamePhase.TITLE, [new MenuInputFilter()]],
@@ -141,19 +140,25 @@ export class CommandInputSystem {
    */
   private setupDOMListeners(): void {
     // Create handlers that can be removed later to prevent memory leaks
-    this.keyDownHandler = (e) => this.captureKeyboardInput(e, true);
-    this.keyUpHandler = (e) => this.captureKeyboardInput(e, false);
-    this.preventDefaultHandler = (e) => {
+    this.keyDownHandler = (e) => {
+      // CRITICAL: Prevent default browser behavior FIRST to stop scrolling
       if (this.keyToCommandMap.has(e.code)) {
         e.preventDefault();
       }
+      this.captureKeyboardInput(e, true);
+    };
+    this.keyUpHandler = (e) => {
+      // Also prevent on keyup for consistency
+      if (this.keyToCommandMap.has(e.code)) {
+        e.preventDefault();
+      }
+      this.captureKeyboardInput(e, false);
     };
     
     // Global keyboard capture
     try {
       document.addEventListener('keydown', this.keyDownHandler);
       document.addEventListener('keyup', this.keyUpHandler);
-      document.addEventListener('keydown', this.preventDefaultHandler);
     } catch (error) {
       console.error('CommandInputSystem: Failed to add event listeners:', error);
       throw error; // Re-throw as this is critical for input functionality
@@ -342,10 +347,6 @@ export class CommandInputSystem {
         document.removeEventListener('keyup', this.keyUpHandler);
         this.keyUpHandler = undefined;
       }
-      if (this.preventDefaultHandler) {
-        document.removeEventListener('keydown', this.preventDefaultHandler);
-        this.preventDefaultHandler = undefined;
-      }
       
       console.log('CommandInputSystem: Event listeners cleaned up');
     } catch (error) {
@@ -353,7 +354,6 @@ export class CommandInputSystem {
       // Continue cleanup despite errors - set handlers to undefined anyway
       this.keyDownHandler = undefined;
       this.keyUpHandler = undefined;
-      this.preventDefaultHandler = undefined;
     }
   }
 }
