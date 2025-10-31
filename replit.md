@@ -54,6 +54,51 @@ Preferred communication style: Simple, everyday language.
 ## Recent Changes
 
 ```
+- October 31, 2025. Weapon X - Bubble Shield Power-Up System:
+  - **Created WeaponX.ts class** - collectible red ball with white stripe that unlocks bubble shield ability
+  - **Created BubbleShield.ts class** - green bubble shield with enemy repulsion and paralysis effects
+  - **Added Levels 5.5 and 5.75** - Government Lab themed levels introducing Weapon X
+  - Updated LEVEL_SEQUENCE: 1 → 1.5 → 1.75 → 2 → 2.5 → 2.75 → 3 → 3.5 → 4 → 4.5 → 5 → 5.5 → 5.75
+  - **Level 5.5 "Weapon X Discovery"**: Government Lab environment with Weapon X collectible in center, no enemies
+  - **Level 5.75 "Lab Escape"**: Same Government Lab aesthetic as Level 5, tests new ability
+  - **Weapon X mechanics**:
+    - Red ball with white stripe collectible spawns in level center
+    - Displays unlock message for 3 seconds: "You've found 'Weapon X' - Press X to use"
+    - Permanently unlocks bubble shield ability for remaining game
+  - **Bubble Shield ability** (activated with X key):
+    - 4-second active duration with green expanding bubble visual
+    - 8-second cooldown after deactivation
+    - 80-pixel radius protection zone around player
+    - Animated pulse effect with sparkles and glowing edges
+  - **Enemy paralysis system**:
+    - Enemies touched by bubble shield freeze for 2 seconds
+    - Paralyzed enemies show green flickering visual effect
+    - Pulsing green ring indicator around paralyzed enemies
+    - Repulsion force pushes enemies away from player
+    - Temporary immunity prevents re-paralysis spam
+  - **Player integration**:
+    - X key activation (only when unlocked)
+    - getBubbleShield() method for game engine access
+    - unlockWeaponX() triggers unlock sequence
+  - **Enemy integration**:
+    - paralyze() method freezes enemy movement
+    - isParalyzed() state check
+    - applyRepulsionForce() for bubble shield knockback
+    - Visual effects: brightness reduction, green glow, animated ring
+  - **Critical timing fixes**:
+    - Fixed deltaTime handling across BubbleShield, Enemy, and Player classes
+    - All timers now consistently use millisecond-based deltaTime (removed incorrect * 1000 multipliers)
+    - Animation coefficients adjusted for millisecond scale (0.003, 0.2, 0.008, 0.01, etc.)
+    - Ensures proper durations: 4s shield active, 8s cooldown, 2s paralysis, 3s message display
+  - **GameEngine integration**:
+    - checkWeaponXCollision() in collision detection loop
+    - Bubble shield effects applied to all enemies each frame
+    - Repulsion and paralysis applied when enemies enter shield radius
+  - **Level integration**:
+    - WeaponX spawning controlled by hasWeaponX config property
+    - checkWeaponXCollision() method for pickup detection
+    - WeaponX rendered with red/white pixel art sprite
+
 - October 31, 2025. Performance Optimization - Spatial Grid Collision Detection:
   - **Implemented spatial partitioning** for collision detection (previously instantiated but unused)
   - Changed collision system from O(n) linear to O(k) spatial grid lookup where k << n
