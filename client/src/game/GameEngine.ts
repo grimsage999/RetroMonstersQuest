@@ -17,6 +17,7 @@ import { CommandInputSystem, GameCommand, InputCommand } from './CommandInputSys
 import { GameUtils } from './GameUtils'; // Assuming GameUtils contains createBounds
 import { COLLISION_CONFIG } from './GameConstants';
 import { GAME_CONFIG } from './GameConfig';
+import { logger } from './Logger';
 
 export interface GameState {
   score: number;
@@ -145,7 +146,7 @@ export class GameEngine {
 
     // Preload all sounds
     this.audioPool.preloadAll().catch(err => {
-      console.warn('Failed to preload some audio:', err);
+      logger.warn('Failed to preload some audio', err);
     });
   }
 
@@ -174,7 +175,7 @@ export class GameEngine {
     this.commandInputSystem.registerCommandExecutor(GameCommand.DASH, (cmd: InputCommand) => {
       if (cmd.pressed) {
         this.inputManager.handleKeyDown('ShiftLeft');
-        console.log('🚀 DASH KEY PRESSED!');
+        logger.debug('Dash key pressed');
       } else {
         this.inputManager.handleKeyUp('ShiftLeft');
       }
@@ -185,7 +186,7 @@ export class GameEngine {
 
       // Handle title screen - start the game
       if (this.stateManager.getCurrentPhase() === GamePhase.TITLE) {
-        console.log('GameEngine: Starting gameplay from title screen');
+        logger.info('Starting gameplay from title screen');
 
         // Initialize the game state for level 1
         this.gameState.level = 1;
@@ -241,7 +242,7 @@ export class GameEngine {
 
   public async start() {
     if (!this.isRunning) {
-      console.log('GameEngine: Starting game...');
+      logger.info('Starting game');
 
       // Set running flag and start game loop immediately for responsiveness
       this.isRunning = true;
@@ -264,12 +265,12 @@ export class GameEngine {
       this.audioManager.initialize().then(() => {
         this.audioManager.playGameStart();
         this.audioManager.playBackgroundMusic();
-        console.log('GameEngine: Audio initialized successfully');
+        logger.info('Audio initialized successfully');
       }).catch(error => {
-        console.warn('GameEngine: Audio initialization failed, continuing without audio:', error);
+        logger.warn('Audio initialization failed, continuing without audio', error);
       });
 
-      console.log('GameEngine: Game started, showing level title card');
+      logger.info('Game started, showing level title card');
     }
   }
 
@@ -282,17 +283,17 @@ export class GameEngine {
 
     // Auto-fix critical issues
     if (report.issues.length > 0) {
-      console.warn('🔧 Attempting auto-fix for critical issues...');
+      logger.warn('Attempting auto-fix for critical issues');
 
       // Check for overlapping transitions
       if (report.issues.some(issue => issue.includes('overlapping'))) {
-        console.log('Fixing: Resetting UI controller');
+        logger.debug('Fixing: Resetting UI controller');
         this.uiController.forceReset();
       }
 
       // Check for invalid states
       if (report.issues.some(issue => issue.includes('Invalid transition'))) {
-        console.log('Fixing: Resetting state manager');
+        logger.debug('Fixing: Resetting state manager');
         this.stateManager.forceTransitionTo(GamePhase.TITLE);
       }
     }
@@ -317,11 +318,11 @@ export class GameEngine {
     // Clean up command input system to prevent memory leaks
     this.commandInputSystem.cleanup();
 
-    console.log('GameEngine: Stopped all game loops and cleaned up resources');
+    logger.info('Stopped all game loops and cleaned up resources');
   }
 
   public restart() {
-    console.log('GameEngine: Restarting game to initial state...');
+    logger.info('Restarting game to initial state');
 
     // Stop current game loop but don't cleanup input system
     this.isRunning = false;
@@ -390,11 +391,11 @@ export class GameEngine {
     // Update state for React UI
     this.updateState();
 
-    console.log('GameEngine: Complete system reset - all functionality restored');
+    logger.info('Complete system reset - all functionality restored');
   }
 
   private handleLevelComplete() {
-    console.log('GameEngine: Level complete!');
+    logger.info('Level complete');
 
     // Use UI controller to properly queue the transition with delay
     this.uiController.queueTransition('levelCard', () => {
@@ -403,7 +404,7 @@ export class GameEngine {
   }
 
   private handleGameOver() {
-    console.log('GameEngine: Game over - player health depleted');
+    logger.info('Game over - player health depleted');
 
     // Clean transition to game over state
     this.gameState.phase = 'gameOver';
@@ -414,7 +415,7 @@ export class GameEngine {
     // Update state immediately to show game over screen
     this.updateState();
 
-    console.log('GameEngine: Game over screen displayed with final score:', this.gameState.score);
+    logger.info('Game over screen displayed with final score', this.gameState.score);
   }
 
 
@@ -447,7 +448,7 @@ export class GameEngine {
 
   // Dev tool: Jump to a specific level instantly
   public jumpToLevel(targetLevel: number) {
-    console.log(`GameEngine: [DEV] Jumping to level ${targetLevel}`);
+    logger.debug(`Jumping to level ${targetLevel}`);
     const currentLevel = this.gameState.level;
     
     this.stateManager.transitionTo(GamePhase.LEVEL_TRANSITION);
@@ -466,12 +467,12 @@ export class GameEngine {
   }
 
   private showLevelCutscene() {
-    console.log(`GameEngine: Showing cutscene for level ${this.gameState.level}`);
+    logger.debug(`Showing cutscene for level ${this.gameState.level}`);
     const cutsceneData: CutsceneData = this.getCutsceneData(this.gameState.level);
 
     // Create cutscene immediately without UI controller queue to prevent conflicts
     this.currentCutscene = new Cutscene(this.canvas, cutsceneData, () => {
-      console.log('GameEngine: Cutscene complete, transitioning to gameplay');
+      logger.debug('Cutscene complete, transitioning to gameplay');
       this.currentCutscene = null;
 
       // Now set the game phase and initialize level
@@ -479,7 +480,7 @@ export class GameEngine {
       this.initializeLevel();
       this.stateManager.transitionTo(GamePhase.PLAYING);
 
-      console.log('GameEngine: Level initialized and ready for gameplay');
+      logger.info('Level initialized and ready for gameplay');
     });
 
     this.currentCutscene.start();
@@ -522,7 +523,7 @@ export class GameEngine {
   }
 
   private initializeLevel() {
-    console.log(`GameEngine: Initializing level ${this.gameState.level}`);
+    logger.debug(`Initializing level ${this.gameState.level}`);
 
     // No weapons in simplified game for better performance
 
@@ -539,13 +540,13 @@ export class GameEngine {
     // Check if level has alligator mini-boss and play intro sequence
     const alligator = this.currentLevel.getAlligator();
     if (alligator && alligator.isIntroReady()) {
-      console.log('GameEngine: Level has alligator mini-boss - playing intro sequence');
+      logger.debug('Level has alligator mini-boss - playing intro sequence');
       this.currentLevel.playAlligatorIntro();
       
       // Complete intro after dramatic pause (2-3 seconds)
       const introTimeout = window.setTimeout(() => {
         this.currentLevel.completeAlligatorIntro();
-        console.log('GameEngine: Alligator intro complete - mini-boss now active');
+        logger.debug('Alligator intro complete - mini-boss now active');
         this.activeTimeouts.delete(introTimeout);
       }, 2500);
       this.activeTimeouts.add(introTimeout);
@@ -554,13 +555,13 @@ export class GameEngine {
     // Check if level has alligator boss (free-roaming) and play intro sequence
     const alligatorBoss = this.currentLevel.getAlligatorBoss();
     if (alligatorBoss && alligatorBoss.isIntroReady()) {
-      console.log('GameEngine: Level has alligator boss (free-roaming) - playing intro sequence');
+      logger.debug('Level has alligator boss (free-roaming) - playing intro sequence');
       this.currentLevel.playAlligatorBossIntro();
       
       // Complete intro after dramatic pause (2-3 seconds)
       const introTimeout = window.setTimeout(() => {
         this.currentLevel.completeAlligatorBossIntro();
-        console.log('GameEngine: Alligator boss intro complete - mini-boss now active');
+        logger.debug('Alligator boss intro complete - mini-boss now active');
         this.activeTimeouts.delete(introTimeout);
       }, 2500);
       this.activeTimeouts.add(introTimeout);
@@ -569,19 +570,19 @@ export class GameEngine {
     // Check if level has necromancer mini-boss and play intro sequence
     const necromancer = this.currentLevel.getNecromancer();
     if (necromancer) {
-      console.log('GameEngine: Level has necromancer mini-boss - playing intro sequence');
+      logger.debug('Level has necromancer mini-boss - playing intro sequence');
       this.currentLevel.playNecromancerIntro();
       
       // Complete intro after dramatic pause (2-3 seconds)
       const introTimeout = window.setTimeout(() => {
         this.currentLevel.completeNecromancerIntro();
-        console.log('GameEngine: Necromancer intro complete - mini-boss now active');
+        logger.debug('Necromancer intro complete - mini-boss now active');
         this.activeTimeouts.delete(introTimeout);
       }, 2500);
       this.activeTimeouts.add(introTimeout);
     }
 
-    console.log(`GameEngine: Level ${this.gameState.level} initialized with ${this.gameState.totalCookies} cookies`);
+    logger.info(`Level ${this.gameState.level} initialized with ${this.gameState.totalCookies} cookies`);
   }
 
   // Removed fireRayGun for better performance
@@ -608,7 +609,7 @@ export class GameEngine {
 
       // Only log critical performance issues 
       if (this.currentFPS < 30) { // Only warn for truly poor performance
-        console.warn(`Critical FPS: ${this.currentFPS}`);
+        logger.warn(`Critical FPS: ${this.currentFPS}`);
         // Run diagnostic only for severe performance issues
         this.runDiagnostic();
       }
@@ -631,7 +632,7 @@ export class GameEngine {
 
       this.render();
     } catch (error) {
-      console.error('GameEngine: Critical error in game loop:', error);
+      logger.error('Critical error in game loop', error);
       // Emergency fallback: pause game and transition to safe state
       this.isRunning = false;
       this.stateManager.forceTransitionTo(GamePhase.TITLE);
@@ -904,7 +905,7 @@ export class GameEngine {
   // Removed renderWeaponUI for better performance
 
   private showVictorySequence() {
-    console.log('GameEngine: Victory!');
+    logger.info('Victory!');
 
     // Use UI controller to properly queue the victory screen
     this.uiController.queueTransition('victory', () => {
