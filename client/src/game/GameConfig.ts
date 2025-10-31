@@ -372,7 +372,7 @@ export const CUTSCENE_DATA = {
   2: {
     levelNumber: 2,
     title: "Level 2: Dystopian City",
-    description: "Government forces mobilize across crumbling streets.\nCracked pavement, neon signs, and surveillance everywhere.\nAmbient citizens watch from windows as you flee."
+    description: "Government forces mobilize across crumbling streets.\nCracked pavement, neon signs, and surveillance everywhere.\nAmbient citizens watch from windows as you flee.\n\n⚡ NEW ABILITIES UNLOCKED! ⚡\nShift = Dash (invulnerability + speed boost)\nSpace = Teleport (random location on map)"
   },
   2.5: {
     levelNumber: 2.5,
