@@ -1,0 +1,134 @@
+Request: Code Cleanup and Quality Assurance for Game
+Goal: Review, refactor, and optimize all game code to ensure clean structure, eliminate bugs, and verify all features function correctly.
+Primary Objectives
+
+Code organization and readability
+Bug identification and fixing
+Performance optimization
+Feature verification
+Remove unused/redundant code
+
+
+Code Structure Review
+Organization:
+
+Ensure consistent naming conventions throughout codebase
+Group related functions together logically
+Add clear comments for complex logic sections
+Verify proper indentation and formatting
+Remove duplicate code blocks
+Consolidate repetitive functions into reusable utilities
+
+File Structure:
+
+Confirm all assets are properly linked and loading
+Check for broken file paths or references
+Organize CSS/JavaScript/image files logically
+Remove any unused files or assets
+
+
+Feature Verification Checklist
+Core Gameplay:
+
+ Player movement (all directions) works smoothly
+ Collision detection functions properly
+ Cookie collection counts correctly
+ Score tracking updates accurately
+ Level transitions work seamlessly
+
+Level-Specific Features:
+
+ Level 1: All obstacles and mechanics functional
+ Level 2.2: All features working as intended
+ Level 2.75: Alligator mini-boss fully operational
+
+Extended neck attack animations
+Audio cues (menacing laughs) playing correctly
+Attack frequency scaling with cookie count
+One-hit-kill mechanic working
+Visual telegraphs (manhole shake/glow) appearing
+Random spawn point selection
+Attack pattern alternation (bite/grab)
+
+
+ Level 3 and beyond: All mechanics functional
+
+UI Elements:
+
+ Dev tool buttons (A button, Next Level button) working
+ HUD displays correct information
+ Menu navigation smooth
+ Visual feedback clear and responsive
+
+Audio System:
+
+ All sound effects loading and playing correctly
+ Audio timing synchronized with gameplay events
+ Volume levels balanced
+ No audio overlapping issues
+
+
+Bug Hunting Focus Areas
+Common Issues to Check:
+
+Collision detection glitches or missed hits
+Player getting stuck in walls/obstacles
+Enemies spawning incorrectly or not at all
+Score not updating or resetting improperly
+Level progression skipping or looping
+Audio not playing or playing at wrong times
+Visual elements rendering off-screen or incorrectly
+Performance slowdowns or frame rate drops
+Button clicks not registering
+Game state not saving/loading properly
+
+Level 2.75 Specific:
+
+Alligator spawn timing issues
+Neck extension not displaying correctly
+Attack laugh not playing before strikes
+Cookie count speed scaling not working
+Visual telegraphs missing or delayed
+One-hit-kill not triggering properly
+
+
+Performance Optimization
+Code Efficiency:
+
+Remove console.log statements used for debugging (unless needed)
+Optimize loops and reduce unnecessary calculations
+Check for memory leaks
+Ensure efficient event listener management
+Minimize DOM manipulations
+
+Asset Loading:
+
+Verify images load efficiently
+Check for oversized files that could be compressed
+Ensure sprites/animations don't cause lag
+Optimize audio file sizes if needed
+
+Game Loop:
+
+Confirm smooth frame rate (target 60 FPS)
+Check for unnecessary re-renders
+Optimize collision detection algorithms
+Ensure timers and intervals are properly cleared
+
+
+Code Quality Standards
+Best Practices:
+
+Use const/let appropriately (avoid var)
+Implement proper error handling (try-catch where needed)
+Validate user inputs
+Follow DRY principle (Don't Repeat Yourself)
+Use meaningful variable and function names
+Add JSDoc comments for complex functions
+
+Maintainability:
+
+Separate concerns (game logic, rendering, input handling)
+Use modular code structure
+Make magic numbers into named constants
+Document any complex algorithms or formulas
