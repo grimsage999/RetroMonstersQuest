@@ -271,7 +271,7 @@ export class Alligator {
       
       if (this.attackState === 'attacking') {
         const attackProgress = Math.min(1, this.stateTimer / (this.ATTACK_DURATION * 0.6));
-        neckExtension = Math.sin(attackProgress * Math.PI) * 35;
+        neckExtension = Math.sin(attackProgress * Math.PI) * 100;
         
         // Calculate direction toward player
         const dx = this.playerX - centerX;
@@ -279,11 +279,11 @@ export class Alligator {
         const distance = Math.sqrt(dx * dx + dy * dy);
         
         if (distance > 0) {
-          // Normalize and apply extension
+          // Normalize and apply extension - reach toward player aggressively
           const dirX = dx / distance;
           const dirY = dy / distance;
-          headX = centerX + dirX * neckExtension * 0.5;
-          headY = baseHeadY + dirY * neckExtension * 0.8;
+          headX = centerX + dirX * neckExtension;
+          headY = baseHeadY + dirY * neckExtension;
         } else {
           headY = baseHeadY - neckExtension;
         }
@@ -352,7 +352,7 @@ export class Alligator {
     const baseHeadY = bodyY - 20;
     
     const attackProgress = Math.min(1, this.stateTimer / (this.ATTACK_DURATION * 0.6));
-    const neckExtension = Math.sin(attackProgress * Math.PI) * 35;
+    const neckExtension = Math.sin(attackProgress * Math.PI) * 100;
     
     // Calculate head position toward player
     let headX = centerX;
@@ -365,13 +365,13 @@ export class Alligator {
     if (distance > 0) {
       const dirX = dx / distance;
       const dirY = dy / distance;
-      headX = centerX + dirX * neckExtension * 0.5;
-      headY = baseHeadY + dirY * neckExtension * 0.8;
+      headX = centerX + dirX * neckExtension;
+      headY = baseHeadY + dirY * neckExtension;
     } else {
       headY = baseHeadY - neckExtension;
     }
 
-    const attackRadius = this.attackType === 'grab' ? 50 : 40;
+    const attackRadius = this.attackType === 'grab' ? 60 : 55;
 
     const dxPlayer = (playerX + playerSize / 2) - headX;
     const dyPlayer = (playerY + playerSize / 2) - headY;
