@@ -750,7 +750,49 @@ export class GameEngine {
       this.updateState();
     }
 
-    // Check enemy collisions with damage system (unless dashing - invulnerable!)
+    // Check Weapon X collection
+    if (this.currentLevel.checkWeaponXCollision(playerBounds)) {
+      this.player.unlockWeaponX();
+      this.audioManager.playSuccess();
+      logger.info('🔴 Weapon X collected! Bubble Shield ability unlocked!');
+    }
+
+    // Apply bubble shield effects to enemies
+    const bubbleShield = this.player.getBubbleShield();
+    if (bubbleShield.isActive()) {
+      this.currentLevel.getEnemies().forEach(enemy => {
+        if (!enemy.isActive()) return;
+        
+        const enemyBounds = enemy.getBounds();
+        
+        // Check if enemy is within bubble shield radius
+        if (bubbleShield.checkEnemyCollision(
+          enemyBounds.x,
+          enemyBounds.y,
+          enemyBounds.width,
+          enemyBounds.height,
+          playerBounds.x,
+          playerBounds.y
+        )) {
+          // Paralyze enemy
+          enemy.paralyze();
+          
+          // Apply repulsion force
+          const repulsionForce = bubbleShield.getRepulsionForce(
+            enemyBounds.x,
+            enemyBounds.y,
+            enemyBounds.width,
+            enemyBounds.height,
+            playerBounds.x,
+            playerBounds.y
+          );
+          
+          enemy.applyRepulsionForce(repulsionForce.dx, repulsionForce.dy);
+        }
+      });
+    }
+
+    // Check enemy collisions with damage system (unless dashing or bubble shield is active!)
     if (!this.player.isDashing() && this.currentLevel.checkEnemyCollisions(playerBounds, this.spatialGrid)) {
       // Use damage system to handle hits properly
       const damageApplied = this.damageSystem.takeDamage('enemy', 1, {
