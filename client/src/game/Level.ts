@@ -1198,7 +1198,7 @@ export class Level {
         // CRITICAL: Fireballs only damage enemies/cactus AFTER being redirected by player
         // AND only if they haven't already hit the player
         if (fireball.isRedirected() && !fireball.hasHitPlayer()) {
-          // Redirected fireballs hit enemies in their path
+          // Redirected fireballs hit ALL enemies in their path
           this.enemies = this.enemies.filter(enemy => {
             if (!enemy.isActive()) return true; // Keep inactive enemies
 
@@ -1206,7 +1206,7 @@ export class Level {
             const hit = this.checkCollision(fbBounds, enemyBounds);
 
             if (hit) {
-              logger.info('💥 Redirected fireball hit enemy! Enemy destroyed.');
+              logger.info(`💥 REDIRECTED FIREBALL HIT ENEMY! Enemy type: ${enemy.constructor.name} destroyed at (${enemyBounds.x}, ${enemyBounds.y})`);
               fireball.kill();
               return false; // Remove enemy
             }

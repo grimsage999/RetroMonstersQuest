@@ -125,25 +125,49 @@ export class Fireball {
     // Draw main fireball
     ctx.save();
     
-    // Outer glow
-    const outerGlow = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size * 1.5);
-    outerGlow.addColorStop(0, '#FFAA00');
-    outerGlow.addColorStop(0.5, '#FF6600');
-    outerGlow.addColorStop(1, 'rgba(255, 102, 0, 0)');
-    
-    ctx.fillStyle = outerGlow;
-    ctx.fillRect(this.x - this.size * 1.5, this.y - this.size * 1.5, this.size * 3, this.size * 3);
-    
-    // Core fireball
-    const coreGradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size);
-    coreGradient.addColorStop(0, '#FFFF00');
-    coreGradient.addColorStop(0.5, '#FF9900');
-    coreGradient.addColorStop(1, '#FF3300');
-    
-    ctx.fillStyle = coreGradient;
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-    ctx.fill();
+    // Visual indicator for redirected fireballs - purple/blue tint
+    if (this.redirected) {
+      // Outer glow - purple for redirected
+      const outerGlow = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size * 1.5);
+      outerGlow.addColorStop(0, '#AA00FF');
+      outerGlow.addColorStop(0.5, '#6600FF');
+      outerGlow.addColorStop(1, 'rgba(102, 0, 255, 0)');
+      
+      ctx.fillStyle = outerGlow;
+      ctx.fillRect(this.x - this.size * 1.5, this.y - this.size * 1.5, this.size * 3, this.size * 3);
+      
+      // Core fireball - purple/pink for redirected
+      const coreGradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size);
+      coreGradient.addColorStop(0, '#FF00FF');
+      coreGradient.addColorStop(0.5, '#CC00FF');
+      coreGradient.addColorStop(1, '#9900FF');
+      
+      ctx.fillStyle = coreGradient;
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+      ctx.fill();
+    } else {
+      // Normal orange/yellow fireball
+      // Outer glow
+      const outerGlow = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size * 1.5);
+      outerGlow.addColorStop(0, '#FFAA00');
+      outerGlow.addColorStop(0.5, '#FF6600');
+      outerGlow.addColorStop(1, 'rgba(255, 102, 0, 0)');
+      
+      ctx.fillStyle = outerGlow;
+      ctx.fillRect(this.x - this.size * 1.5, this.y - this.size * 1.5, this.size * 3, this.size * 3);
+      
+      // Core fireball
+      const coreGradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size);
+      coreGradient.addColorStop(0, '#FFFF00');
+      coreGradient.addColorStop(0.5, '#FF9900');
+      coreGradient.addColorStop(1, '#FF3300');
+      
+      ctx.fillStyle = coreGradient;
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+      ctx.fill();
+    }
     
     ctx.restore();
   }
