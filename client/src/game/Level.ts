@@ -894,6 +894,13 @@ export class Level {
       return false;
     }
     
+    // Check body collision first (always active)
+    const bodyHit = this.necromancer.checkBodyCollision(
+      playerBounds.x,
+      playerBounds.y,
+      playerBounds.width
+    );
+    
     // Check broom melee attack
     const broomHit = this.necromancer.checkBroomCollision(
       playerBounds.x,
@@ -910,7 +917,7 @@ export class Level {
       playerBounds.height
     );
     
-    return broomHit || (ghostHit !== null);
+    return bodyHit || broomHit || (ghostHit !== null);
   }
 
   public getNecromancer(): Necromancer | null {

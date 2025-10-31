@@ -32,11 +32,17 @@ export class Necromancer {
   private animationTimer: number = 0;
   private broomSwingAngle: number = 0;
   private isIntroComplete: boolean = false;
+  private idleTimer: number = 0;
+  private breatheOffset: number = 0;
+  private swayOffset: number = 0;
+  private laughTimer: number = 0;
+  private isLaughing: boolean = false;
 
   private readonly CHANNEL_DURATION = 1000; // 1 second warning
   private readonly ATTACK_DURATION = 600;
   private readonly RECOVERY_DURATION = 400;
   private readonly MELEE_RANGE = 100;
+  private readonly BODY_COLLISION_RANGE = 35;
 
   constructor(x: number, y: number, tombstonePositions: TombstonePosition[], audioManager: any, totalCookies: number) {
     this.x = x;
@@ -132,6 +138,22 @@ export class Necromancer {
 
     this.attackCooldown -= deltaTime;
     this.stateTimer += deltaTime;
+    this.idleTimer += deltaTime;
+    this.laughTimer += deltaTime;
+
+    // Idle breathing and swaying animation
+    this.breatheOffset = Math.sin(this.idleTimer * 0.002) * 2;
+    this.swayOffset = Math.sin(this.idleTimer * 0.001) * 3;
+
+    // Periodic laughing (every 8-15 seconds)
+    if (this.laughTimer > 8000 + Math.random() * 7000) {
+      this.isLaughing = true;
+      this.playEvilLaugh();
+      this.laughTimer = 0;
+      setTimeout(() => {
+        this.isLaughing = false;
+      }, 1500);
+    }
 
     // Update animation
     this.animationTimer += deltaTime;
@@ -217,65 +239,80 @@ export class Necromancer {
 
     ctx.save();
 
+    // Apply position with breathing and swaying
+    const renderX = this.x + this.swayOffset;
+    const renderY = this.y + this.breatheOffset;
+
+    // Laughing visual effect (green evil glow)
+    if (this.isLaughing) {
+      const pulseAlpha = 0.3 + Math.sin(Date.now() * 0.02) * 0.2;
+      ctx.globalAlpha = pulseAlpha;
+      ctx.fillStyle = '#00FF00'; // Green evil aura when laughing
+      ctx.beginPath();
+      ctx.arc(renderX + this.width / 2, renderY + this.height / 2, 40, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+
     // Channeling visual effect
     if (this.attackState === 'channeling' && this.attackType === 'summon_ghost') {
       const pulseAlpha = 0.3 + Math.sin(this.stateTimer * 0.01) * 0.2;
       ctx.globalAlpha = pulseAlpha;
       ctx.fillStyle = '#9370DB'; // Purple magic aura
-      ctx.fillRect(this.x - 10, this.y - 10, this.width + 20, this.height + 20);
+      ctx.fillRect(renderX - 10, renderY - 10, this.width + 20, this.height + 20);
       ctx.globalAlpha = 1;
     }
 
     // Necromancer body (dark witch in flowing robes)
-    const breathe = Math.sin(this.animationFrame * Math.PI / 2) * 2;
 
     // Flowing dark robe/dress
     ctx.fillStyle = '#1C1C1C'; // Black robe
-    ctx.fillRect(this.x, this.y + 20, this.width, this.height - 20);
+    ctx.fillRect(renderX, renderY + 20, this.width, this.height - 20);
     
     // Purple accents on robe
     ctx.fillStyle = '#9370DB';
-    ctx.fillRect(this.x + 8, this.y + 28, 8, this.height - 28);
-    ctx.fillRect(this.x + this.width - 16, this.y + 28, 8, this.height - 28);
+    ctx.fillRect(renderX + 8, renderY + 28, 8, this.height - 28);
+    ctx.fillRect(renderX + this.width - 16, renderY + 28, 8, this.height - 28);
 
     // Witch hat (large pointed hat)
     ctx.fillStyle = '#000000';
     ctx.beginPath();
-    ctx.moveTo(this.x + this.width / 2, this.y - 20);
-    ctx.lineTo(this.x + 8, this.y + 8);
-    ctx.lineTo(this.x + this.width - 8, this.y + 8);
+    ctx.moveTo(renderX + this.width / 2, renderY - 20);
+    ctx.lineTo(renderX + 8, renderY + 8);
+    ctx.lineTo(renderX + this.width - 8, renderY + 8);
     ctx.closePath();
     ctx.fill();
     
     // Hat brim
-    ctx.fillRect(this.x + 4, this.y + 8, this.width - 8, 4);
+    ctx.fillRect(renderX + 4, renderY + 8, this.width - 8, 4);
     
     // Purple band on hat
     ctx.fillStyle = '#9370DB';
-    ctx.fillRect(this.x + 12, this.y + 4, this.width - 24, 4);
+    ctx.fillRect(renderX + 12, renderY + 4, this.width - 24, 4);
 
     // Head/face (pale greenish witch skin)
     ctx.fillStyle = '#8FBC8F';
-    ctx.fillRect(this.x + 12, this.y + 12, this.width - 24, 16);
+    ctx.fillRect(renderX + 12, renderY + 12, this.width - 24, 16);
 
-    // Glowing purple eyes
-    ctx.fillStyle = '#FF00FF';
-    ctx.fillRect(this.x + 16, this.y + 16, 4, 4);
-    ctx.fillRect(this.x + 28, this.y + 16, 4, 4);
+    // Glowing purple eyes (brighter when laughing)
+    ctx.fillStyle = this.isLaughing ? '#00FF00' : '#FF00FF';
+    ctx.fillRect(renderX + 16, renderY + 16, 4, 4);
+    ctx.fillRect(renderX + 28, renderY + 16, 4, 4);
 
-    // Evil grin
+    // Evil grin (wider when laughing)
     ctx.fillStyle = '#000000';
-    ctx.fillRect(this.x + 16, this.y + 24, 16, 2);
+    const mouthWidth = this.isLaughing ? 20 : 16;
+    ctx.fillRect(renderX + 16 - (mouthWidth - 16) / 2, renderY + 24, mouthWidth, 2);
 
     // Arms/hands
     ctx.fillStyle = '#8FBC8F';
-    ctx.fillRect(this.x + 4, this.y + 28, 8, 16);
-    ctx.fillRect(this.x + this.width - 12, this.y + 28, 8, 16);
+    ctx.fillRect(renderX + 4, renderY + 28, 8, 16);
+    ctx.fillRect(renderX + this.width - 12, renderY + 28, 8, 16);
 
     // Broom (held in right hand)
     if (this.attackType === 'broom' && this.attackState === 'attacking') {
       ctx.save();
-      ctx.translate(this.x + this.width - 8, this.y + 36);
+      ctx.translate(renderX + this.width - 8, renderY + 36);
       ctx.rotate(this.broomSwingAngle);
       
       // Broom handle
@@ -290,9 +327,9 @@ export class Necromancer {
     } else {
       // Broom at rest
       ctx.fillStyle = '#8B4513';
-      ctx.fillRect(this.x + this.width - 8, this.y + 36, 4, 32);
+      ctx.fillRect(renderX + this.width - 8, renderY + 36, 4, 32);
       ctx.fillStyle = '#DAA520';
-      ctx.fillRect(this.x + this.width - 12, this.y + 64, 12, 6);
+      ctx.fillRect(renderX + this.width - 12, renderY + 64, 12, 6);
     }
 
     ctx.restore();
@@ -315,6 +352,20 @@ export class Necromancer {
       }
     }
     return null;
+  }
+
+  public checkBodyCollision(playerX: number, playerY: number, playerSize: number): boolean {
+    // Check if player touches the necromancer's body
+    const necromancerCenterX = this.x + this.width / 2;
+    const necromancerCenterY = this.y + this.height / 2;
+    const playerCenterX = playerX + playerSize / 2;
+    const playerCenterY = playerY + playerSize / 2;
+
+    const dx = playerCenterX - necromancerCenterX;
+    const dy = playerCenterY - necromancerCenterY;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+
+    return distance < this.BODY_COLLISION_RANGE;
   }
 
   public getPosition(): { x: number; y: number } {
