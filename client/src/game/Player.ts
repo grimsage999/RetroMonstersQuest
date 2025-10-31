@@ -42,14 +42,14 @@ export class Player {
   private previousSpeed: number = 0;
   
   // Teleport system
-  private teleportDistance: number = 75; // Teleport distance in pixels
-  private teleportCooldown: number = 2000; // 2 second cooldown in ms
+  private teleportCooldown: number = 3000; // 3 second cooldown in ms (random teleport is powerful)
   private teleportCooldownTimer: number = 0;
   private isTeleporting: boolean = false;
   private teleportAnimationTimer: number = 0;
-  private teleportAnimationDuration: number = 300; // 300ms for teleport animation
+  private teleportAnimationDuration: number = 600; // 600ms for teleport animation (longer for dramatic effect)
   private teleportStartX: number = 0;
   private teleportStartY: number = 0;
+  private teleportPhase: 'fadeOut' | 'fadeIn' = 'fadeOut';
 
   constructor(x: number, y: number) {
     this.x = x;
@@ -140,41 +140,34 @@ export class Player {
   }
   
   private activateTeleport(inputX: number, inputY: number, canvasWidth: number, canvasHeight: number) {
-    // Determine teleport direction
-    let teleportX = inputX;
-    let teleportY = inputY;
-    
-    // If no input, teleport in facing direction
-    if (teleportX === 0 && teleportY === 0) {
-      teleportX = this.direction === 'right' ? 1 : -1;
-    }
-    
-    // Normalize direction
-    const length = Math.sqrt(teleportX * teleportX + teleportY * teleportY);
-    if (length > 0) {
-      teleportX /= length;
-      teleportY /= length;
-    }
-    
     // Store start position for visual effect
     this.teleportStartX = this.x;
     this.teleportStartY = this.y;
     
-    // Calculate target position
-    const targetX = this.x + (teleportX * this.teleportDistance);
-    const targetY = this.y + (teleportY * this.teleportDistance);
+    // Generate random position anywhere on the map
+    // Add margin to avoid spawning too close to edges
+    const margin = 50;
+    const targetX = margin + Math.random() * (canvasWidth - this.width - margin * 2);
+    const targetY = margin + Math.random() * (canvasHeight - this.height - margin * 2);
     
-    // Clamp to bounds
-    this.x = Math.max(0, Math.min(canvasWidth - this.width, targetX));
-    this.y = Math.max(0, Math.min(canvasHeight - this.height, targetY));
-    
-    // Set teleport state
+    // Set teleport state - start with fade out phase
     this.isTeleporting = true;
     this.teleportAnimationTimer = this.teleportAnimationDuration;
     this.teleportCooldownTimer = this.teleportCooldown;
     this.animationState = 'teleporting';
+    this.teleportPhase = 'fadeOut';
     
-    logger.info(`✨ TELEPORT ACTIVATED! From (${Math.round(this.teleportStartX)}, ${Math.round(this.teleportStartY)}) to (${Math.round(this.x)}, ${Math.round(this.y)})`);
+    // Actually move player at halfway point of animation
+    const halfwayDelay = this.teleportAnimationDuration / 2;
+    setTimeout(() => {
+      if (this.isTeleporting) {
+        this.x = targetX;
+        this.y = targetY;
+        this.teleportPhase = 'fadeIn';
+      }
+    }, halfwayDelay);
+    
+    logger.info(`✨ TELEPORT ACTIVATED! From (${Math.round(this.teleportStartX)}, ${Math.round(this.teleportStartY)}) to (${Math.round(targetX)}, ${Math.round(targetY)})`);
   }
 
   public render(ctx: CanvasRenderingContext2D) {
@@ -205,6 +198,18 @@ export class Player {
     
     ctx.save();
     ctx.imageSmoothingEnabled = false;
+    
+    // Apply teleport fade effect
+    if (this.isTeleporting) {
+      const progress = 1 - (this.teleportAnimationTimer / this.teleportAnimationDuration);
+      if (this.teleportPhase === 'fadeOut') {
+        // Fade out during first half
+        ctx.globalAlpha = 1 - (progress * 2);
+      } else {
+        // Fade in during second half
+        ctx.globalAlpha = (progress - 0.5) * 2;
+      }
+    }
     
     // Apply squash & stretch transformation
     const centerX = this.x + this.width / 2;
@@ -504,63 +509,124 @@ export class Player {
   private renderTeleportEffect(ctx: CanvasRenderingContext2D) {
     // Calculate animation progress (0 = start, 1 = end)
     const progress = 1 - (this.teleportAnimationTimer / this.teleportAnimationDuration);
+    const phaseProgress = this.teleportPhase === 'fadeOut' ? progress * 2 : (progress - 0.5) * 2;
     
     const centerX = this.x + this.width / 2;
     const centerY = this.y + this.height / 2;
     
     ctx.save();
     
-    // Cyan/blue spiral rings around the player (based on reference image)
-    const numRings = 4;
-    const maxRadius = 60;
-    const baseAlpha = 0.7 * (1 - progress); // Fade out as animation completes
+    // PORTAL EFFECT - Large expanding/contracting portal
+    const portalMaxRadius = 120;
+    const portalRadius = this.teleportPhase === 'fadeOut' 
+      ? portalMaxRadius * phaseProgress 
+      : portalMaxRadius * (1 - phaseProgress);
     
-    for (let i = 0; i < numRings; i++) {
-      const ringProgress = (progress * 2 + (i / numRings)) % 1;
-      const radius = maxRadius * ringProgress;
-      const alpha = baseAlpha * (1 - ringProgress);
+    // Portal outer glow
+    const gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, portalRadius);
+    gradient.addColorStop(0, 'rgba(0, 255, 255, 0)');
+    gradient.addColorStop(0.7, 'rgba(0, 255, 255, 0.3)');
+    gradient.addColorStop(1, 'rgba(0, 255, 255, 0)');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(centerX - portalRadius, centerY - portalRadius, portalRadius * 2, portalRadius * 2);
+    
+    // Multiple spinning portal rings
+    const numPortalRings = 6;
+    for (let i = 0; i < numPortalRings; i++) {
+      const ringRadius = portalRadius * (0.3 + (i / numPortalRings) * 0.7);
+      const ringAlpha = 0.8 - (i / numPortalRings) * 0.5;
       
-      // Outer cyan ring
-      ctx.strokeStyle = `rgba(0, 255, 255, ${alpha})`;
-      ctx.lineWidth = 3;
+      ctx.strokeStyle = `rgba(0, 255, 255, ${ringAlpha})`;
+      ctx.lineWidth = 4;
       ctx.beginPath();
-      ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+      ctx.arc(centerX, centerY, ringRadius, 0, Math.PI * 2);
       ctx.stroke();
       
-      // Inner blue ring (slightly smaller)
-      ctx.strokeStyle = `rgba(64, 224, 255, ${alpha * 0.7})`;
+      // Inner purple ring for depth
+      ctx.strokeStyle = `rgba(138, 43, 226, ${ringAlpha * 0.6})`;
       ctx.lineWidth = 2;
       ctx.beginPath();
-      ctx.arc(centerX, centerY, radius * 0.8, 0, Math.PI * 2);
+      ctx.arc(centerX, centerY, ringRadius * 0.9, 0, Math.PI * 2);
       ctx.stroke();
     }
     
-    // Add horizontal scan lines for sci-fi effect
-    const scanLineCount = 8;
-    for (let i = 0; i < scanLineCount; i++) {
-      const scanProgress = (progress * 3 + (i / scanLineCount)) % 1;
-      const yOffset = (scanProgress - 0.5) * this.height * 2;
-      const scanAlpha = baseAlpha * 0.5 * (1 - Math.abs(scanProgress - 0.5) * 2);
+    // ENERGY BEAMS shooting outward
+    const beamCount = 16;
+    for (let i = 0; i < beamCount; i++) {
+      const angle = (i / beamCount) * Math.PI * 2 + progress * Math.PI;
+      const beamLength = portalRadius * 1.5;
+      const startDist = 20;
       
-      ctx.strokeStyle = `rgba(0, 255, 255, ${scanAlpha})`;
-      ctx.lineWidth = 1;
+      const x1 = centerX + Math.cos(angle) * startDist;
+      const y1 = centerY + Math.sin(angle) * startDist;
+      const x2 = centerX + Math.cos(angle) * beamLength;
+      const y2 = centerY + Math.sin(angle) * beamLength;
+      
+      const beamGradient = ctx.createLinearGradient(x1, y1, x2, y2);
+      beamGradient.addColorStop(0, 'rgba(0, 255, 255, 0.8)');
+      beamGradient.addColorStop(1, 'rgba(0, 255, 255, 0)');
+      
+      ctx.strokeStyle = beamGradient;
+      ctx.lineWidth = 2;
       ctx.beginPath();
-      ctx.moveTo(centerX - this.width, centerY + yOffset);
-      ctx.lineTo(centerX + this.width, centerY + yOffset);
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
       ctx.stroke();
     }
     
-    // Particle sparkles
-    const sparkleCount = 12;
-    for (let i = 0; i < sparkleCount; i++) {
-      const angle = (i / sparkleCount) * Math.PI * 2 + progress * Math.PI * 4;
-      const dist = 30 + Math.sin(progress * Math.PI * 2) * 10;
+    // PARTICLE EXPLOSION - lots more particles
+    const particleCount = 40;
+    for (let i = 0; i < particleCount; i++) {
+      const angle = (i / particleCount) * Math.PI * 2 + progress * Math.PI * 3;
+      // Use deterministic offset based on particle index
+      const distOffset = Math.sin(i * 0.5) * 0.5 + 0.5; // 0 to 1
+      const dist = portalRadius * 0.5 + distOffset * portalRadius * 0.5;
       const x = centerX + Math.cos(angle) * dist;
       const y = centerY + Math.sin(angle) * dist;
-      const size = 2 + Math.sin(progress * Math.PI * 2 + i) * 1;
+      const size = 3 + Math.sin(i * 0.7) * 2 + 1;
+      const alpha = 0.6 + Math.sin(i * 0.3) * 0.2 + 0.2;
       
-      ctx.fillStyle = `rgba(0, 255, 255, ${baseAlpha * 0.8})`;
+      // Mix of cyan and purple particles
+      if (i % 3 === 0) {
+        ctx.fillStyle = `rgba(138, 43, 226, ${alpha})`;
+      } else {
+        ctx.fillStyle = `rgba(0, 255, 255, ${alpha})`;
+      }
       ctx.fillRect(x - size / 2, y - size / 2, size, size);
+    }
+    
+    // VERTICAL ENERGY COLUMN
+    const columnWidth = 60;
+    const columnHeight = 200;
+    const columnGradient = ctx.createLinearGradient(
+      centerX, centerY - columnHeight / 2,
+      centerX, centerY + columnHeight / 2
+    );
+    columnGradient.addColorStop(0, 'rgba(0, 255, 255, 0)');
+    columnGradient.addColorStop(0.5, 'rgba(0, 255, 255, 0.4)');
+    columnGradient.addColorStop(1, 'rgba(0, 255, 255, 0)');
+    ctx.fillStyle = columnGradient;
+    ctx.fillRect(centerX - columnWidth / 2, centerY - columnHeight / 2, columnWidth, columnHeight);
+    
+    // ELECTRIC ARCS - deterministic based on progress to prevent flickering
+    const arcCount = 8;
+    for (let i = 0; i < arcCount; i++) {
+      const angle1 = (i / arcCount) * Math.PI * 2 + progress * Math.PI * 0.5;
+      const angle2 = angle1 + (Math.sin(i * 2.3) - 0.5) * Math.PI;
+      const radius = portalRadius * 0.6;
+      
+      const x1 = centerX + Math.cos(angle1) * radius;
+      const y1 = centerY + Math.sin(angle1) * radius;
+      const x2 = centerX + Math.cos(angle2) * radius;
+      const y2 = centerY + Math.sin(angle2) * radius;
+      
+      const alpha = 0.6 + Math.sin(progress * Math.PI * 2 + i) * 0.2 + 0.2;
+      ctx.strokeStyle = `rgba(255, 255, 255, ${alpha})`;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
+      ctx.stroke();
     }
     
     ctx.restore();
