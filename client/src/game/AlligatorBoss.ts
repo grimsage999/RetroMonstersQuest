@@ -19,12 +19,15 @@ export class AlligatorBoss {
   private neckExtension: number = 0;
   private headX: number = 0;
   private headY: number = 0;
+  private walkBob: number = 0;
+  private walkBobSpeed: number = 0;
 
   private readonly WARNING_DURATION = 1000;
   private readonly ATTACK_DURATION = 1200;
   private readonly COOLDOWN_DURATION = 500;
   private readonly MOVE_SPEED = 1.5;
   private readonly BITE_RANGE = 120;
+  private readonly BODY_COLLISION_RANGE = 40;
 
   constructor(audioManager: any, totalCookies: number, startX: number = 400, startY: number = 350) {
     this.audioManager = audioManager;
@@ -87,6 +90,9 @@ export class AlligatorBoss {
       this.velocityX = (dx / distance) * this.MOVE_SPEED;
       this.velocityY = (dy / distance) * this.MOVE_SPEED;
       
+      // Calculate walking speed for animation
+      this.walkBobSpeed = Math.sqrt(this.velocityX * this.velocityX + this.velocityY * this.velocityY);
+      
       // Update facing direction
       if (dx > 0) {
         this.facingDirection = 1;
@@ -96,6 +102,7 @@ export class AlligatorBoss {
     } else {
       this.velocityX *= 0.8;
       this.velocityY *= 0.8;
+      this.walkBobSpeed *= 0.8;
     }
   }
 
@@ -121,6 +128,11 @@ export class AlligatorBoss {
     // Keep within bounds
     this.x = Math.max(0, Math.min(800 - this.width, this.x));
     this.y = Math.max(0, Math.min(600 - this.height, this.y));
+
+    // Update walking bob animation
+    if (this.walkBobSpeed > 0.1) {
+      this.walkBob += deltaTime * 0.008 * this.walkBobSpeed;
+    }
 
     this.stateTimer += deltaTime;
 
@@ -158,9 +170,13 @@ export class AlligatorBoss {
           this.velocityY = (dy / distance) * this.MOVE_SPEED * 0.8;
         }
         
-        // Extend neck toward player
-        const attackProgress = Math.min(1, this.stateTimer / (this.ATTACK_DURATION * 0.7));
-        this.neckExtension = Math.sin(attackProgress * Math.PI) * 80;
+        // Extend neck toward player with smooth animation
+        const attackProgress = Math.min(1, this.stateTimer / (this.ATTACK_DURATION * 0.6));
+        // Use a smoother easing function for neck extension
+        const easeProgress = attackProgress < 0.5 
+          ? 2 * attackProgress * attackProgress 
+          : 1 - Math.pow(-2 * attackProgress + 2, 2) / 2;
+        this.neckExtension = easeProgress * 100;
         
         // Calculate head position
         const baseHeadX = this.x + this.width / 2;
@@ -214,32 +230,39 @@ export class AlligatorBoss {
       ctx.fill();
     }
 
+    // Calculate walking bob offset for animation
+    const bobOffset = Math.sin(this.walkBob) * 3;
+
     // Render detailed pixel art alligator
     ctx.save();
     if (this.facingDirection === -1) {
-      ctx.translate(this.x + this.width, this.y);
+      ctx.translate(this.x + this.width, this.y + bobOffset);
       ctx.scale(-1, 1);
     } else {
-      ctx.translate(this.x, this.y);
+      ctx.translate(this.x, this.y + bobOffset);
     }
 
     const scale = 2;
 
-    // Legs (humanoid stance)
+    // Calculate leg offsets for walking animation
+    const leftLegOffset = Math.sin(this.walkBob) * 2;
+    const rightLegOffset = Math.sin(this.walkBob + Math.PI) * 2;
+
+    // Legs (humanoid stance) with animated walking
     ctx.fillStyle = '#5A7D4A';
-    ctx.fillRect(12 * scale, 42 * scale, 8 * scale, 18 * scale);
-    ctx.fillRect(30 * scale, 42 * scale, 8 * scale, 18 * scale);
+    ctx.fillRect(12 * scale, (42 + leftLegOffset) * scale, 8 * scale, (18 - leftLegOffset) * scale);
+    ctx.fillRect(30 * scale, (42 + rightLegOffset) * scale, 8 * scale, (18 - rightLegOffset) * scale);
     
-    // Feet/claws
+    // Feet/claws with animated walking
     ctx.fillStyle = '#4A5F3A';
-    ctx.fillRect(10 * scale, 58 * scale, 12 * scale, 4 * scale);
-    ctx.fillRect(28 * scale, 58 * scale, 12 * scale, 4 * scale);
+    ctx.fillRect(10 * scale, (58 + leftLegOffset) * scale, 12 * scale, 4 * scale);
+    ctx.fillRect(28 * scale, (58 + rightLegOffset) * scale, 12 * scale, 4 * scale);
     
     // Claws on feet
     ctx.fillStyle = '#FFFACD';
     for (let i = 0; i < 3; i++) {
-      ctx.fillRect((11 + i * 3) * scale, 60 * scale, 2 * scale, 2 * scale);
-      ctx.fillRect((29 + i * 3) * scale, 60 * scale, 2 * scale, 2 * scale);
+      ctx.fillRect((11 + i * 3) * scale, (60 + leftLegOffset) * scale, 2 * scale, 2 * scale);
+      ctx.fillRect((29 + i * 3) * scale, (60 + rightLegOffset) * scale, 2 * scale, 2 * scale);
     }
 
     // Main body (green)
@@ -370,6 +393,13 @@ export class AlligatorBoss {
   }
 
   public checkPlayerCollision(playerX: number, playerY: number, playerSize: number): boolean {
+    // Check body collision first (always active)
+    const bodyCollision = this.checkBodyCollision(playerX, playerY, playerSize);
+    if (bodyCollision) {
+      return true;
+    }
+
+    // Check bite attack collision (only during attacking state)
     if (this.attackState !== 'attacking') {
       return false;
     }
@@ -391,6 +421,20 @@ export class AlligatorBoss {
     const distance = Math.sqrt(dx * dx + dy * dy);
 
     return distance < this.BITE_RANGE;
+  }
+
+  public checkBodyCollision(playerX: number, playerY: number, playerSize: number): boolean {
+    // Check if player touches the boss body
+    const bossCenterX = this.x + this.width / 2;
+    const bossCenterY = this.y + this.height / 2;
+    const playerCenterX = playerX + playerSize / 2;
+    const playerCenterY = playerY + playerSize / 2;
+
+    const dx = playerCenterX - bossCenterX;
+    const dy = playerCenterY - bossCenterY;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+
+    return distance < this.BODY_COLLISION_RANGE;
   }
 
   public getPosition() {
