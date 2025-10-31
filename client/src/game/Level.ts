@@ -2144,7 +2144,14 @@ export class Level {
       return false;
     });
 
-    return spatialHit;
+    // CRITICAL FIX: Check ALL spinning cacti for fireball collisions
+    // Fireballs can travel far from the cactus body, so they won't be in the spatial grid
+    const fireballHit = this.spinningCacti.some(cactus => {
+      if (!cactus.isAlive()) return false;
+      return cactus.checkCollision(playerBounds.x, playerBounds.y, playerBounds.width, playerBounds.height);
+    });
+
+    return spatialHit || fireballHit;
   }
 
   public checkAlligatorCollision(playerBounds: { x: number; y: number; width: number; height: number; }): boolean {
