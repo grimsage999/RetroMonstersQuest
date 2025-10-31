@@ -74,7 +74,7 @@ Preferred communication style: Simple, everyday language.
     - High cookies (>70%): 4-5 seconds between attacks
     - Medium cookies (30-70%): 3-4 seconds between attacks
     - Low cookies (<30%): 2-3 seconds between attacks
-  - ONE-HIT KILL mechanic - bite attack is instant death (dash provides invulnerability)
+  - **Damage**: Bite attack deals 1 damage (dash provides invulnerability)
   - **Audio system**:
     - Intro laugh (0.4x playback rate)
     - Attack warning sound (0.6x playback rate)

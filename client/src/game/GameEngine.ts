@@ -799,15 +799,25 @@ export class GameEngine {
       this.handleGameOver();
     }
 
-    // Check alligator boss (free-roaming) collision (ONE-HIT KILL - unless dashing!)
+    // Check alligator boss (free-roaming) collision
     if (!this.player.isDashing() && this.currentLevel.checkAlligatorBossCollision(playerBounds)) {
-      // Alligator boss bite and spit attacks are instant death
-      this.audioManager.playHit();
-      this.damageSystem.takeDamage('alligator_boss', 999, {
+      // Alligator boss bite attack deals 1 damage
+      const damageApplied = this.damageSystem.takeDamage('alligator_boss', 1, {
         x: playerBounds.x,
         y: playerBounds.y
       });
-      this.handleGameOver();
+
+      if (damageApplied) {
+        this.audioManager.playHit();
+
+        if (this.damageSystem.getHealth() <= 0) {
+          // Game over - use UI controller to properly queue the transition
+          this.handleGameOver();
+        } else {
+          // Respawn player but keep invincibility
+          this.player.reset(this.canvas.width / 2, this.canvas.height - 50);
+        }
+      }
     }
 
     // Check necromancer mini-boss collision (ONE-HIT KILL - unless dashing!)
