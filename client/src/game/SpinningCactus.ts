@@ -166,15 +166,24 @@ export class SpinningCactus {
 
     // Check collision with fireballs - fireballs ALWAYS damage the player
     for (const fireball of this.fireballs) {
-      if (!fireball.isAlive() || fireball.hasHitPlayer()) continue;
+      if (!fireball.isAlive()) {
+        continue;
+      }
+      
+      if (fireball.hasHitPlayer()) {
+        continue;
+      }
 
       const fbBounds = fireball.getBounds();
-      if (playerX < fbBounds.x + fbBounds.width &&
-          playerX + playerWidth > fbBounds.x &&
-          playerY < fbBounds.y + fbBounds.height &&
-          playerY + playerHeight > fbBounds.y) {
-        logger.info('🔥 FIREBALL HIT PLAYER! Taking 1 damage.');
-        // Mark for removal but don't kill yet - let it check enemy collisions first
+      
+      // AABB collision detection
+      const collision = playerX < fbBounds.x + fbBounds.width &&
+                       playerX + playerWidth > fbBounds.x &&
+                       playerY < fbBounds.y + fbBounds.height &&
+                       playerY + playerHeight > fbBounds.y;
+      
+      if (collision) {
+        logger.info(`🔥 FIREBALL HIT PLAYER! Fireball at (${Math.round(fbBounds.x)}, ${Math.round(fbBounds.y)}), Player at (${Math.round(playerX)}, ${Math.round(playerY)})`);
         fireball.markHitPlayer();
         return true;
       }
