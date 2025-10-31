@@ -97,12 +97,12 @@ Preferred communication style: Simple, everyday language.
     - 5-second lifetime with fade-out effect in final second
     - Homing behavior with smooth velocity blending
     - Cyan ethereal appearance with glowing eyes and wispy trails
-    - ONE-HIT KILL if they catch the player
+    - Deal 1 damage if they catch the player
   - **Attack frequency** (scales with cookie count):
     - High cookies (>70%): 3.5-4.5 seconds between attacks
     - Medium cookies (30-70%): 2.5-3.5 seconds between attacks
     - Low cookies (<30%): 1.5-2.5 seconds between attacks
-  - ONE-HIT KILL mechanic - both broom and ghosts are instant death (dash provides invulnerability)
+  - **Damage**: Both broom and ghosts deal 1 damage (dash provides invulnerability)
   - **Audio system**: 
     - Evil laugh intro (0.3x playback rate)
     - Ghost summoning sound (0.5x playback rate)

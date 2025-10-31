@@ -820,15 +820,25 @@ export class GameEngine {
       }
     }
 
-    // Check necromancer mini-boss collision (ONE-HIT KILL - unless dashing!)
+    // Check necromancer mini-boss collision
     if (!this.player.isDashing() && this.currentLevel.checkNecromancerCollision(playerBounds)) {
-      // Necromancer attacks and ghosts are instant death
-      this.audioManager.playHit();
-      this.damageSystem.takeDamage('necromancer', 999, {
+      // Necromancer attacks and ghosts deal 1 damage
+      const damageApplied = this.damageSystem.takeDamage('necromancer', 1, {
         x: playerBounds.x,
         y: playerBounds.y
       });
-      this.handleGameOver();
+
+      if (damageApplied) {
+        this.audioManager.playHit();
+
+        if (this.damageSystem.getHealth() <= 0) {
+          // Game over - use UI controller to properly queue the transition
+          this.handleGameOver();
+        } else {
+          // Respawn player but keep invincibility
+          this.player.reset(this.canvas.width / 2, this.canvas.height - 50);
+        }
+      }
     }
   }
 
