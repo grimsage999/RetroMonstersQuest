@@ -962,15 +962,255 @@ export class Level {
   }
 
   private renderGraveyardBackground(ctx: CanvasRenderingContext2D) {
-    // PERFORMANCE FIX: Solid color instead of gradient
-    ctx.fillStyle = '#2F2F2F'; // Dark gray
-    ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
+    // Dark blue night sky gradient
+    const skyGradient = ctx.createLinearGradient(0, 0, 0, this.canvasHeight * 0.6);
+    skyGradient.addColorStop(0, '#1A1F3A');
+    skyGradient.addColorStop(0.5, '#2C3E66');
+    skyGradient.addColorStop(1, '#3D5A80');
+    ctx.fillStyle = skyGradient;
+    ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight * 0.6);
     
-    // Simple moon
-    ctx.fillStyle = '#F5F5DC';
+    // Full moon (bright and large)
+    ctx.fillStyle = '#C9E4F5';
     ctx.beginPath();
-    ctx.arc(this.canvasWidth * 0.8, this.canvasHeight * 0.2, 28, 0, 2 * Math.PI);
+    ctx.arc(this.canvasWidth * 0.65, this.canvasHeight * 0.15, 35, 0, Math.PI * 2);
     ctx.fill();
+    
+    // Moon glow
+    ctx.fillStyle = 'rgba(201, 228, 245, 0.3)';
+    ctx.beginPath();
+    ctx.arc(this.canvasWidth * 0.65, this.canvasHeight * 0.15, 45, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Stars - twinkling effect with different sizes
+    const stars = [
+      { x: 0.05, y: 0.08, size: 2, sparkle: true },
+      { x: 0.12, y: 0.05, size: 1.5, sparkle: false },
+      { x: 0.18, y: 0.12, size: 1, sparkle: false },
+      { x: 0.28, y: 0.07, size: 2, sparkle: true },
+      { x: 0.35, y: 0.15, size: 1, sparkle: false },
+      { x: 0.42, y: 0.05, size: 1.5, sparkle: false },
+      { x: 0.52, y: 0.10, size: 1, sparkle: false },
+      { x: 0.75, y: 0.08, size: 2, sparkle: true },
+      { x: 0.82, y: 0.12, size: 1, sparkle: false },
+      { x: 0.88, y: 0.06, size: 1.5, sparkle: false },
+      { x: 0.92, y: 0.14, size: 2, sparkle: true },
+      { x: 0.15, y: 0.20, size: 1, sparkle: false },
+      { x: 0.48, y: 0.18, size: 1, sparkle: false },
+      { x: 0.70, y: 0.25, size: 1.5, sparkle: false },
+    ];
+    
+    stars.forEach(star => {
+      ctx.fillStyle = '#FFFFFF';
+      ctx.beginPath();
+      ctx.arc(star.x * this.canvasWidth, star.y * this.canvasHeight, star.size, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Cross sparkle for larger stars
+      if (star.sparkle) {
+        ctx.strokeStyle = '#FFFFFF';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(star.x * this.canvasWidth - 4, star.y * this.canvasHeight);
+        ctx.lineTo(star.x * this.canvasWidth + 4, star.y * this.canvasHeight);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(star.x * this.canvasWidth, star.y * this.canvasHeight - 4);
+        ctx.lineTo(star.x * this.canvasWidth, star.y * this.canvasHeight + 4);
+        ctx.stroke();
+      }
+    });
+    
+    // Spooky dead trees
+    this.renderDeadTrees(ctx);
+    
+    // Layered tombstones (back layer)
+    this.renderBackTombstones(ctx);
+    
+    // Misty ground
+    const groundGradient = ctx.createLinearGradient(0, this.canvasHeight * 0.6, 0, this.canvasHeight);
+    groundGradient.addColorStop(0, '#5A7A9A');
+    groundGradient.addColorStop(0.5, '#6B8FAF');
+    groundGradient.addColorStop(1, '#7CA4C4');
+    ctx.fillStyle = groundGradient;
+    ctx.fillRect(0, this.canvasHeight * 0.6, this.canvasWidth, this.canvasHeight * 0.4);
+    
+    // Fog effect
+    ctx.fillStyle = 'rgba(90, 122, 154, 0.3)';
+    for (let i = 0; i < 3; i++) {
+      ctx.beginPath();
+      ctx.ellipse(
+        this.canvasWidth * (0.2 + i * 0.3),
+        this.canvasHeight * 0.62,
+        80,
+        20,
+        0,
+        0,
+        Math.PI * 2
+      );
+      ctx.fill();
+    }
+    
+    // Front tombstones
+    this.renderFrontTombstones(ctx);
+    
+    // Iron fence in foreground
+    this.renderIronFence(ctx);
+  }
+  
+  private renderDeadTrees(ctx: CanvasRenderingContext2D) {
+    const trees = [
+      { x: 0.15, y: 0.55, scale: 1.2 },
+      { x: 0.40, y: 0.58, scale: 0.9 },
+      { x: 0.70, y: 0.56, scale: 1.1 },
+      { x: 0.88, y: 0.57, scale: 1.0 },
+    ];
+    
+    trees.forEach(tree => {
+      const x = tree.x * this.canvasWidth;
+      const y = tree.y * this.canvasHeight;
+      const scale = tree.scale;
+      
+      ctx.fillStyle = '#0D1B2A';
+      ctx.strokeStyle = '#0D1B2A';
+      ctx.lineWidth = 3 * scale;
+      
+      // Twisted trunk
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.quadraticCurveTo(x - 5 * scale, y - 30 * scale, x, y - 60 * scale);
+      ctx.stroke();
+      
+      // Gnarled branches
+      const branches = [
+        { startY: -15, angle: -45, length: 25 },
+        { startY: -25, angle: 30, length: 20 },
+        { startY: -35, angle: -60, length: 18 },
+        { startY: -45, angle: 40, length: 22 },
+        { startY: -55, angle: -30, length: 15 },
+      ];
+      
+      branches.forEach(branch => {
+        ctx.lineWidth = 2 * scale;
+        ctx.beginPath();
+        ctx.moveTo(x, y + branch.startY * scale);
+        
+        const endX = x + Math.cos(branch.angle * Math.PI / 180) * branch.length * scale;
+        const endY = y + branch.startY * scale + Math.sin(branch.angle * Math.PI / 180) * branch.length * scale;
+        
+        ctx.quadraticCurveTo(
+          x + Math.cos(branch.angle * Math.PI / 180) * branch.length * 0.5 * scale,
+          y + branch.startY * scale + Math.sin(branch.angle * Math.PI / 180) * branch.length * 0.3 * scale,
+          endX,
+          endY
+        );
+        ctx.stroke();
+        
+        // Smaller twigs
+        ctx.lineWidth = 1 * scale;
+        ctx.beginPath();
+        ctx.moveTo(endX, endY);
+        ctx.lineTo(endX + 5 * scale, endY - 5 * scale);
+        ctx.stroke();
+      });
+    });
+  }
+  
+  private renderBackTombstones(ctx: CanvasRenderingContext2D) {
+    const tombstones = [
+      { x: 0.10, y: 0.58, width: 15, height: 25, type: 'rounded' },
+      { x: 0.20, y: 0.60, width: 18, height: 22, type: 'square' },
+      { x: 0.30, y: 0.59, width: 16, height: 28, type: 'rounded' },
+      { x: 0.45, y: 0.61, width: 14, height: 20, type: 'cross' },
+      { x: 0.55, y: 0.58, width: 20, height: 30, type: 'rounded' },
+      { x: 0.65, y: 0.62, width: 15, height: 24, type: 'square' },
+      { x: 0.78, y: 0.60, width: 17, height: 26, type: 'rounded' },
+      { x: 0.90, y: 0.59, width: 16, height: 23, type: 'square' },
+    ];
+    
+    tombstones.forEach(tomb => {
+      const x = tomb.x * this.canvasWidth;
+      const y = tomb.y * this.canvasHeight;
+      
+      ctx.fillStyle = '#4A6580';
+      
+      if (tomb.type === 'rounded') {
+        ctx.beginPath();
+        ctx.moveTo(x - tomb.width / 2, y);
+        ctx.lineTo(x - tomb.width / 2, y + tomb.height - 5);
+        ctx.arcTo(x - tomb.width / 2, y + tomb.height, x, y + tomb.height, 5);
+        ctx.arcTo(x + tomb.width / 2, y + tomb.height, x + tomb.width / 2, y + tomb.height - 5, 5);
+        ctx.lineTo(x + tomb.width / 2, y);
+        ctx.arc(x, y, tomb.width / 2, Math.PI, 0);
+        ctx.closePath();
+        ctx.fill();
+      } else if (tomb.type === 'square') {
+        ctx.fillRect(x - tomb.width / 2, y, tomb.width, tomb.height);
+      } else if (tomb.type === 'cross') {
+        // Cross shape
+        ctx.fillRect(x - 3, y, 6, tomb.height);
+        ctx.fillRect(x - 8, y + 8, 16, 6);
+      }
+    });
+  }
+  
+  private renderFrontTombstones(ctx: CanvasRenderingContext2D) {
+    const tombstones = [
+      { x: 0.08, y: 0.68, width: 25, height: 40, type: 'rounded' },
+      { x: 0.25, y: 0.70, width: 30, height: 45, type: 'rounded' },
+      { x: 0.50, y: 0.68, width: 28, height: 50, type: 'rounded' },
+      { x: 0.75, y: 0.71, width: 26, height: 42, type: 'square' },
+    ];
+    
+    tombstones.forEach(tomb => {
+      const x = tomb.x * this.canvasWidth;
+      const y = tomb.y * this.canvasHeight;
+      
+      // Main stone (darker for foreground)
+      ctx.fillStyle = '#3A5570';
+      
+      if (tomb.type === 'rounded') {
+        ctx.beginPath();
+        ctx.moveTo(x - tomb.width / 2, y);
+        ctx.lineTo(x - tomb.width / 2, y + tomb.height - 8);
+        ctx.arcTo(x - tomb.width / 2, y + tomb.height, x, y + tomb.height, 8);
+        ctx.arcTo(x + tomb.width / 2, y + tomb.height, x + tomb.width / 2, y + tomb.height - 8, 8);
+        ctx.lineTo(x + tomb.width / 2, y);
+        ctx.arc(x, y, tomb.width / 2, Math.PI, 0);
+        ctx.closePath();
+        ctx.fill();
+      } else {
+        ctx.fillRect(x - tomb.width / 2, y, tomb.width, tomb.height);
+      }
+      
+      // Stone texture/cracks
+      ctx.strokeStyle = '#2A4560';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(x - tomb.width / 3, y + 10);
+      ctx.lineTo(x - tomb.width / 4, y + 18);
+      ctx.stroke();
+    });
+  }
+  
+  private renderIronFence(ctx: CanvasRenderingContext2D) {
+    const fenceY = this.canvasHeight * 0.85;
+    const fenceHeight = this.canvasHeight * 0.15;
+    
+    // Fence posts with cross tops
+    for (let x = 0; x < this.canvasWidth; x += 40) {
+      // Vertical bar
+      ctx.fillStyle = '#0D1B2A';
+      ctx.fillRect(x, fenceY, 4, fenceHeight);
+      
+      // Cross on top
+      ctx.fillRect(x - 4, fenceY - 8, 12, 3);
+      ctx.fillRect(x - 2, fenceY - 12, 8, 12);
+    }
+    
+    // Horizontal rails
+    ctx.fillRect(0, fenceY + 10, this.canvasWidth, 3);
+    ctx.fillRect(0, fenceY + 25, this.canvasWidth, 3);
   }
 
   private renderLabBackground(ctx: CanvasRenderingContext2D) {
