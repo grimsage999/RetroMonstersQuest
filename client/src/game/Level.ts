@@ -1457,17 +1457,202 @@ export class Level {
   }
 
   private renderSpaceBackground(ctx: CanvasRenderingContext2D) {
-    // Deep space
-    ctx.fillStyle = '#000011';
+    // Swirling vortex background - cosmic void
+    const centerX = this.canvasWidth / 2;
+    const centerY = this.canvasHeight / 2;
+    
+    // Base deep purple-black void
+    ctx.fillStyle = '#1A0F2E';
     ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
     
-    // Simplified stars for performance
-    ctx.fillStyle = '#FFFFFF';
-    for (let i = 0; i < 20; i++) {
-      const x = (i * 37) % this.canvasWidth;
-      const y = (i * 73) % this.canvasHeight;
-      ctx.fillRect(x, y, 1, 1);
+    // Draw spiral vortex rings
+    this.renderVortexSpiral(ctx, centerX, centerY);
+    
+    // Green/lime particles scattered throughout
+    this.renderCosmicParticles(ctx);
+    
+    // Pink/magenta cosmic elements
+    this.renderCosmicElements(ctx);
+  }
+  
+  private renderVortexSpiral(ctx: CanvasRenderingContext2D, centerX: number, centerY: number) {
+    // Create the swirling spiral effect with multiple rings
+    const numRings = 12;
+    const maxRadius = Math.max(this.canvasWidth, this.canvasHeight) * 0.8;
+    
+    // Time-based animation for subtle movement
+    const time = Date.now() * 0.0003;
+    
+    for (let ring = 0; ring < numRings; ring++) {
+      const radius = (ring + 1) * (maxRadius / numRings);
+      const segments = 60;
+      
+      // Alternate between purple and blue tones
+      const hue = ring % 2 === 0 ? 250 : 220;
+      const lightness = 15 + (ring * 2);
+      
+      ctx.strokeStyle = `hsl(${hue}, 70%, ${lightness}%)`;
+      ctx.lineWidth = 8 + (ring * 0.5);
+      
+      // Draw spiral arc
+      ctx.beginPath();
+      for (let i = 0; i < segments; i++) {
+        const angle = (i / segments) * Math.PI * 2 + (ring * 0.3) + time;
+        const spiralRadius = radius * (1 + Math.sin(angle * 2 + ring) * 0.1);
+        
+        const x = centerX + Math.cos(angle) * spiralRadius;
+        const y = centerY + Math.sin(angle) * spiralRadius;
+        
+        if (i === 0) {
+          ctx.moveTo(x, y);
+        } else {
+          ctx.lineTo(x, y);
+        }
+      }
+      ctx.closePath();
+      ctx.stroke();
+      
+      // Add inner glow effect to some rings
+      if (ring % 3 === 0) {
+        ctx.strokeStyle = `hsla(${hue}, 80%, ${lightness + 10}%, 0.3)`;
+        ctx.lineWidth = 12 + (ring * 0.5);
+        ctx.stroke();
+      }
     }
+    
+    // Draw connecting spiral tendrils
+    const numTendrils = 8;
+    for (let t = 0; t < numTendrils; t++) {
+      const baseAngle = (t / numTendrils) * Math.PI * 2 + time * 0.5;
+      
+      ctx.strokeStyle = 'rgba(100, 80, 180, 0.4)';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      
+      for (let r = 0; r < maxRadius; r += 10) {
+        const angle = baseAngle + (r * 0.02);
+        const x = centerX + Math.cos(angle) * r;
+        const y = centerY + Math.sin(angle) * r;
+        
+        if (r === 0) {
+          ctx.moveTo(x, y);
+        } else {
+          ctx.lineTo(x, y);
+        }
+      }
+      ctx.stroke();
+    }
+  }
+  
+  private renderCosmicParticles(ctx: CanvasRenderingContext2D) {
+    // Green/lime particles scattered throughout
+    const particles = [
+      { x: 0.08, y: 0.12, size: 2 },
+      { x: 0.15, y: 0.25, size: 1.5 },
+      { x: 0.22, y: 0.08, size: 1 },
+      { x: 0.35, y: 0.18, size: 2.5 },
+      { x: 0.42, y: 0.35, size: 1 },
+      { x: 0.48, y: 0.15, size: 1.5 },
+      { x: 0.55, y: 0.28, size: 2 },
+      { x: 0.62, y: 0.45, size: 1 },
+      { x: 0.68, y: 0.08, size: 2 },
+      { x: 0.75, y: 0.32, size: 1.5 },
+      { x: 0.82, y: 0.18, size: 1 },
+      { x: 0.88, y: 0.42, size: 2.5 },
+      { x: 0.12, y: 0.55, size: 1 },
+      { x: 0.25, y: 0.68, size: 2 },
+      { x: 0.38, y: 0.75, size: 1.5 },
+      { x: 0.45, y: 0.88, size: 1 },
+      { x: 0.58, y: 0.62, size: 2 },
+      { x: 0.65, y: 0.78, size: 1.5 },
+      { x: 0.78, y: 0.65, size: 2.5 },
+      { x: 0.85, y: 0.85, size: 1 },
+      { x: 0.92, y: 0.72, size: 1.5 },
+      { x: 0.18, y: 0.92, size: 2 },
+      { x: 0.95, y: 0.15, size: 1 },
+      { x: 0.05, y: 0.85, size: 1.5 },
+    ];
+    
+    particles.forEach(particle => {
+      ctx.fillStyle = '#9AFF4F';
+      ctx.fillRect(
+        particle.x * this.canvasWidth - particle.size / 2,
+        particle.y * this.canvasHeight - particle.size / 2,
+        particle.size,
+        particle.size
+      );
+      
+      // Add glow to larger particles
+      if (particle.size > 1.5) {
+        ctx.fillStyle = 'rgba(154, 255, 79, 0.3)';
+        ctx.fillRect(
+          particle.x * this.canvasWidth - particle.size * 1.5,
+          particle.y * this.canvasHeight - particle.size * 1.5,
+          particle.size * 3,
+          particle.size * 3
+        );
+      }
+    });
+  }
+  
+  private renderCosmicElements(ctx: CanvasRenderingContext2D) {
+    // Pink/magenta floating cosmic symbols
+    const time = Date.now() * 0.001;
+    
+    // Floating crescents
+    const crescents = [
+      { x: 0.30, y: 0.45, size: 20, rotation: 0.3 },
+      { x: 0.70, y: 0.35, size: 15, rotation: -0.5 },
+    ];
+    
+    crescents.forEach(crescent => {
+      const x = crescent.x * this.canvasWidth;
+      const y = crescent.y * this.canvasHeight + Math.sin(time + crescent.x * 10) * 8;
+      
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(crescent.rotation);
+      
+      // Draw crescent shape
+      ctx.fillStyle = '#FF6B9D';
+      ctx.beginPath();
+      ctx.arc(0, 0, crescent.size, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Cut out inner circle to create crescent
+      ctx.fillStyle = '#1A0F2E';
+      ctx.beginPath();
+      ctx.arc(crescent.size * 0.4, 0, crescent.size * 0.8, 0, Math.PI * 2);
+      ctx.fill();
+      
+      ctx.restore();
+    });
+    
+    // Floating asterisks/sparkles
+    const sparkles = [
+      { x: 0.40, y: 0.60, size: 8 },
+      { x: 0.55, y: 0.50, size: 6 },
+    ];
+    
+    sparkles.forEach(sparkle => {
+      const x = sparkle.x * this.canvasWidth;
+      const y = sparkle.y * this.canvasHeight + Math.sin(time * 1.5 + sparkle.x * 15) * 5;
+      
+      ctx.strokeStyle = '#FF6B9D';
+      ctx.lineWidth = 2;
+      
+      // Draw asterisk
+      for (let i = 0; i < 4; i++) {
+        const angle = (i / 4) * Math.PI * 2;
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(
+          x + Math.cos(angle) * sparkle.size,
+          y + Math.sin(angle) * sparkle.size
+        );
+        ctx.stroke();
+      }
+    });
   }
 
   private renderEnvironment(ctx: CanvasRenderingContext2D) {
@@ -1499,6 +1684,10 @@ export class Level {
         
       case 5: // Government Lab - Lab equipment and desks
         this.renderLabEnvironment(ctx);
+        break;
+        
+      case 6: // Cosmic Void - Swirling vortex
+        this.renderSpaceEnvironment(ctx);
         break;
     }
     
@@ -1807,6 +1996,12 @@ export class Level {
       ctx.fillRect(320, this.canvasHeight - 88, 12, 8);
       // Simplified rendering for performance
     }
+  }
+
+  private renderSpaceEnvironment(ctx: CanvasRenderingContext2D) {
+    // The cosmic void is mostly empty space with the vortex background
+    // No additional environmental objects needed - the swirling vortex provides the atmosphere
+    // Players float through the void collecting cookies
   }
 
   private renderCookie(ctx: CanvasRenderingContext2D, cookie: Cookie) {
