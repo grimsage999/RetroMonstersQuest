@@ -468,6 +468,7 @@ export class Level {
         
       case 2: // City - Dystopian buildings and debris
       case 2.5: // Sewer Streets - Same city environment
+      case 2.75: // Grease Gator - Same city environment
         this.renderCityEnvironment(ctx);
         break;
         
