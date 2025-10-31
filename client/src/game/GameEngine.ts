@@ -27,6 +27,8 @@ export interface GameState {
   cookiesCollected: number;
   totalCookies: number;
   canDash?: boolean;
+  canTeleport?: boolean;
+  teleportCooldown?: number;
 }
 
 export class GameEngine {
@@ -967,7 +969,9 @@ export class GameEngine {
   private updateState() {
     this.onStateChange({ 
       ...this.gameState,
-      canDash: this.player.canDash()
+      canDash: this.player.canDash(),
+      canTeleport: this.player.canTeleport(),
+      teleportCooldown: this.player.getTeleportCooldown()
     });
   }
 }
