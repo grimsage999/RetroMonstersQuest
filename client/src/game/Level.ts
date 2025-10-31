@@ -614,19 +614,20 @@ export class Level {
     });
     
     // Middle layer - main skyline buildings with lit windows
+    // Deterministic window patterns (no random to prevent flickering)
     const buildings = [
       // Tall Empire State-style building (left)
-      { x: 0.12, width: 30, height: 180, spire: true },
+      { x: 0.12, width: 30, height: 180, spire: true, windowPattern: [0, 1, 0, 1, 1] },
       // Mid-height building
-      { x: 0.25, width: 50, height: 120, windows: true },
+      { x: 0.25, width: 50, height: 120, windows: true, windowPattern: [1, 0, 1, 1, 0, 1, 1, 0] },
       // Short building
-      { x: 0.35, width: 40, height: 90, windows: true },
+      { x: 0.35, width: 40, height: 90, windows: true, windowPattern: [1, 1, 0, 1, 0, 1] },
       // Chrysler Building-style (center-right)
-      { x: 0.52, width: 35, height: 200, chrysler: true },
+      { x: 0.52, width: 35, height: 200, chrysler: true, windowPattern: [1, 0, 1, 1, 0] },
       // Medium building
-      { x: 0.65, width: 45, height: 110, windows: true },
+      { x: 0.65, width: 45, height: 110, windows: true, windowPattern: [0, 1, 1, 0, 1, 1, 0] },
       // Tall building (right)
-      { x: 0.82, width: 42, height: 150, windows: true },
+      { x: 0.82, width: 42, height: 150, windows: true, windowPattern: [1, 1, 0, 1, 1, 0, 1] },
     ];
     
     buildings.forEach(building => {
@@ -637,17 +638,20 @@ export class Level {
       ctx.fillStyle = '#000000';
       ctx.fillRect(x, y, building.width, building.height);
       
-      // Lit windows - yellow
+      // Lit windows - yellow (deterministic pattern)
       if (building.windows || building.spire || building.chrysler) {
         ctx.fillStyle = '#FFD700';
         const windowSize = 3;
         const windowSpacing = 6;
         
+        let patternIndex = 0;
         for (let wx = 4; wx < building.width - 4; wx += windowSpacing) {
           for (let wy = 8; wy < building.height - 4; wy += 10) {
-            if (Math.random() > 0.3) {
+            // Use deterministic pattern instead of random
+            if (building.windowPattern[patternIndex % building.windowPattern.length] === 1) {
               ctx.fillRect(x + wx, y + wy, windowSize, windowSize);
             }
+            patternIndex++;
           }
         }
       }
