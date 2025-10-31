@@ -191,6 +191,15 @@ Changelog:
   - Level uses same dystopian city backdrop/environment as Level 2
   - Cutscene added explaining manhole hazard mechanic and timing challenge
   - Teaches players to watch for environmental timing patterns
+- October 31, 2025. Developer Testing Tools for Level Navigation:
+  - Added jumpToLevel(targetLevel) method to GameEngine for instant level jumping
+  - Created dev tools buttons in top-right corner of GameCanvas during gameplay
+  - "⏭️ Next Level" button (orange) - instantly skips to next level in sequence
+  - "🔄 Reset to L1" button (blue) - instantly returns to Level 1
+  - Buttons only visible during active gameplay (isStarted === true)
+  - Styled with hover effects and tooltips for clear identification as dev utilities
+  - Enables rapid testing and debugging across all 8 levels
+  - Dev tools respect level transition flow with proper initialization and cutscenes
 ```
 
 ## User Preferences
