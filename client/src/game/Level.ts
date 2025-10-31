@@ -1214,16 +1214,246 @@ export class Level {
   }
 
   private renderLabBackground(ctx: CanvasRenderingContext2D) {
-    // PERFORMANCE FIX: Solid colors instead of gradients and loops
-    ctx.fillStyle = '#F5F5F5'; // White walls
+    // Dark teal/cyan laboratory walls
+    ctx.fillStyle = '#3A5558';
     ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
     
-    // Simple lighting strips
-    ctx.fillStyle = '#FFFFFF';
-    ctx.fillRect(100, 20, 80, 8);
-    ctx.fillRect(300, 20, 80, 8);
-    ctx.fillRect(500, 20, 80, 8);
-    ctx.fillRect(700, 20, 80, 8);
+    // Wall texture (subtle grunge effect)
+    ctx.fillStyle = 'rgba(50, 70, 72, 0.3)';
+    for (let i = 0; i < 15; i++) {
+      const x = (i * 53) % this.canvasWidth;
+      const y = (i * 97) % (this.canvasHeight * 0.6);
+      ctx.fillRect(x, y, 8, 8);
+    }
+    
+    // Ceiling fluorescent light panel (center top)
+    const lightX = this.canvasWidth * 0.4;
+    const lightY = 20;
+    const lightWidth = this.canvasWidth * 0.2;
+    const lightHeight = 25;
+    
+    // Light fixture frame (dark gray)
+    ctx.fillStyle = '#2C3E40';
+    ctx.fillRect(lightX - 5, lightY - 3, lightWidth + 10, lightHeight + 6);
+    
+    // Light panel (bright yellow-white)
+    ctx.fillStyle = '#FFFFCC';
+    ctx.fillRect(lightX, lightY, lightWidth, lightHeight);
+    
+    // Light glow/beam effect
+    const glowGradient = ctx.createRadialGradient(
+      lightX + lightWidth / 2, lightY + lightHeight,
+      0,
+      lightX + lightWidth / 2, lightY + lightHeight,
+      150
+    );
+    glowGradient.addColorStop(0, 'rgba(255, 255, 204, 0.3)');
+    glowGradient.addColorStop(1, 'rgba(255, 255, 204, 0)');
+    ctx.fillStyle = glowGradient;
+    ctx.fillRect(lightX - 50, lightY, lightWidth + 100, 150);
+    
+    // Hanging cables from ceiling
+    this.renderHangingCables(ctx);
+    
+    // Tiled floor
+    this.renderLabFloor(ctx);
+    
+    // Lab tables with equipment
+    this.renderLabTables(ctx);
+    
+    // Computer monitor (center back wall)
+    this.renderCentralMonitor(ctx);
+    
+    // Floor debris
+    this.renderLabDebris(ctx);
+  }
+  
+  private renderHangingCables(ctx: CanvasRenderingContext2D) {
+    const cables = [
+      { x: 0.12, length: 0.35, color: '#4A4A4A', connector: '#666666' },
+      { x: 0.20, length: 0.25, color: '#8B4513', connector: '#A0522D' },
+      { x: 0.28, length: 0.42, color: '#B22222', connector: '#CD5C5C' },
+      { x: 0.35, length: 0.30, color: '#FFD700', connector: '#FFA500' },
+      { x: 0.48, length: 0.28, color: '#4A4A4A', connector: '#808080' },
+      { x: 0.58, length: 0.38, color: '#00CED1', connector: '#40E0D0' },
+      { x: 0.68, length: 0.22, color: '#696969', connector: '#A9A9A9' },
+      { x: 0.75, length: 0.45, color: '#8B4513', connector: '#CD853F' },
+      { x: 0.85, length: 0.32, color: '#B22222', connector: '#DC143C' },
+      { x: 0.92, length: 0.26, color: '#FFD700', connector: '#FFFF00' },
+    ];
+    
+    cables.forEach(cable => {
+      const x = cable.x * this.canvasWidth;
+      const y = 0;
+      const endY = cable.length * this.canvasHeight;
+      
+      // Cable wire
+      ctx.strokeStyle = cable.color;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      
+      // Slight curve for natural hang
+      ctx.quadraticCurveTo(x + 3, endY * 0.5, x, endY);
+      ctx.stroke();
+      
+      // Connector at end
+      ctx.fillStyle = cable.connector;
+      ctx.fillRect(x - 3, endY - 6, 6, 8);
+      ctx.fillRect(x - 2, endY - 2, 4, 2);
+    });
+  }
+  
+  private renderLabFloor(ctx: CanvasRenderingContext2D) {
+    const floorY = this.canvasHeight * 0.65;
+    const tileSize = 25;
+    
+    // Floor base
+    ctx.fillStyle = '#B8C5C7';
+    ctx.fillRect(0, floorY, this.canvasWidth, this.canvasHeight - floorY);
+    
+    // Tile grid
+    ctx.strokeStyle = '#8A9B9D';
+    ctx.lineWidth = 1;
+    
+    // Horizontal lines
+    for (let y = floorY; y < this.canvasHeight; y += tileSize) {
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(this.canvasWidth, y);
+      ctx.stroke();
+    }
+    
+    // Vertical lines
+    for (let x = 0; x < this.canvasWidth; x += tileSize) {
+      ctx.beginPath();
+      ctx.moveTo(x, floorY);
+      ctx.lineTo(x, this.canvasHeight);
+      ctx.stroke();
+    }
+    
+    // Some darker tiles for variation
+    ctx.fillStyle = 'rgba(138, 155, 157, 0.2)';
+    const darkTiles = [
+      { x: 3, y: 2 }, { x: 7, y: 3 }, { x: 12, y: 2 },
+      { x: 18, y: 4 }, { x: 25, y: 3 }, { x: 30, y: 2 }
+    ];
+    darkTiles.forEach(tile => {
+      const tx = tile.x * tileSize;
+      const ty = floorY + tile.y * tileSize;
+      if (ty < this.canvasHeight) {
+        ctx.fillRect(tx, ty, tileSize - 1, tileSize - 1);
+      }
+    });
+  }
+  
+  private renderLabTables(ctx: CanvasRenderingContext2D) {
+    const tableY = this.canvasHeight * 0.5;
+    
+    // Left table
+    const leftTableX = 50;
+    ctx.fillStyle = '#5A7A7D';
+    ctx.fillRect(leftTableX, tableY, 120, 12);
+    
+    // Left table legs
+    ctx.fillStyle = '#4A6A6D';
+    ctx.fillRect(leftTableX + 10, tableY + 12, 8, 40);
+    ctx.fillRect(leftTableX + 102, tableY + 12, 8, 40);
+    
+    // Right table
+    const rightTableX = this.canvasWidth - 170;
+    ctx.fillStyle = '#5A7A7D';
+    ctx.fillRect(rightTableX, tableY, 120, 12);
+    
+    // Right table legs
+    ctx.fillStyle = '#4A6A6D';
+    ctx.fillRect(rightTableX + 10, tableY + 12, 8, 40);
+    ctx.fillRect(rightTableX + 102, tableY + 12, 8, 40);
+    
+    // Equipment on left table
+    // Beakers with purple liquid
+    ctx.fillStyle = '#8844CC';
+    ctx.fillRect(leftTableX + 20, tableY - 15, 12, 15);
+    ctx.fillRect(leftTableX + 50, tableY - 20, 15, 20);
+    
+    // Equipment on right table
+    // Microscope-like object
+    ctx.fillStyle = '#6A8A8D';
+    ctx.fillRect(rightTableX + 60, tableY - 8, 15, 8);
+    ctx.fillRect(rightTableX + 67, tableY - 20, 4, 12);
+    
+    // Purple substance spill
+    ctx.fillStyle = '#AA55DD';
+    ctx.beginPath();
+    ctx.ellipse(rightTableX + 30, tableY - 2, 12, 6, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  
+  private renderCentralMonitor(ctx: CanvasRenderingContext2D) {
+    const monitorX = this.canvasWidth * 0.45;
+    const monitorY = this.canvasHeight * 0.28;
+    const monitorWidth = 80;
+    const monitorHeight = 60;
+    
+    // Monitor frame (dark gray)
+    ctx.fillStyle = '#2C3C3E';
+    ctx.fillRect(monitorX, monitorY, monitorWidth, monitorHeight);
+    
+    // Monitor screen (teal with data)
+    ctx.fillStyle = '#1A4A4C';
+    ctx.fillRect(monitorX + 5, monitorY + 5, monitorWidth - 10, monitorHeight - 15);
+    
+    // Screen content (purple/cyan lines simulating data)
+    ctx.strokeStyle = '#00FFFF';
+    ctx.lineWidth = 1;
+    for (let i = 0; i < 5; i++) {
+      ctx.beginPath();
+      ctx.moveTo(monitorX + 10, monitorY + 12 + i * 8);
+      ctx.lineTo(monitorX + 70, monitorY + 12 + i * 8);
+      ctx.stroke();
+    }
+    
+    // Purple accent on screen
+    ctx.fillStyle = '#AA55DD';
+    ctx.fillRect(monitorX + 30, monitorY + 20, 20, 15);
+    
+    // Monitor stand
+    ctx.fillStyle = '#3C4C4E';
+    ctx.fillRect(monitorX + 30, monitorY + monitorHeight, 20, 8);
+    ctx.fillRect(monitorX + 25, monitorY + monitorHeight + 8, 30, 3);
+  }
+  
+  private renderLabDebris(ctx: CanvasRenderingContext2D) {
+    const floorY = this.canvasHeight * 0.65;
+    
+    // Scattered debris on floor
+    const debris = [
+      { x: 0.15, y: 0.72, width: 8, height: 8, color: '#6A7A7D' },
+      { x: 0.35, y: 0.78, width: 6, height: 6, color: '#5A6A6D' },
+      { x: 0.50, y: 0.85, width: 10, height: 10, color: '#4A5A5D' },
+      { x: 0.68, y: 0.75, width: 7, height: 7, color: '#6A7A7D' },
+      { x: 0.82, y: 0.80, width: 9, height: 9, color: '#5A6A6D' },
+    ];
+    
+    debris.forEach(item => {
+      ctx.fillStyle = item.color;
+      ctx.fillRect(
+        item.x * this.canvasWidth,
+        item.y * this.canvasHeight,
+        item.width,
+        item.height
+      );
+    });
+    
+    // Purple puddles/spills on floor
+    ctx.fillStyle = 'rgba(170, 85, 221, 0.6)';
+    ctx.beginPath();
+    ctx.ellipse(this.canvasWidth * 0.25, this.canvasHeight * 0.88, 15, 8, 0, 0, Math.PI * 2);
+    ctx.fill();
+    
+    ctx.beginPath();
+    ctx.ellipse(this.canvasWidth * 0.60, this.canvasHeight * 0.82, 12, 7, 0, 0, Math.PI * 2);
+    ctx.fill();
   }
 
   private renderSpaceBackground(ctx: CanvasRenderingContext2D) {
