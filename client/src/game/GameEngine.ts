@@ -29,6 +29,10 @@ export interface GameState {
   canDash?: boolean;
   canTeleport?: boolean;
   teleportCooldown?: number;
+  weaponXUnlocked?: boolean;
+  bubbleShieldActive?: boolean;
+  bubbleShieldCooldown?: number;
+  bubbleShieldCooldownPercent?: number;
 }
 
 export class GameEngine {
@@ -1027,11 +1031,16 @@ export class GameEngine {
   }
 
   private updateState() {
+    const bubbleShield = this.player.getBubbleShield();
     this.onStateChange({ 
       ...this.gameState,
       canDash: this.player.canDash(),
       canTeleport: this.player.canTeleport(),
-      teleportCooldown: this.player.getTeleportCooldown()
+      teleportCooldown: this.player.getTeleportCooldown(),
+      weaponXUnlocked: this.player.isWeaponXUnlocked(),
+      bubbleShieldActive: bubbleShield.isActive(),
+      bubbleShieldCooldown: bubbleShield.isOnCooldown() ? bubbleShield.getCooldownPercent() : 0,
+      bubbleShieldCooldownPercent: bubbleShield.getCooldownPercent()
     });
   }
 }

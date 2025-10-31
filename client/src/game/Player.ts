@@ -57,6 +57,7 @@ export class Player {
   private bubbleShield: BubbleShield;
   private weaponXMessageTimer: number = 0;
   private weaponXMessageDuration: number = 3000; // Show message for 3 seconds
+  private previousXKeyState: boolean = false; // Track previous key state to detect press (not hold)
 
   constructor(x: number, y: number) {
     this.x = x;
@@ -103,10 +104,19 @@ export class Player {
       return;
     }
     
-    // Check for Weapon X bubble shield activation (X key)
+    // Check for Weapon X bubble shield activation (X key) - only on key press, not hold
     const isXPressed = inputManager.isKeyPressed('x') || inputManager.isKeyPressed('X');
-    if (isXPressed && this.weaponXUnlocked) {
-      this.bubbleShield.activate();
+    const isXJustPressed = isXPressed && !this.previousXKeyState;
+    this.previousXKeyState = isXPressed;
+    
+    if (isXJustPressed && this.weaponXUnlocked) {
+      const activated = this.bubbleShield.activate();
+      if (!activated) {
+        // Only log if it failed due to cooldown (not spam the console)
+        if (this.bubbleShield.isOnCooldown()) {
+          logger.debug(`🛡️ Bubble Shield on cooldown: ${(this.bubbleShield.getCooldownPercent() * 100).toFixed(0)}% remaining`);
+        }
+      }
     }
     
     // Get input direction
