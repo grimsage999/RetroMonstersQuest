@@ -303,11 +303,18 @@ export class Alligator {
     const manhole = this.manholePositions[this.currentManholeIndex];
     const centerX = manhole.x + 24;
     const centerY = manhole.y + 24;
+    const emergeHeight = this.emergenceProgress * 60;
+    const bodyY = centerY - emergeHeight;
+    const baseHeadY = bodyY - 20;
+    
+    const attackProgress = Math.min(1, this.stateTimer / (this.ATTACK_DURATION * 0.6));
+    const neckExtension = Math.sin(attackProgress * Math.PI) * 35;
+    const headY = baseHeadY - neckExtension;
 
     const attackRadius = this.attackType === 'grab' ? 50 : 40;
 
     const dx = (playerX + playerSize / 2) - centerX;
-    const dy = (playerY + playerSize / 2) - centerY;
+    const dy = (playerY + playerSize / 2) - headY;
     const distance = Math.sqrt(dx * dx + dy * dy);
 
     return distance < attackRadius;

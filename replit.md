@@ -50,3 +50,30 @@ Preferred communication style: Simple, everyday language.
 - **Game Rendering**: HTML5 Canvas API
 - **Audio**: Web Audio API
 - **TypeScript**: For both client and server-side development
+
+## Recent Changes
+
+```
+- October 31, 2025. Level 2.75 "Grease Gator" with Alligator Mini-Boss - Enhanced:
+  - Created Alligator.ts class - menacing mini-boss that hunts from manholes
+  - Added Level 2.75 configuration between Level 2.5 and Level 3
+  - Updated LEVEL_SEQUENCE: 1 → 1.5 → 1.75 → 2 → 2.5 → 2.75 → 3 → 4 → 5
+  - Alligator emerges from any manhole (5 spawn points) with humanoid design
+  - Attack patterns: Bite and grab attacks with extending neck animation
+  - **Neck Extension**: Animated neck extends ~35 pixels upward during attacks using sine wave motion
+  - Segmented neck rendering (4 segments) with green scales and beige underbelly
+  - **Increased Attack Frequency**: 
+    - High cookies (>70%): 4-5 seconds between attacks
+    - Medium cookies (30-70%): 3-4 seconds between attacks
+    - Low cookies (<30%): 2-3 seconds between attacks
+  - ONE-HIT KILL mechanic - instant death if caught (dash provides invulnerability)
+  - **Audio system**: Menacing laughter as audio cue during warning phase before attacks
+    - Sinister intro laugh (0.4x playback rate)
+    - Ambient laughs at 10-20 second intervals (0.5x playback rate)
+    - Attack warning laughs (0.6x playback rate)
+  - Visual telegraph: Manhole shake/rattle + orange glow before each attack (1.5s warning)
+  - Dynamic difficulty: Attack frequency scales with cookie count
+  - Collision detection follows animated head position for accurate hit detection
+  - Introduction sequence: 2.5 second dramatic pause with sinister laugh before attacks begin
+  - Level uses same dystopian city backdrop/environment as Level 2/2.5
+```
