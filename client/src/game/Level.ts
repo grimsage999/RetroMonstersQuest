@@ -221,7 +221,7 @@ export class Level {
     // Update alligator boss (free-roaming)
     if (this.alligatorBoss && playerX !== undefined && playerY !== undefined && cookiesCollected !== undefined) {
       this.alligatorBoss.updateCookieCount(cookiesCollected);
-      this.alligatorBoss.update(deltaTime, playerX, playerY, this.enemies);
+      this.alligatorBoss.update(deltaTime, playerX, playerY);
     }
 
     // Update necromancer mini-boss
@@ -923,12 +923,7 @@ export class Level {
     }
     
     // Check bite collision
-    const biteHit = this.alligatorBoss.checkPlayerCollision(playerBounds.x, playerBounds.y, playerBounds.width);
-    
-    // Check spit projectile collision
-    const spitHit = this.alligatorBoss.checkSpitCollision(playerBounds.x, playerBounds.y, playerBounds.width);
-    
-    return biteHit || spitHit;
+    return this.alligatorBoss.checkPlayerCollision(playerBounds.x, playerBounds.y, playerBounds.width);
   }
 
   public getAlligatorBoss(): AlligatorBoss | null {
