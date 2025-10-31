@@ -523,45 +523,249 @@ export class Level {
   }
 
   private renderCityBackground(ctx: CanvasRenderingContext2D) {
-    // PERFORMANCE FIX: Solid color sky instead of gradient
-    ctx.fillStyle = '#6A0DAD'; // Purple cyberpunk sky
-    ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight * 0.7);
+    // Night sky gradient - purple to dark blue
+    const skyGradient = ctx.createLinearGradient(0, 0, 0, this.canvasHeight * 0.65);
+    skyGradient.addColorStop(0, '#3D2B56');
+    skyGradient.addColorStop(0.5, '#4A3366');
+    skyGradient.addColorStop(1, '#5B4276');
+    ctx.fillStyle = skyGradient;
+    ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight * 0.65);
     
-    // Add floating geometric shapes (cyberpunk aesthetic)
-    ctx.fillStyle = '#00FFFF';
-    ctx.globalAlpha = 0.3;
-    for (let i = 0; i < 8; i++) {
-      const x = (i * 100) + Math.sin(Date.now() * 0.001 + i) * 20;
-      const y = 50 + Math.cos(Date.now() * 0.002 + i) * 30;
-      ctx.fillRect(x, y, 8, 8);
+    // Crescent moon
+    ctx.fillStyle = '#FFD700';
+    ctx.beginPath();
+    ctx.arc(this.canvasWidth * 0.35, this.canvasHeight * 0.15, 20, 0, Math.PI * 2);
+    ctx.fill();
+    // Dark overlay to create crescent
+    ctx.fillStyle = '#3D2B56';
+    ctx.beginPath();
+    ctx.arc(this.canvasWidth * 0.35 + 12, this.canvasHeight * 0.15, 20, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Twinkling stars
+    const stars = [
+      { x: 0.08, y: 0.12, size: 3, color: '#FFFFFF' },
+      { x: 0.15, y: 0.08, size: 2, color: '#FFD700' },
+      { x: 0.22, y: 0.18, size: 2, color: '#FFFFFF' },
+      { x: 0.42, y: 0.10, size: 3, color: '#FFD700' },
+      { x: 0.52, y: 0.14, size: 2, color: '#FFFFFF' },
+      { x: 0.64, y: 0.08, size: 2, color: '#FFD700' },
+      { x: 0.72, y: 0.16, size: 3, color: '#FFFFFF' },
+      { x: 0.85, y: 0.11, size: 2, color: '#FFD700' },
+      { x: 0.92, y: 0.14, size: 2, color: '#FFFFFF' },
+      { x: 0.12, y: 0.22, size: 2, color: '#FFD700' },
+    ];
+    
+    stars.forEach(star => {
+      ctx.fillStyle = star.color;
+      ctx.beginPath();
+      ctx.arc(star.x * this.canvasWidth, star.y * this.canvasHeight, star.size, 0, Math.PI * 2);
+      ctx.fill();
+    });
+    
+    // City skyline - multiple building layers for depth
+    this.renderCitySkyline(ctx);
+    
+    // Suspension bridge in foreground
+    this.renderSuspensionBridge(ctx);
+    
+    // Road with lane markings
+    ctx.fillStyle = '#1A1A1A';
+    ctx.fillRect(0, this.canvasHeight * 0.72, this.canvasWidth, this.canvasHeight * 0.28);
+    
+    // Lane markings - dashed white lines
+    ctx.strokeStyle = '#FFFFFF';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([12, 8]);
+    for (let i = 0; i < 3; i++) {
+      const y = this.canvasHeight * 0.76 + i * 20;
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(this.canvasWidth, y);
+      ctx.stroke();
     }
-    ctx.globalAlpha = 1;
+    ctx.setLineDash([]);
     
-    // Sleek pavement
-    ctx.fillStyle = '#483D8B'; // Dark slate blue
-    ctx.fillRect(0, this.canvasHeight * 0.7, this.canvasWidth, this.canvasHeight * 0.3);
+    // Small cars on the road
+    this.renderCars(ctx);
+  }
+  
+  private renderCitySkyline(ctx: CanvasRenderingContext2D) {
+    const skylineY = this.canvasHeight * 0.65;
     
-    // Add grid lines for futuristic feel (only for level 2)
-    if (this.levelNumber === 2) {
-      ctx.strokeStyle = '#00CED1'; // Dark turquoise
-      ctx.lineWidth = 1;
-      ctx.globalAlpha = 0.4;
-      // Vertical lines
-      for (let x = 0; x < this.canvasWidth; x += 32) {
-        ctx.beginPath();
-        ctx.moveTo(x, this.canvasHeight * 0.7);
-        ctx.lineTo(x, this.canvasHeight);
-        ctx.stroke();
+    // Back layer - distant buildings (purple silhouette)
+    ctx.fillStyle = '#4A3C66';
+    const backBuildings = [
+      { x: 0.05, width: 40, height: 80 },
+      { x: 0.15, width: 50, height: 100 },
+      { x: 0.30, width: 35, height: 70 },
+      { x: 0.50, width: 45, height: 85 },
+      { x: 0.70, width: 55, height: 95 },
+      { x: 0.88, width: 38, height: 75 },
+    ];
+    
+    backBuildings.forEach(building => {
+      ctx.fillRect(
+        building.x * this.canvasWidth,
+        skylineY - building.height,
+        building.width,
+        building.height
+      );
+    });
+    
+    // Middle layer - main skyline buildings with lit windows
+    const buildings = [
+      // Tall Empire State-style building (left)
+      { x: 0.12, width: 30, height: 180, spire: true },
+      // Mid-height building
+      { x: 0.25, width: 50, height: 120, windows: true },
+      // Short building
+      { x: 0.35, width: 40, height: 90, windows: true },
+      // Chrysler Building-style (center-right)
+      { x: 0.52, width: 35, height: 200, chrysler: true },
+      // Medium building
+      { x: 0.65, width: 45, height: 110, windows: true },
+      // Tall building (right)
+      { x: 0.82, width: 42, height: 150, windows: true },
+    ];
+    
+    buildings.forEach(building => {
+      const x = building.x * this.canvasWidth;
+      const y = skylineY - building.height;
+      
+      // Building body
+      ctx.fillStyle = '#000000';
+      ctx.fillRect(x, y, building.width, building.height);
+      
+      // Lit windows - yellow
+      if (building.windows || building.spire || building.chrysler) {
+        ctx.fillStyle = '#FFD700';
+        const windowSize = 3;
+        const windowSpacing = 6;
+        
+        for (let wx = 4; wx < building.width - 4; wx += windowSpacing) {
+          for (let wy = 8; wy < building.height - 4; wy += 10) {
+            if (Math.random() > 0.3) {
+              ctx.fillRect(x + wx, y + wy, windowSize, windowSize);
+            }
+          }
+        }
       }
-      // Horizontal lines
-      for (let y = this.canvasHeight * 0.7; y < this.canvasHeight; y += 16) {
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(this.canvasWidth, y);
-        ctx.stroke();
+      
+      // Spire for Empire State-style
+      if (building.spire) {
+        ctx.fillStyle = '#FFD700';
+        ctx.fillRect(x + building.width / 2 - 3, y - 30, 6, 30);
       }
-      ctx.globalAlpha = 1;
+      
+      // Chrysler Building decorative top
+      if (building.chrysler) {
+        ctx.fillStyle = '#FFD700';
+        // Art deco triangular top
+        ctx.beginPath();
+        ctx.moveTo(x + building.width / 2, y - 20);
+        ctx.lineTo(x, y + 20);
+        ctx.lineTo(x + building.width, y + 20);
+        ctx.closePath();
+        ctx.fill();
+        
+        // Arched windows pattern
+        for (let i = 0; i < 5; i++) {
+          const archY = y + 30 + i * 15;
+          ctx.beginPath();
+          ctx.arc(x + building.width / 2, archY, 8 - i, Math.PI, 0);
+          ctx.fill();
+        }
+      }
+    });
+    
+    // Statue of Liberty silhouette
+    const statueX = this.canvasWidth * 0.75;
+    const statueY = skylineY - 70;
+    ctx.fillStyle = '#2A2347';
+    // Base/pedestal
+    ctx.fillRect(statueX - 8, statueY + 50, 16, 20);
+    // Body
+    ctx.fillRect(statueX - 5, statueY + 30, 10, 20);
+    // Torch arm
+    ctx.fillRect(statueX - 15, statueY + 32, 12, 3);
+    // Torch
+    ctx.fillStyle = '#FF6347';
+    ctx.beginPath();
+    ctx.arc(statueX - 16, statueY + 28, 4, 0, Math.PI * 2);
+    ctx.fill();
+    // Crown
+    ctx.fillStyle = '#2A2347';
+    ctx.fillRect(statueX - 6, statueY + 26, 12, 4);
+    for (let i = 0; i < 5; i++) {
+      ctx.fillRect(statueX - 5 + i * 2.5, statueY + 20, 2, 6);
     }
+  }
+  
+  private renderSuspensionBridge(ctx: CanvasRenderingContext2D) {
+    const bridgeY = this.canvasHeight * 0.68;
+    
+    // Bridge deck
+    ctx.fillStyle = '#FFD700';
+    ctx.fillRect(0, bridgeY, this.canvasWidth, 4);
+    
+    // Support towers
+    const towers = [
+      { x: this.canvasWidth * 0.25 },
+      { x: this.canvasWidth * 0.65 },
+    ];
+    
+    towers.forEach(tower => {
+      ctx.fillStyle = '#FFD700';
+      ctx.fillRect(tower.x - 4, bridgeY - 40, 8, 40);
+      ctx.fillRect(tower.x - 6, bridgeY - 50, 12, 10);
+    });
+    
+    // Suspension cables
+    ctx.strokeStyle = '#FFD700';
+    ctx.lineWidth = 2;
+    
+    // Main cables (curved)
+    ctx.beginPath();
+    ctx.moveTo(0, bridgeY);
+    ctx.quadraticCurveTo(this.canvasWidth * 0.25, bridgeY - 45, this.canvasWidth * 0.5, bridgeY - 20);
+    ctx.stroke();
+    
+    ctx.beginPath();
+    ctx.moveTo(this.canvasWidth * 0.5, bridgeY - 20);
+    ctx.quadraticCurveTo(this.canvasWidth * 0.65, bridgeY - 45, this.canvasWidth, bridgeY);
+    ctx.stroke();
+    
+    // Vertical cables
+    ctx.lineWidth = 1;
+    for (let i = 0; i < this.canvasWidth; i += 25) {
+      const cableHeight = 20 + Math.abs(Math.sin((i / this.canvasWidth) * Math.PI * 2)) * 25;
+      ctx.beginPath();
+      ctx.moveTo(i, bridgeY);
+      ctx.lineTo(i, bridgeY - cableHeight);
+      ctx.stroke();
+    }
+  }
+  
+  private renderCars(ctx: CanvasRenderingContext2D) {
+    const roadY = this.canvasHeight * 0.78;
+    const cars = [
+      { x: 0.15, color: '#FF6347', lane: 0 },
+      { x: 0.45, color: '#00CED1', lane: 1 },
+      { x: 0.75, color: '#32CD32', lane: 2 },
+    ];
+    
+    cars.forEach(car => {
+      const carX = car.x * this.canvasWidth;
+      const carY = roadY + car.lane * 20;
+      
+      // Car body
+      ctx.fillStyle = car.color;
+      ctx.fillRect(carX, carY, 20, 10);
+      // Car windows
+      ctx.fillStyle = '#1A1A1A';
+      ctx.fillRect(carX + 4, carY + 2, 12, 6);
+    });
   }
 
   private renderSubwayBackground(ctx: CanvasRenderingContext2D) {
