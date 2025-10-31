@@ -5,6 +5,7 @@ import { DancingCactus, HazardConfig } from './DancingCactus';
 import { SpinningCactus } from './SpinningCactus';
 import { Manhole } from './Manhole';
 import { Alligator, ManholeSpawnPoint } from './Alligator';
+import { AlligatorBoss } from './AlligatorBoss';
 import { Necromancer, TombstonePosition } from './Necromancer';
 
 interface Cookie {
@@ -37,6 +38,7 @@ export class Level {
   private spinningCacti: SpinningCactus[] = [];
   private manholes: Manhole[] = [];
   private alligator: Alligator | null = null;
+  private alligatorBoss: AlligatorBoss | null = null;
   private necromancer: Necromancer | null = null;
   private finishLine: { x: number; y: number; width: number; height: number; } | null = null;
   private config: LevelConfig;
@@ -161,6 +163,18 @@ export class Level {
       );
     }
 
+    // Initialize alligator boss (free-roaming) if present in config
+    this.alligatorBoss = null;
+    if ((this.config as any).miniBoss && (this.config as any).miniBoss.type === 'alligator_boss') {
+      const miniBossConfig = (this.config as any).miniBoss;
+      this.alligatorBoss = new AlligatorBoss(
+        this.audioManager,
+        this.config.cookies,
+        miniBossConfig.position.x,
+        miniBossConfig.position.y
+      );
+    }
+
     // Initialize necromancer mini-boss if present in config
     this.necromancer = null;
     if ((this.config as any).miniBoss && (this.config as any).miniBoss.type === 'necromancer') {
@@ -202,6 +216,12 @@ export class Level {
     if (this.alligator && cookiesCollected !== undefined) {
       this.alligator.updateCookieCount(cookiesCollected);
       this.alligator.update(deltaTime, playerX, playerY);
+    }
+
+    // Update alligator boss (free-roaming)
+    if (this.alligatorBoss && playerX !== undefined && playerY !== undefined && cookiesCollected !== undefined) {
+      this.alligatorBoss.updateCookieCount(cookiesCollected);
+      this.alligatorBoss.update(deltaTime, playerX, playerY, this.enemies);
     }
 
     // Update necromancer mini-boss
@@ -249,6 +269,11 @@ export class Level {
     // Render alligator mini-boss (on top of everything)
     if (this.alligator) {
       this.alligator.render(ctx);
+    }
+
+    // Render alligator boss (free-roaming)
+    if (this.alligatorBoss) {
+      this.alligatorBoss.render(ctx);
     }
 
     // Render necromancer mini-boss (on top of everything)
@@ -887,6 +912,36 @@ export class Level {
 
   public getNecromancer(): Necromancer | null {
     return this.necromancer;
+  }
+
+  public checkAlligatorBossCollision(playerBounds: { x: number; y: number; width: number; height: number; }): boolean {
+    if (!this.alligatorBoss) {
+      return false;
+    }
+    
+    // Check bite collision
+    const biteHit = this.alligatorBoss.checkPlayerCollision(playerBounds.x, playerBounds.y, playerBounds.width);
+    
+    // Check spit projectile collision
+    const spitHit = this.alligatorBoss.checkSpitCollision(playerBounds.x, playerBounds.y, playerBounds.width);
+    
+    return biteHit || spitHit;
+  }
+
+  public getAlligatorBoss(): AlligatorBoss | null {
+    return this.alligatorBoss;
+  }
+
+  public playAlligatorBossIntro(): void {
+    if (this.alligatorBoss) {
+      this.alligatorBoss.playIntroSequence();
+    }
+  }
+
+  public completeAlligatorBossIntro(): void {
+    if (this.alligatorBoss) {
+      this.alligatorBoss.completeIntro();
+    }
   }
 
   public playNecromancerIntro(): void {

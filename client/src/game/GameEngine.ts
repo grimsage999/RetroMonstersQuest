@@ -577,6 +577,21 @@ export class GameEngine {
       this.activeTimeouts.add(introTimeout);
     }
 
+    // Check if level has alligator boss (free-roaming) and play intro sequence
+    const alligatorBoss = this.currentLevel.getAlligatorBoss();
+    if (alligatorBoss && alligatorBoss.isIntroReady()) {
+      console.log('GameEngine: Level has alligator boss (free-roaming) - playing intro sequence');
+      this.currentLevel.playAlligatorBossIntro();
+      
+      // Complete intro after dramatic pause (2-3 seconds)
+      const introTimeout = window.setTimeout(() => {
+        this.currentLevel.completeAlligatorBossIntro();
+        console.log('GameEngine: Alligator boss intro complete - mini-boss now active');
+        this.activeTimeouts.delete(introTimeout);
+      }, 2500);
+      this.activeTimeouts.add(introTimeout);
+    }
+
     // Check if level has necromancer mini-boss and play intro sequence
     const necromancer = this.currentLevel.getNecromancer();
     if (necromancer) {
@@ -778,6 +793,17 @@ export class GameEngine {
       // Alligator is instant death
       this.audioManager.playHit();
       this.damageSystem.takeDamage('alligator', 999, {
+        x: playerBounds.x,
+        y: playerBounds.y
+      });
+      this.handleGameOver();
+    }
+
+    // Check alligator boss (free-roaming) collision (ONE-HIT KILL - unless dashing!)
+    if (!this.player.isDashing() && this.currentLevel.checkAlligatorBossCollision(playerBounds)) {
+      // Alligator boss bite and spit attacks are instant death
+      this.audioManager.playHit();
+      this.damageSystem.takeDamage('alligator_boss', 999, {
         x: playerBounds.x,
         y: playerBounds.y
       });
