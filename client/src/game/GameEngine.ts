@@ -149,31 +149,6 @@ export class GameEngine {
     });
   }
 
-  private createBossContext(deltaTime: number = 16): GameContext {
-    // Add null check for player bounds
-    if (!this.player) {
-      throw new Error('GameEngine: Player not initialized when creating boss context');
-    }
-
-    const playerBounds = this.player.getBounds();
-    if (!playerBounds) {
-      throw new Error('GameEngine: Unable to get player bounds for boss context');
-    }
-
-    // No weapons in simplified game
-    const weapons: string[] = [];
-
-    return {
-      playerPosition: { x: playerBounds.x, y: playerBounds.y },
-      playerHealth: this.gameState.lives,
-      bossHealth: this.gameState.bossHealth,
-      deltaTime: Math.max(1, deltaTime), // Use actual deltaTime, minimum 1ms
-      canvasWidth: this.canvas.width,
-      canvasHeight: this.canvas.height,
-      currentWeapons: weapons
-    };
-  }
-
   private setupCommandExecutors() {
     // Set up command executors with proper filtering
     this.commandInputSystem.registerCommandExecutor(GameCommand.MOVE_UP, (cmd: InputCommand) => {
@@ -381,7 +356,6 @@ export class GameEngine {
     this.entityCount = 0;
 
     // Clear all game objects
-    this.bossStateMachine = null;
     this.currentCutscene = null;
 
     // Reset to completely fresh state
@@ -448,7 +422,7 @@ export class GameEngine {
   public nextLevel() {
     // Use level sequence to determine next level
     const currentLevel = this.gameState.level;
-    const currentIndex = GAME_CONFIG.LEVEL_SEQUENCE.indexOf(currentLevel);
+    const currentIndex = GAME_CONFIG.LEVEL_SEQUENCE.indexOf(currentLevel as any);
     
     // Get next level from sequence, or increment if not in sequence
     const nextLevel = currentIndex >= 0 && currentIndex < GAME_CONFIG.LEVEL_SEQUENCE.length - 1
