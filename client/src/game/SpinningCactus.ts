@@ -160,10 +160,11 @@ export class SpinningCactus {
         playerX + playerWidth > this.x &&
         playerY < this.y + this.height &&
         playerY + playerHeight > this.y) {
+      logger.debug('Player hit spinning cactus body!');
       return true;
     }
 
-    // Check collision with fireballs
+    // Check collision with fireballs - fireballs ALWAYS damage the player
     for (const fireball of this.fireballs) {
       if (!fireball.isAlive()) continue;
 
@@ -172,6 +173,7 @@ export class SpinningCactus {
           playerX + playerWidth > fbBounds.x &&
           playerY < fbBounds.y + fbBounds.height &&
           playerY + playerHeight > fbBounds.y) {
+        logger.info('🔥 FIREBALL HIT PLAYER! Taking 1 damage.');
         fireball.kill();
         return true;
       }

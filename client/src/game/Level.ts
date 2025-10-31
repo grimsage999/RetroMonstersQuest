@@ -1195,30 +1195,33 @@ export class Level {
 
         const fbBounds = fireball.getBounds();
 
-        // Fireballs hit enemies in their path as they chase the player
-        this.enemies = this.enemies.filter(enemy => {
-          if (!enemy.isActive()) return true; // Keep inactive enemies
+        // CRITICAL: Fireballs only damage enemies/cactus AFTER being redirected by player
+        if (fireball.isRedirected()) {
+          // Redirected fireballs hit enemies in their path
+          this.enemies = this.enemies.filter(enemy => {
+            if (!enemy.isActive()) return true; // Keep inactive enemies
 
-          const enemyBounds = enemy.getBounds();
-          const hit = this.checkCollision(fbBounds, enemyBounds);
+            const enemyBounds = enemy.getBounds();
+            const hit = this.checkCollision(fbBounds, enemyBounds);
 
-          if (hit) {
-            logger.info('Fireball hit enemy! Enemy destroyed.');
-            fireball.kill();
-            return false; // Remove enemy
-          }
-          return true; // Keep enemy
-        });
+            if (hit) {
+              logger.info('Redirected fireball hit enemy! Enemy destroyed.');
+              fireball.kill();
+              return false; // Remove enemy
+            }
+            return true; // Keep enemy
+          });
 
-        // Fireballs also hit the cactus if it's in their path (player dodged away)
-        if (fireball.isAlive()) {
-          const cactusBounds = cactus.getBounds();
-          const hit = this.checkCollision(fbBounds, cactusBounds);
+          // Redirected fireballs can also hit the cactus (friendly fire!)
+          if (fireball.isAlive()) {
+            const cactusBounds = cactus.getBounds();
+            const hit = this.checkCollision(fbBounds, cactusBounds);
 
-          if (hit) {
-            logger.info('Fireball hit cactus! Damage dealt.');
-            fireball.kill();
-            cactus.takeDamage(1);
+            if (hit) {
+              logger.info('Redirected fireball hit cactus! Damage dealt.');
+              fireball.kill();
+              cactus.takeDamage(1);
+            }
           }
         }
       });
