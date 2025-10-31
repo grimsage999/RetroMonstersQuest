@@ -186,7 +186,17 @@ export class GameEngine {
     });
 
     this.commandInputSystem.registerCommandExecutor(GameCommand.FIRE_PRIMARY, (cmd: InputCommand) => {
-      if (!cmd.pressed) return; // Only on key press, not release
+      // During gameplay, pass Space key to InputManager for teleport mechanic
+      if (this.stateManager.getCurrentPhase() === GamePhase.PLAYING) {
+        if (cmd.pressed) {
+          this.inputManager.handleKeyDown('Space');
+        } else {
+          this.inputManager.handleKeyUp('Space');
+        }
+        return; // Don't process other Space key functions during gameplay
+      }
+      
+      if (!cmd.pressed) return; // Only on key press, not release for menu functions
 
       // Handle title screen - start the game
       if (this.stateManager.getCurrentPhase() === GamePhase.TITLE) {
