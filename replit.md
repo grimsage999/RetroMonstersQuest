@@ -28,7 +28,7 @@ Preferred communication style: Simple, everyday language.
 
 ### Feature Specifications
 - **Player**: UFO character with movement, dash, and boundary checking.
-- **Enemies**: Diverse enemy types (e.g., CIA agents, army men, radioactive rats), mini-bosses (e.g., Alligator, Necromancer), and a final boss (Void Lord) with unique AI behaviors and attack patterns.
+- **Enemies**: Diverse enemy types (e.g., CIA agents, army men, radioactive rats), mini-bosses (e.g., Alligator, Necromancer), and a final boss (Void Lord - humanoid cosmic entity with menacing face and void ghost summoning abilities) with unique AI behaviors and attack patterns.
 - **Levels**: Multiple levels with distinct themes (e.g., sunset desert, cyberpunk city, dystopian subway, graveyard, government lab, cosmic void), environmental hazards (e.g., Dancing Cactus, Manholes, Spinning Cactus, Fireballs), and a defined progression sequence.
 - **Hazards**: Interactive environmental elements posing threats or strategic opportunities (e.g., Fireball redirection).
 - **Collectibles**: Cookies as the primary objective.
