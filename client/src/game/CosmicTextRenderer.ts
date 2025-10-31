@@ -51,17 +51,7 @@ export class CosmicTextRenderer {
     const adjustedFontSize = style.FONT_SIZE * pulseFactor;
     ctx.font = `bold ${adjustedFontSize}px "Courier New", monospace`;
 
-    // 1. Render outer glow (multiple passes for intensity)
-    for (let i = 0; i < style.GLOW_INTENSITY; i++) {
-      ctx.shadowColor = style.GLOW_COLOR;
-      ctx.shadowBlur = style.GLOW_INTENSITY + i * 2;
-      ctx.shadowOffsetX = 0;
-      ctx.shadowOffsetY = 0;
-      ctx.fillStyle = style.GLOW_COLOR;
-      ctx.globalAlpha = 0.1;
-      ctx.fillText(text, x, y);
-    }
-
+    // PERFORMANCE FIX: Removed glow passes (shadowBlur is extremely expensive!)
     // Clear shadow for next layers
     ctx.shadowBlur = 0;
     ctx.shadowColor = 'transparent';
@@ -71,17 +61,13 @@ export class CosmicTextRenderer {
     ctx.fillStyle = style.SHADOW_COLOR;
     ctx.fillText(text, x + style.SHADOW_OFFSET, y + style.SHADOW_OFFSET);
 
-    // 3. Render thick outline (multiple passes for boldness)
+    // 3. Render outline (PERFORMANCE FIX: Single pass only)
     ctx.globalAlpha = 1;
     ctx.strokeStyle = style.OUTLINE_COLOR;
     ctx.lineWidth = style.OUTLINE_WIDTH;
     ctx.lineJoin = 'round';
     ctx.lineCap = 'round';
-    
-    // Multiple outline passes for bolder effect
-    for (let i = 0; i < 3; i++) {
-      ctx.strokeText(text, x, y);
-    }
+    ctx.strokeText(text, x, y);
 
     // 4. Render main text fill
     ctx.fillStyle = style.PRIMARY_COLOR;

@@ -109,9 +109,7 @@ export class DancingCactus {
     ctx.strokeStyle = '#000000';
     ctx.stroke();
     
-    // Add glow effect for "dancing" feel
-    ctx.shadowColor = '#2ECC71';
-    ctx.shadowBlur = 10 + Math.sin(this.time * 3) * 5;
+    // PERFORMANCE FIX: Removed shadow blur (too expensive!)
     
     ctx.restore();
   }

@@ -270,58 +270,32 @@ export class Level {
   }
 
   private renderDesertBackground(ctx: CanvasRenderingContext2D) {
-    // Beautiful desert sunset sky
-    const skyGradient = ctx.createLinearGradient(0, 0, 0, this.canvasHeight * 0.7);
-    skyGradient.addColorStop(0, '#FF6B35'); // Orange sunset
-    skyGradient.addColorStop(0.3, '#FF8C42'); // Warm orange
-    skyGradient.addColorStop(0.6, '#FFAA44'); // Golden
-    skyGradient.addColorStop(1, '#F4A460'); // Sandy transition
-    ctx.fillStyle = skyGradient;
+    // PERFORMANCE FIX: Use solid colors instead of gradients
+    ctx.fillStyle = '#FF8C42'; // Warm orange sky
     ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight * 0.7);
     
-    // Add stylized sun
+    // Simple sun (NO SHADOW BLUR - extremely expensive!)
     ctx.fillStyle = '#FFD700';
-    ctx.shadowColor = '#FFD700';
-    ctx.shadowBlur = 20;
     ctx.beginPath();
     ctx.arc(this.canvasWidth * 0.8, this.canvasHeight * 0.2, 32, 0, 2 * Math.PI);
     ctx.fill();
     
-    // Desert sand with warm tones
-    const sandGradient = ctx.createLinearGradient(0, this.canvasHeight * 0.7, 0, this.canvasHeight);
-    sandGradient.addColorStop(0, '#DEB887'); // Burlywood
-    sandGradient.addColorStop(1, '#CD853F'); // Peru
-    ctx.fillStyle = sandGradient;
+    // Desert sand - solid color
+    ctx.fillStyle = '#DEB887';
     ctx.fillRect(0, this.canvasHeight * 0.7, this.canvasWidth, this.canvasHeight * 0.3);
     
-    // PERFORMANCE OPTIMIZATION: Simplified sand dunes - larger chunks, less math
-    for (let x = 0; x < this.canvasWidth; x += 32) {
-      const waveHeight = Math.sin(x * 0.01) * 8;
-      ctx.fillStyle = '#F4A460';
-      ctx.fillRect(x, this.canvasHeight * 0.7 + waveHeight, 32, this.canvasHeight * 0.3 - waveHeight);
-    }
-    
-    // PERFORMANCE OPTIMIZATION: Simplified star rendering - remove animation
-    ctx.shadowBlur = 0;
+    // Simple stars - no animation
     ctx.fillStyle = '#FFFF99';
-    ctx.globalAlpha = 0.8;
-    // Reduced from 20 to 8 stars for better performance
     for (let i = 0; i < 8; i++) {
       const x = (i * this.canvasWidth / 8) + Math.sin(i) * 50;
       const y = (i * this.canvasHeight * 0.05) + 20;
       ctx.fillRect(x, y, 2, 2);
     }
-    ctx.globalAlpha = 1;
   }
 
   private renderCityBackground(ctx: CanvasRenderingContext2D) {
-    // Vibrant cyberpunk sky with aurora-like colors
-    const skyGradient = ctx.createLinearGradient(0, 0, 0, this.canvasHeight * 0.7);
-    skyGradient.addColorStop(0, '#4B0082'); // Indigo
-    skyGradient.addColorStop(0.3, '#8A2BE2'); // Blue violet
-    skyGradient.addColorStop(0.6, '#DA70D6'); // Orchid
-    skyGradient.addColorStop(1, '#2F4F4F'); // Dark slate gray
-    ctx.fillStyle = skyGradient;
+    // PERFORMANCE FIX: Solid color sky instead of gradient
+    ctx.fillStyle = '#6A0DAD'; // Purple cyberpunk sky
     ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight * 0.7);
     
     // Add floating geometric shapes (cyberpunk aesthetic)

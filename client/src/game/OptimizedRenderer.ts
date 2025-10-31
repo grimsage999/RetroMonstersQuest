@@ -17,14 +17,7 @@ export class OptimizedRenderer {
     // Single drawImage call maintains exact visual quality at 60fps
     ctx.drawImage(sprite, x, y);
     
-    // Add glow effect (preserved from original)
-    ctx.save();
-    ctx.shadowColor = '#DAA520';
-    ctx.shadowBlur = 3;
-    ctx.strokeStyle = '#DAA520';
-    ctx.lineWidth = 1;
-    ctx.strokeRect(x - 1, y - 1, sprite.width + 2, sprite.height + 2);
-    ctx.restore();
+    // PERFORMANCE FIX: Removed shadow blur (too expensive for many cookies)
   }
 
   public static renderOptimizedEnemy(ctx: CanvasRenderingContext2D, x: number, y: number, type: string, frame: number, hasGlow?: boolean): void {
@@ -36,11 +29,7 @@ export class OptimizedRenderer {
       this.cache.set(key, sprite);
     }
     
-    if (hasGlow) {
-      const glowIntensity = Math.sin(Date.now() * 0.01) * 2 + 3;
-      ctx.shadowColor = '#39ff14';
-      ctx.shadowBlur = glowIntensity;
-    }
+    // PERFORMANCE FIX: Removed glow effect (shadowBlur too expensive)
     
     // Single drawImage call maintains exact visual quality at 60fps
     ctx.drawImage(sprite, x, y);
