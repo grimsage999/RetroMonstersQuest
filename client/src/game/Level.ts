@@ -336,85 +336,38 @@ export class Level {
   }
 
   private renderSubwayBackground(ctx: CanvasRenderingContext2D) {
-    // Atmospheric underground with warm lighting
-    const wallGradient = ctx.createLinearGradient(0, 0, 0, this.canvasHeight * 0.8);
-    wallGradient.addColorStop(0, '#4A4A4A'); // Medium gray
-    wallGradient.addColorStop(0.5, '#6A5ACD'); // Slate blue
-    wallGradient.addColorStop(1, '#2F2F2F'); // Dark gray
-    ctx.fillStyle = wallGradient;
+    // PERFORMANCE FIX: Solid colors instead of gradients and tile loops
+    ctx.fillStyle = '#4A4A4A'; // Gray walls
     ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight * 0.8);
     
-    // Colorful mosaic floor tiles
-    const tileSize = 16;
-    const tileColors = ['#4169E1', '#1E90FF', '#00CED1', '#20B2AA', '#4682B4'];
-    for (let x = 0; x < this.canvasWidth; x += tileSize) {
-      for (let y = this.canvasHeight * 0.8; y < this.canvasHeight; y += tileSize) {
-        const colorIndex = ((x + y) / tileSize) % tileColors.length;
-        ctx.fillStyle = tileColors[colorIndex];
-        ctx.globalAlpha = 0.8;
-        ctx.fillRect(x, y, tileSize, tileSize);
-        
-        // Add tile borders
-        ctx.globalAlpha = 1;
-        ctx.strokeStyle = '#1C1C1C';
-        ctx.lineWidth = 1;
-        ctx.strokeRect(x, y, tileSize, tileSize);
-      }
-    }
-    
-    // Simplified lighting for better performance
+    // Simple floor
+    ctx.fillStyle = '#4169E1'; // Blue floor
+    ctx.fillRect(0, this.canvasHeight * 0.8, this.canvasWidth, this.canvasHeight * 0.2);
   }
 
   private renderGraveyardBackground(ctx: CanvasRenderingContext2D) {
-    // Spooky graveyard atmosphere with mist
-    const skyGradient = ctx.createLinearGradient(0, 0, 0, this.canvasHeight);
-    skyGradient.addColorStop(0, '#2F2F2F'); // Dark gray
-    skyGradient.addColorStop(0.4, '#404040'); // Medium gray
-    skyGradient.addColorStop(1, '#1C1C1C'); // Very dark ground
-    ctx.fillStyle = skyGradient;
+    // PERFORMANCE FIX: Solid color instead of gradient
+    ctx.fillStyle = '#2F2F2F'; // Dark gray
     ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
     
-    // Simplified moon for performance
+    // Simple moon
     ctx.fillStyle = '#F5F5DC';
     ctx.beginPath();
     ctx.arc(this.canvasWidth * 0.8, this.canvasHeight * 0.2, 28, 0, 2 * Math.PI);
     ctx.fill();
-    
-    // Simplified background for performance
   }
 
   private renderLabBackground(ctx: CanvasRenderingContext2D) {
-    // Sterile government lab environment
-    const bgGradient = ctx.createLinearGradient(0, 0, 0, this.canvasHeight);
-    bgGradient.addColorStop(0, '#E0E0E0'); // Light gray ceiling
-    bgGradient.addColorStop(0.3, '#F5F5F5'); // White walls
-    bgGradient.addColorStop(0.7, '#DCDCDC'); // Gray floor transition
-    bgGradient.addColorStop(1, '#C0C0C0'); // Darker floor
-    ctx.fillStyle = bgGradient;
+    // PERFORMANCE FIX: Solid colors instead of gradients and loops
+    ctx.fillStyle = '#F5F5F5'; // White walls
     ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
     
-    // Add fluorescent lighting strips
+    // Simple lighting strips
     ctx.fillStyle = '#FFFFFF';
-    for (let x = 100; x < this.canvasWidth; x += 200) {
-      ctx.fillRect(x, 20, 80, 8);
-      // Simplified for performance
-    }
-    
-    // Add grid floor pattern
-    ctx.strokeStyle = '#B0B0B0';
-    ctx.lineWidth = 1;
-    for (let x = 0; x < this.canvasWidth; x += 32) {
-      ctx.beginPath();
-      ctx.moveTo(x, this.canvasHeight * 0.7);
-      ctx.lineTo(x, this.canvasHeight);
-      ctx.stroke();
-    }
-    for (let y = this.canvasHeight * 0.7; y < this.canvasHeight; y += 32) {
-      ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.lineTo(this.canvasWidth, y);
-      ctx.stroke();
-    }
+    ctx.fillRect(100, 20, 80, 8);
+    ctx.fillRect(300, 20, 80, 8);
+    ctx.fillRect(500, 20, 80, 8);
+    ctx.fillRect(700, 20, 80, 8);
   }
 
   private renderSpaceBackground(ctx: CanvasRenderingContext2D) {
@@ -589,31 +542,22 @@ export class Level {
       ctx.fillStyle = '#2F2F2F';
       ctx.fillRect(building.x, y, building.width, building.height);
       
-      // Windows (some lit, some dark)
-      const windowSize = 6;
-      const windowSpacing = 12;
-      for (let wx = building.x + 8; wx < building.x + building.width - 8; wx += windowSpacing) {
-        for (let wy = y + 16; wy < y + building.height - 16; wy += windowSpacing) {
-          const isLit = Math.random() > 0.7;
-          ctx.fillStyle = isLit ? '#FFFF99' : '#1C1C1C';
-          ctx.fillRect(wx, wy, windowSize, windowSize);
-        }
-      }
+      // PERFORMANCE FIX: Simplified windows (no nested loops or Math.random in render)
+      ctx.fillStyle = '#FFFF99';
+      ctx.fillRect(building.x + 12, y + 20, 6, 6);
+      ctx.fillRect(building.x + 12, y + 40, 6, 6);
+      ctx.fillStyle = '#1C1C1C';
+      ctx.fillRect(building.x + 24, y + 20, 6, 6);
       
-      // Antenna or details on top
-      if (Math.random() > 0.5) {
-        ctx.fillStyle = '#FF0000';
-        ctx.fillRect(building.x + building.width/2, y - 8, 2, 8);
-      }
+      // Simple antenna
+      ctx.fillStyle = '#FF0000';
+      ctx.fillRect(building.x + building.width/2, y - 8, 2, 8);
     });
 
-    // Neon signs
+    // PERFORMANCE FIX: Neon signs without shadow blur
     ctx.fillStyle = '#FF1493'; // Deep pink neon
-    ctx.shadowColor = '#FF1493';
-    ctx.shadowBlur = 4;
     ctx.fillRect(150, this.canvasHeight - 180, 32, 8);
     ctx.fillStyle = '#00FFFF'; // Cyan neon
-    ctx.shadowColor = '#00FFFF';
     ctx.fillRect(350, this.canvasHeight - 160, 24, 6);
 
     // Debris on street
@@ -654,17 +598,10 @@ export class Level {
       ctx.fillRect(x, this.canvasHeight - 28, 16, 20);
     }
 
-    // Flickering lights (simulated with random brightness)
+    // PERFORMANCE FIX: Simple lights (no gradients or Math.random)
     const lightPositions = [100, 300, 500, 700];
     lightPositions.forEach(x => {
-      const brightness = Math.random() > 0.8 ? 0.5 : 0.2;
-      const lightGradient = ctx.createRadialGradient(x, 30, 0, x, 30, 60);
-      lightGradient.addColorStop(0, `rgba(255, 255, 255, ${brightness})`);
-      lightGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
-      ctx.fillStyle = lightGradient;
-      ctx.fillRect(x - 60, 0, 120, 120);
-      
-      // Light fixture
+      // Light fixture only
       ctx.fillStyle = '#2F2F2F';
       ctx.fillRect(x - 8, 20, 16, 8);
     });
