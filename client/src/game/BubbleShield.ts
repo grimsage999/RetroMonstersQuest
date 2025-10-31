@@ -77,7 +77,8 @@ export class BubbleShield {
 
     const centerX = playerX + 16;
     const centerY = playerY + 16;
-    const currentRadius = this.expandRadius + Math.sin(this.pulseOffset) * 5;
+    // Ensure radius is always positive (clamp to minimum of 10)
+    const currentRadius = Math.max(10, this.expandRadius + Math.sin(this.pulseOffset) * 5);
 
     ctx.save();
 
@@ -100,11 +101,13 @@ export class BubbleShield {
     ctx.arc(centerX, centerY, currentRadius, 0, Math.PI * 2);
     ctx.stroke();
 
+    // Ensure inner ring radius is always positive (minimum of 2)
+    const innerRadius = Math.max(2, currentRadius - 8);
     ctx.strokeStyle = `rgba(150, 255, 150, ${0.4 + Math.sin(this.pulseOffset * 2.5) * 0.2})`;
     ctx.lineWidth = 2;
     ctx.shadowBlur = 15;
     ctx.beginPath();
-    ctx.arc(centerX, centerY, currentRadius - 8, 0, Math.PI * 2);
+    ctx.arc(centerX, centerY, innerRadius, 0, Math.PI * 2);
     ctx.stroke();
 
     this.sparkles.forEach(sparkle => {
