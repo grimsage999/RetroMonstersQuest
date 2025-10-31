@@ -2247,34 +2247,30 @@ export class Level {
 
         const fbBounds = fireball.getBounds();
 
-        // CRITICAL: Fireballs only damage enemies/cactus AFTER being redirected by player
-        // AND only if they haven't already hit the player
-        if (fireball.isRedirected() && !fireball.hasHitPlayer()) {
-          // Redirected fireballs hit ALL enemies in their path
-          this.enemies = this.enemies.filter(enemy => {
-            if (!enemy.isActive()) return true; // Keep inactive enemies
+        // Fireballs damage ALL enemies in their path
+        this.enemies = this.enemies.filter(enemy => {
+          if (!enemy.isActive()) return true; // Keep inactive enemies
 
-            const enemyBounds = enemy.getBounds();
-            const hit = this.checkCollision(fbBounds, enemyBounds);
+          const enemyBounds = enemy.getBounds();
+          const hit = this.checkCollision(fbBounds, enemyBounds);
 
-            if (hit) {
-              logger.info(`💥 REDIRECTED FIREBALL HIT ENEMY! Enemy type: ${enemy.constructor.name} destroyed at (${enemyBounds.x}, ${enemyBounds.y})`);
-              fireball.kill();
-              return false; // Remove enemy
-            }
-            return true; // Keep enemy
-          });
+          if (hit) {
+            logger.info(`💥 FIREBALL HIT ENEMY! Enemy type: ${enemy.constructor.name} destroyed at (${enemyBounds.x}, ${enemyBounds.y})`);
+            fireball.kill();
+            return false; // Remove enemy
+          }
+          return true; // Keep enemy
+        });
 
-          // Redirected fireballs can also hit the cactus (friendly fire!)
-          if (fireball.isAlive()) {
-            const cactusBounds = cactus.getBounds();
-            const hit = this.checkCollision(fbBounds, cactusBounds);
+        // Fireballs can also hit the cactus (friendly fire!)
+        if (fireball.isAlive()) {
+          const cactusBounds = cactus.getBounds();
+          const hit = this.checkCollision(fbBounds, cactusBounds);
 
-            if (hit) {
-              logger.info('💥 Redirected fireball hit cactus! Damage dealt.');
-              fireball.kill();
-              cactus.takeDamage(1);
-            }
+          if (hit) {
+            logger.info('💥 Fireball hit cactus! Damage dealt.');
+            fireball.kill();
+            cactus.takeDamage(1);
           }
         }
 

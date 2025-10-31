@@ -20,7 +20,6 @@ export class Fireball {
   private size: number = 16;
   private alive: boolean = true;
   private trailPositions: Array<{ x: number; y: number; alpha: number }> = [];
-  private redirected: boolean = false; // Becomes true when player dodges (gets close)
   private hitPlayer: boolean = false; // Track if fireball hit player this frame
 
   constructor(config: FireballConfig) {
@@ -44,20 +43,9 @@ export class Fireball {
   public update(deltaTime: number, playerX: number, playerY: number, canvasWidth: number, canvasHeight: number): void {
     if (!this.alive) return;
 
-    // Check if fireball is close to player (dodge detection for redirect mechanic)
+    // Homing behavior - slightly adjust direction toward player
     const playerCenterX = playerX + 24;
     const playerCenterY = playerY + 24;
-    const distanceToPlayer = Math.sqrt(
-      Math.pow(this.x - playerCenterX, 2) + Math.pow(this.y - playerCenterY, 2)
-    );
-    
-    // If fireball gets within 70 pixels of player, it's been "redirected"
-    if (!this.redirected && distanceToPlayer < 70) {
-      this.redirected = true;
-      logger.debug('Fireball redirected! Can now damage enemies/cactus.');
-    }
-
-    // Homing behavior - slightly adjust direction toward player
     if (this.homing) {
       const dx = playerCenterX - this.x; // Target center of player
       const dy = playerCenterY - this.y;
@@ -125,49 +113,26 @@ export class Fireball {
     // Draw main fireball
     ctx.save();
     
-    // Visual indicator for redirected fireballs - purple/blue tint
-    if (this.redirected) {
-      // Outer glow - purple for redirected
-      const outerGlow = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size * 1.5);
-      outerGlow.addColorStop(0, '#AA00FF');
-      outerGlow.addColorStop(0.5, '#6600FF');
-      outerGlow.addColorStop(1, 'rgba(102, 0, 255, 0)');
-      
-      ctx.fillStyle = outerGlow;
-      ctx.fillRect(this.x - this.size * 1.5, this.y - this.size * 1.5, this.size * 3, this.size * 3);
-      
-      // Core fireball - purple/pink for redirected
-      const coreGradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size);
-      coreGradient.addColorStop(0, '#FF00FF');
-      coreGradient.addColorStop(0.5, '#CC00FF');
-      coreGradient.addColorStop(1, '#9900FF');
-      
-      ctx.fillStyle = coreGradient;
-      ctx.beginPath();
-      ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-      ctx.fill();
-    } else {
-      // Normal orange/yellow fireball
-      // Outer glow
-      const outerGlow = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size * 1.5);
-      outerGlow.addColorStop(0, '#FFAA00');
-      outerGlow.addColorStop(0.5, '#FF6600');
-      outerGlow.addColorStop(1, 'rgba(255, 102, 0, 0)');
-      
-      ctx.fillStyle = outerGlow;
-      ctx.fillRect(this.x - this.size * 1.5, this.y - this.size * 1.5, this.size * 3, this.size * 3);
-      
-      // Core fireball
-      const coreGradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size);
-      coreGradient.addColorStop(0, '#FFFF00');
-      coreGradient.addColorStop(0.5, '#FF9900');
-      coreGradient.addColorStop(1, '#FF3300');
-      
-      ctx.fillStyle = coreGradient;
-      ctx.beginPath();
-      ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-      ctx.fill();
-    }
+    // Orange/yellow fireball
+    // Outer glow
+    const outerGlow = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size * 1.5);
+    outerGlow.addColorStop(0, '#FFAA00');
+    outerGlow.addColorStop(0.5, '#FF6600');
+    outerGlow.addColorStop(1, 'rgba(255, 102, 0, 0)');
+    
+    ctx.fillStyle = outerGlow;
+    ctx.fillRect(this.x - this.size * 1.5, this.y - this.size * 1.5, this.size * 3, this.size * 3);
+    
+    // Core fireball
+    const coreGradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size);
+    coreGradient.addColorStop(0, '#FFFF00');
+    coreGradient.addColorStop(0.5, '#FF9900');
+    coreGradient.addColorStop(1, '#FF3300');
+    
+    ctx.fillStyle = coreGradient;
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+    ctx.fill();
     
     ctx.restore();
   }
@@ -191,10 +156,6 @@ export class Fireball {
 
   public getDamage(): number {
     return this.damage;
-  }
-
-  public isRedirected(): boolean {
-    return this.redirected;
   }
 
   public markHitPlayer(): void {
