@@ -45,60 +45,97 @@ export class Manhole {
     ctx.save();
     ctx.imageSmoothingEnabled = false;
 
+    const centerX = this.x + this.width / 2;
+    const centerY = this.y + this.height / 2;
+    const radius = this.width / 2;
+
+    // Render the dark hole underneath when open
     if (this.isOpen && this.openProgress > 0.1) {
-      const holeDepth = this.openProgress;
-      
+      // Orange glow around the hole when opening
+      const glowAlpha = this.openProgress * 0.6;
+      ctx.fillStyle = `rgba(255, 140, 0, ${glowAlpha})`;
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, radius + 4, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Dark hole
       ctx.fillStyle = '#000000';
-      ctx.fillRect(this.x + 4, this.y + 4, this.width - 8, this.height - 8);
-      
-      ctx.fillStyle = `rgba(50, 50, 50, ${holeDepth * 0.8})`;
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, radius - 2, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Add depth shadows
       for (let i = 0; i < 3; i++) {
-        const offset = i * 4;
-        ctx.fillRect(
-          this.x + 4 + offset,
-          this.y + 4 + offset,
-          this.width - 8 - offset * 2,
-          this.height - 8 - offset * 2
-        );
+        ctx.fillStyle = `rgba(40, 40, 40, ${0.3 - i * 0.1})`;
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, radius - 2 - i * 3, 0, Math.PI * 2);
+        ctx.fill();
       }
-
-      ctx.strokeStyle = '#666666';
-      ctx.lineWidth = 2;
-      ctx.strokeRect(this.x + 4, this.y + 4, this.width - 8, this.height - 8);
     }
 
-    const coverOffset = this.openProgress * (this.width / 2);
-    
-    ctx.fillStyle = '#4A4A4A';
-    ctx.fillRect(this.x - coverOffset, this.y, this.width / 2, this.height);
-    ctx.fillRect(this.x + this.width / 2 + coverOffset, this.y, this.width / 2, this.height);
+    // Slide the cover to the right as one piece
+    const slideOffset = this.openProgress * this.width * 0.8;
 
-    ctx.fillStyle = '#2F2F2F';
-    ctx.fillRect(this.x - coverOffset + 2, this.y + 2, this.width / 2 - 4, this.height - 4);
-    ctx.fillRect(this.x + this.width / 2 + coverOffset + 2, this.y + 2, this.width / 2 - 4, this.height - 4);
+    // NYC Subway Manhole Cover
+    ctx.translate(slideOffset, 0);
 
-    ctx.strokeStyle = '#666666';
-    ctx.lineWidth = 1;
-    for (let i = 0; i < 4; i++) {
-      const lineY = this.y + 10 + i * 10;
-      ctx.beginPath();
-      ctx.moveTo(this.x - coverOffset + 4, lineY);
-      ctx.lineTo(this.x - coverOffset + this.width / 2 - 4, lineY);
-      ctx.stroke();
-      
-      ctx.beginPath();
-      ctx.moveTo(this.x + this.width / 2 + coverOffset + 4, lineY);
-      ctx.lineTo(this.x + this.width + coverOffset - 4, lineY);
-      ctx.stroke();
+    // Outer ring - metallic gray-blue
+    ctx.fillStyle = '#5A7D9A';
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Inner ring - darker
+    ctx.fillStyle = '#4A5F7A';
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, radius - 4, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Main cover surface
+    ctx.fillStyle = '#6B8AA3';
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, radius - 6, 0, Math.PI * 2);
+    ctx.fill();
+
+    // NYC text in center
+    ctx.fillStyle = '#E8D4A0';
+    ctx.font = 'bold 14px monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('NYC', centerX, centerY - 2);
+
+    // SUBWAY text at bottom
+    ctx.font = 'bold 8px monospace';
+    ctx.fillText('SUBWAY', centerX, centerY + radius - 12);
+
+    // Small decorative symbols around the edge
+    ctx.fillStyle = '#E8D4A0';
+    const symbolRadius = radius - 12;
+    const symbols = ['◯', '■', '◇', '▽', '△', '●', '□', '◆'];
+    for (let i = 0; i < 8; i++) {
+      const angle = (i / 8) * Math.PI * 2 - Math.PI / 2;
+      const x = centerX + Math.cos(angle) * symbolRadius;
+      const y = centerY + Math.sin(angle) * symbolRadius;
+      ctx.font = '6px monospace';
+      ctx.fillText(symbols[i], x, y);
     }
 
-    if (this.isOpen && this.openProgress > 0.5) {
-      const warningAlpha = 0.3 + Math.sin(this.time * 0.01) * 0.2;
-      ctx.fillStyle = `rgba(255, 0, 0, ${warningAlpha})`;
-      ctx.fillRect(this.x - 4, this.y - 4, this.width + 8, 4);
-      ctx.fillRect(this.x - 4, this.y + this.height, this.width + 8, 4);
-      ctx.fillRect(this.x - 4, this.y, 4, this.height);
-      ctx.fillRect(this.x + this.width, this.y, 4, this.height);
+    // Add metallic edge highlight
+    ctx.strokeStyle = '#8BA8BF';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, radius - 1, 0, Math.PI);
+    ctx.stroke();
+
+    // Add some wear/rust spots for realism
+    ctx.fillStyle = '#8B7355';
+    for (let i = 0; i < 5; i++) {
+      const angle = (i / 5) * Math.PI * 2;
+      const spotX = centerX + Math.cos(angle) * (radius - 8);
+      const spotY = centerY + Math.sin(angle) * (radius - 8);
+      ctx.beginPath();
+      ctx.arc(spotX, spotY, 1, 0, Math.PI * 2);
+      ctx.fill();
     }
 
     ctx.restore();
