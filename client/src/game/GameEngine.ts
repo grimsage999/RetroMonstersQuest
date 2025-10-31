@@ -611,6 +611,21 @@ export class GameEngine {
       this.activeTimeouts.add(introTimeout);
     }
 
+    // Check if level has Void Lord boss and play intro sequence
+    const voidLord = this.currentLevel.getVoidLord();
+    if (voidLord && voidLord.isIntroReady()) {
+      logger.debug('Level has Void Lord boss - playing intro sequence');
+      this.currentLevel.playVoidLordIntro();
+      
+      // Complete intro after dramatic pause (3 seconds for final boss)
+      const introTimeout = window.setTimeout(() => {
+        this.currentLevel.completeVoidLordIntro();
+        logger.debug('Void Lord intro complete - final boss now active');
+        this.activeTimeouts.delete(introTimeout);
+      }, 3000);
+      this.activeTimeouts.add(introTimeout);
+    }
+
     logger.info(`Level ${this.gameState.level} initialized with ${this.gameState.totalCookies} cookies`);
   }
 
@@ -897,6 +912,17 @@ export class GameEngine {
           this.player.reset(this.canvas.width / 2, this.canvas.height - 50);
         }
       }
+    }
+
+    // Check Void Lord boss collision (INSTANT DEATH - NO PROTECTION!)
+    if (this.currentLevel.checkVoidLordCollision(playerBounds)) {
+      // Void Lord attacks are always instant death - dashing doesn't protect!
+      this.audioManager.playHit();
+      this.damageSystem.takeDamage('void_lord', 999, {
+        x: playerBounds.x,
+        y: playerBounds.y
+      });
+      this.handleGameOver();
     }
   }
 

@@ -8,6 +8,7 @@ import { Manhole } from './Manhole';
 import { Alligator, ManholeSpawnPoint } from './Alligator';
 import { AlligatorBoss } from './AlligatorBoss';
 import { Necromancer, TombstonePosition } from './Necromancer';
+import { VoidLord } from './VoidLord';
 import { SpatialGrid } from './SpatialGrid';
 import { WeaponX } from './WeaponX';
 
@@ -44,6 +45,7 @@ export class Level {
   private alligator: Alligator | null = null;
   private alligatorBoss: AlligatorBoss | null = null;
   private necromancer: Necromancer | null = null;
+  private voidLord: VoidLord | null = null;
   private weaponX: WeaponX | null = null;
   private finishLine: { x: number; y: number; width: number; height: number; } | null = null;
   private config: LevelConfig;
@@ -194,6 +196,20 @@ export class Level {
       );
     }
 
+    // Initialize Void Lord boss for Level 6
+    this.voidLord = null;
+    if (this.levelNumber === 6) {
+      const centerX = this.canvasWidth / 2 - 60;
+      const centerY = this.canvasHeight / 2 - 60;
+      this.voidLord = new VoidLord(
+        this.audioManager,
+        this.config.cookies,
+        centerX,
+        centerY
+      );
+      logger.info(`Void Lord spawned at center: (${centerX}, ${centerY})`);
+    }
+
     // Initialize Weapon X collectible if present in config
     this.weaponX = null;
     if (this.config.hasWeaponX) {
@@ -244,6 +260,12 @@ export class Level {
       this.necromancer.updateCookieCount(cookiesCollected);
       this.necromancer.updatePlayerPosition(playerX, playerY);
       this.necromancer.update(deltaTime);
+    }
+
+    // Update Void Lord boss
+    if (this.voidLord && playerX !== undefined && playerY !== undefined && cookiesCollected !== undefined) {
+      this.voidLord.updateCookieCount(cookiesCollected);
+      this.voidLord.update(deltaTime, playerX, playerY, this.canvasWidth, this.canvasHeight);
     }
 
     // Update Weapon X
@@ -345,6 +367,11 @@ export class Level {
     // Render necromancer mini-boss (on top of everything)
     if (this.necromancer) {
       this.necromancer.render(ctx);
+    }
+
+    // Render Void Lord boss (on top of everything)
+    if (this.voidLord) {
+      this.voidLord.render(ctx);
     }
     
     // All level elements rendered
@@ -2284,6 +2311,35 @@ export class Level {
   public completeNecromancerIntro(): void {
     if (this.necromancer) {
       this.necromancer.completeIntro();
+    }
+  }
+
+  public checkVoidLordCollision(playerBounds: { x: number; y: number; width: number; height: number; }): boolean {
+    if (!this.voidLord) {
+      return false;
+    }
+    
+    // All VoidLord attacks are instant-death
+    return this.voidLord.checkPlayerCollision(
+      playerBounds.x,
+      playerBounds.y,
+      playerBounds.width
+    );
+  }
+
+  public getVoidLord(): VoidLord | null {
+    return this.voidLord;
+  }
+
+  public playVoidLordIntro(): void {
+    if (this.voidLord) {
+      this.voidLord.playIntroSequence();
+    }
+  }
+
+  public completeVoidLordIntro(): void {
+    if (this.voidLord) {
+      this.voidLord.completeIntro();
     }
   }
 

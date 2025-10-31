@@ -373,6 +373,17 @@ export const LEVEL_CONFIGS = {
     title: 'Level 5-3: Lab Combat Test',
     description: 'Test your new Weapon X ability in combat!',
     hazards: []
+  },
+  6: {
+    background: '#000011',
+    fbiAgents: 0,
+    armyMen: 0,
+    radioactiveRats: 0,
+    zombies: 0,
+    cookies: 15,
+    title: 'Level 6: THE VOID LORD',
+    description: 'The ultimate cosmic challenge awaits in the void of space',
+    hazards: []
   }
 } as const;
 
@@ -443,5 +454,10 @@ export const CUTSCENE_DATA = {
     levelNumber: 5.75,
     title: "Level 5-3: LAB COMBAT TEST",
     description: "Time to test your new Weapon X ability!\n\n🛡️ Press X to activate BUBBLE SHIELD! 🛡️\nThe green bubble repels enemies and paralyzes them!\n\nUse it strategically - it has a cooldown!\nProtect yourself and collect cookies!"
+  },
+  6: {
+    levelNumber: 6,
+    title: "⚠️ LEVEL 6: THE VOID LORD ⚠️",
+    description: "You've entered the cosmic void - the Void Lord's domain!\n\n🌌 THE ULTIMATE CHALLENGE 🌌\n\nThe Void Lord CANNOT be defeated!\nAny attack from him means INSTANT DEATH!\n\n💀 His deadly arsenal:\n• Green & Red Fire Breath\n• Devastating Eye Lasers\n• Summoned Void Ghosts\n\nCollect ALL cookies to escape!\nDash and dodge to survive!\n\nThis is your final test, Cosmo!"
   }
 } as const;
