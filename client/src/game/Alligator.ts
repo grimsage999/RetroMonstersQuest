@@ -238,7 +238,29 @@ export class Alligator {
     }
 
     if (this.emergenceProgress > 0.5) {
-      const headY = bodyY - 20;
+      const baseHeadY = bodyY - 20;
+      let headY = baseHeadY;
+      let neckExtension = 0;
+      
+      if (this.attackState === 'attacking') {
+        const attackProgress = Math.min(1, this.stateTimer / (this.ATTACK_DURATION * 0.6));
+        neckExtension = Math.sin(attackProgress * Math.PI) * 35;
+        headY = baseHeadY - neckExtension;
+        
+        if (neckExtension > 5) {
+          ctx.fillStyle = '#5A7D4A';
+          const neckSegments = 4;
+          for (let i = 0; i < neckSegments; i++) {
+            const segmentY = baseHeadY - (neckExtension * (i / neckSegments));
+            const segmentWidth = 16 - (i * 2);
+            ctx.fillRect(centerX - segmentWidth / 2, segmentY, segmentWidth, neckExtension / neckSegments + 2);
+            
+            ctx.fillStyle = '#E8D4A0';
+            ctx.fillRect(centerX - (segmentWidth / 2 - 2), segmentY + 2, segmentWidth - 4, neckExtension / neckSegments - 2);
+            ctx.fillStyle = '#5A7D4A';
+          }
+        }
+      }
       
       ctx.fillStyle = '#4A5F3A';
       ctx.fillRect(centerX - 22, headY, 44, 24);
@@ -260,12 +282,12 @@ export class Alligator {
         
         ctx.beginPath();
         ctx.moveTo(centerX - 24, headY + 24);
-        ctx.lineTo(centerX - 32, headY + 32);
+        ctx.lineTo(centerX - 32, headY + 24 + neckExtension * 0.3);
         ctx.stroke();
 
         ctx.beginPath();
         ctx.moveTo(centerX + 24, headY + 24);
-        ctx.lineTo(centerX + 32, headY + 32);
+        ctx.lineTo(centerX + 32, headY + 24 + neckExtension * 0.3);
         ctx.stroke();
       }
     }
