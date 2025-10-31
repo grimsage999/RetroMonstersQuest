@@ -114,7 +114,7 @@ export const GAME_CONFIG = {
   },
 
   // Level Progression Sequence
-  LEVEL_SEQUENCE: [1, 1.5, 1.75, 2, 2.5, 2.75, 3, 4, 4.5, 5] as const,
+  LEVEL_SEQUENCE: [1, 1.5, 1.75, 2, 2.5, 2.75, 3, 3.5, 4, 4.5, 5] as const,
 
   // Animation Configuration
   ANIMATION: {
@@ -292,6 +292,21 @@ export const LEVEL_CONFIGS = {
     description: 'Underground tunnels, graffiti, flickering lights',
     hazards: []
   },
+  3.5: {
+    background: '#1C1C1C',
+    fbiAgents: 10,
+    armyMen: 6,
+    radioactiveRats: 8,
+    zombies: 0,
+    cookies: 14,
+    title: 'Level 3-2: Sewer Boss',
+    description: 'The alligator is free in the sewers! He bites and spits enemies at you!',
+    hazards: [],
+    miniBoss: {
+      type: 'alligator_boss',
+      position: { x: 400, y: 350 }
+    }
+  },
   4: {
     background: '#2F2F2F',
     fbiAgents: 6,
@@ -374,6 +389,11 @@ export const CUTSCENE_DATA = {
     title: "Level 3: Abandoned Subway",
     description: "Underground tunnels echo with danger.\nRadioactive rats emerge from dark corners.\nIn the debris, you discover alien technology...",
     weaponUnlocked: "🚀 ENHANCED AGILITY 🚀\nCosmo's movement becomes more responsive!\nDodge faster and collect more cookies!"
+  },
+  3.5: {
+    levelNumber: 3.5,
+    title: "Level 3-2: SEWER BOSS",
+    description: "The alligator broke free from the manholes!\n\nHe roams the sewers in his greasy tank top!\nHe can BITE you or EAT enemies and SPIT them at you!\n\nBoth attacks are ONE HIT KILL!\n\nDash to dodge his attacks and stay alive!\nThe fewer cookies remain, the more aggressive he becomes!"
   },
   4: {
     levelNumber: 4,
