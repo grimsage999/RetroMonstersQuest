@@ -84,11 +84,11 @@ export class Alligator {
     const cookieRatio = this.cookieCount / this.totalCookies;
     
     if (cookieRatio > 0.7) {
-      return 8000 + Math.random() * 2000;
+      return 4000 + Math.random() * 1000;
     } else if (cookieRatio > 0.3) {
-      return 6000 + Math.random() * 2000;
+      return 3000 + Math.random() * 1000;
     } else {
-      return 5000 + Math.random() * 2000;
+      return 2000 + Math.random() * 1000;
     }
   }
 
