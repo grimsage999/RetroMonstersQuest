@@ -18,6 +18,7 @@ class PlayerSpriteColors {
 
 import { InputManager } from './InputManager';
 import { MovementSystem } from './MovementSystem';
+import { logger } from './Logger';
 
 export class Player {
   private x: number;
@@ -36,9 +37,19 @@ export class Player {
   // Enhanced animation properties for squash & stretch
   private scaleX: number = 1;
   private scaleY: number = 1;
-  private animationState: 'idle' | 'walking' | 'dashing' | 'starting' | 'stopping' = 'idle';
+  private animationState: 'idle' | 'walking' | 'dashing' | 'starting' | 'stopping' | 'teleporting' = 'idle';
   private stateTimer: number = 0;
   private previousSpeed: number = 0;
+  
+  // Teleport system
+  private teleportDistance: number = 75; // Teleport distance in pixels
+  private teleportCooldown: number = 2000; // 2 second cooldown in ms
+  private teleportCooldownTimer: number = 0;
+  private isTeleporting: boolean = false;
+  private teleportAnimationTimer: number = 0;
+  private teleportAnimationDuration: number = 300; // 300ms for teleport animation
+  private teleportStartX: number = 0;
+  private teleportStartY: number = 0;
 
   constructor(x: number, y: number) {
     this.x = x;
@@ -57,6 +68,22 @@ export class Player {
   }
 
   public update(inputManager: InputManager, deltaTime: number, canvasWidth: number, canvasHeight: number) {
+    // Update teleport cooldown
+    if (this.teleportCooldownTimer > 0) {
+      this.teleportCooldownTimer -= deltaTime;
+    }
+    
+    // Update teleport animation
+    if (this.isTeleporting) {
+      this.teleportAnimationTimer -= deltaTime;
+      if (this.teleportAnimationTimer <= 0) {
+        this.isTeleporting = false;
+        this.animationState = 'idle';
+      }
+      // Don't process other inputs during teleport animation
+      return;
+    }
+    
     // Get input direction
     let inputX = 0;
     let inputY = 0;
@@ -70,6 +97,13 @@ export class Player {
     if (inputManager.isKeyPressed('ArrowRight')) {
       inputX = 1;
       this.direction = 'right';
+    }
+    
+    // Check for teleport input (Spacebar)
+    const isTeleportPressed = inputManager.isKeyPressed(' ') || inputManager.isKeyPressed('Space');
+    if (isTeleportPressed && this.teleportCooldownTimer <= 0 && !this.isTeleporting) {
+      this.activateTeleport(inputX, inputY, canvasWidth, canvasHeight);
+      return; // Skip normal movement this frame
     }
     
     // Check for dash input (Shift key - either left or right)
@@ -104,9 +138,52 @@ export class Player {
     
     this.previousSpeed = state.speed;
   }
+  
+  private activateTeleport(inputX: number, inputY: number, canvasWidth: number, canvasHeight: number) {
+    // Determine teleport direction
+    let teleportX = inputX;
+    let teleportY = inputY;
+    
+    // If no input, teleport in facing direction
+    if (teleportX === 0 && teleportY === 0) {
+      teleportX = this.direction === 'right' ? 1 : -1;
+    }
+    
+    // Normalize direction
+    const length = Math.sqrt(teleportX * teleportX + teleportY * teleportY);
+    if (length > 0) {
+      teleportX /= length;
+      teleportY /= length;
+    }
+    
+    // Store start position for visual effect
+    this.teleportStartX = this.x;
+    this.teleportStartY = this.y;
+    
+    // Calculate target position
+    const targetX = this.x + (teleportX * this.teleportDistance);
+    const targetY = this.y + (teleportY * this.teleportDistance);
+    
+    // Clamp to bounds
+    this.x = Math.max(0, Math.min(canvasWidth - this.width, targetX));
+    this.y = Math.max(0, Math.min(canvasHeight - this.height, targetY));
+    
+    // Set teleport state
+    this.isTeleporting = true;
+    this.teleportAnimationTimer = this.teleportAnimationDuration;
+    this.teleportCooldownTimer = this.teleportCooldown;
+    this.animationState = 'teleporting';
+    
+    logger.info(`✨ TELEPORT ACTIVATED! From (${Math.round(this.teleportStartX)}, ${Math.round(this.teleportStartY)}) to (${Math.round(this.x)}, ${Math.round(this.y)})`);
+  }
 
   public render(ctx: CanvasRenderingContext2D) {
     const state = this.movementSystem.getState();
+    
+    // Draw teleport effect if teleporting
+    if (this.isTeleporting) {
+      this.renderTeleportEffect(ctx);
+    }
     
     // Draw dash trail effect if dashing
     if (state.isDashing) {
@@ -407,6 +484,87 @@ export class Player {
   public canDash(): boolean {
     return this.movementSystem.getState().canDash;
   }
+  
+  public isTeleportingNow(): boolean {
+    return this.isTeleporting;
+  }
+  
+  public canTeleport(): boolean {
+    return this.teleportCooldownTimer <= 0 && !this.isTeleporting;
+  }
+  
+  public getTeleportCooldown(): number {
+    return Math.max(0, this.teleportCooldownTimer);
+  }
+  
+  public getTeleportCooldownPercent(): number {
+    return Math.max(0, Math.min(1, this.teleportCooldownTimer / this.teleportCooldown));
+  }
+  
+  private renderTeleportEffect(ctx: CanvasRenderingContext2D) {
+    // Calculate animation progress (0 = start, 1 = end)
+    const progress = 1 - (this.teleportAnimationTimer / this.teleportAnimationDuration);
+    
+    const centerX = this.x + this.width / 2;
+    const centerY = this.y + this.height / 2;
+    
+    ctx.save();
+    
+    // Cyan/blue spiral rings around the player (based on reference image)
+    const numRings = 4;
+    const maxRadius = 60;
+    const baseAlpha = 0.7 * (1 - progress); // Fade out as animation completes
+    
+    for (let i = 0; i < numRings; i++) {
+      const ringProgress = (progress * 2 + (i / numRings)) % 1;
+      const radius = maxRadius * ringProgress;
+      const alpha = baseAlpha * (1 - ringProgress);
+      
+      // Outer cyan ring
+      ctx.strokeStyle = `rgba(0, 255, 255, ${alpha})`;
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+      ctx.stroke();
+      
+      // Inner blue ring (slightly smaller)
+      ctx.strokeStyle = `rgba(64, 224, 255, ${alpha * 0.7})`;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, radius * 0.8, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+    
+    // Add horizontal scan lines for sci-fi effect
+    const scanLineCount = 8;
+    for (let i = 0; i < scanLineCount; i++) {
+      const scanProgress = (progress * 3 + (i / scanLineCount)) % 1;
+      const yOffset = (scanProgress - 0.5) * this.height * 2;
+      const scanAlpha = baseAlpha * 0.5 * (1 - Math.abs(scanProgress - 0.5) * 2);
+      
+      ctx.strokeStyle = `rgba(0, 255, 255, ${scanAlpha})`;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(centerX - this.width, centerY + yOffset);
+      ctx.lineTo(centerX + this.width, centerY + yOffset);
+      ctx.stroke();
+    }
+    
+    // Particle sparkles
+    const sparkleCount = 12;
+    for (let i = 0; i < sparkleCount; i++) {
+      const angle = (i / sparkleCount) * Math.PI * 2 + progress * Math.PI * 4;
+      const dist = 30 + Math.sin(progress * Math.PI * 2) * 10;
+      const x = centerX + Math.cos(angle) * dist;
+      const y = centerY + Math.sin(angle) * dist;
+      const size = 2 + Math.sin(progress * Math.PI * 2 + i) * 1;
+      
+      ctx.fillStyle = `rgba(0, 255, 255, ${baseAlpha * 0.8})`;
+      ctx.fillRect(x - size / 2, y - size / 2, size, size);
+    }
+    
+    ctx.restore();
+  }
 
   public reset(x: number, y: number) {
     this.x = x;
@@ -423,6 +581,11 @@ export class Player {
     this.animationState = 'idle';
     this.stateTimer = 0;
     this.previousSpeed = 0;
+    
+    // Reset teleport state
+    this.teleportCooldownTimer = 0;
+    this.isTeleporting = false;
+    this.teleportAnimationTimer = 0;
   }
 
   public resetMovementSystem() {
