@@ -5,6 +5,7 @@ import { DancingCactus, HazardConfig } from './DancingCactus';
 import { SpinningCactus } from './SpinningCactus';
 import { Manhole } from './Manhole';
 import { Alligator, ManholeSpawnPoint } from './Alligator';
+import { Necromancer, TombstonePosition } from './Necromancer';
 
 interface Cookie {
   x: number;
@@ -36,6 +37,7 @@ export class Level {
   private spinningCacti: SpinningCactus[] = [];
   private manholes: Manhole[] = [];
   private alligator: Alligator | null = null;
+  private necromancer: Necromancer | null = null;
   private finishLine: { x: number; y: number; width: number; height: number; } | null = null;
   private config: LevelConfig;
   private audioManager: any;
@@ -158,6 +160,19 @@ export class Level {
         this.config.cookies
       );
     }
+
+    // Initialize necromancer mini-boss if present in config
+    this.necromancer = null;
+    if ((this.config as any).miniBoss && (this.config as any).miniBoss.type === 'necromancer') {
+      const miniBossConfig = (this.config as any).miniBoss;
+      this.necromancer = new Necromancer(
+        miniBossConfig.position.x,
+        miniBossConfig.position.y,
+        miniBossConfig.tombstonePositions,
+        this.audioManager,
+        this.config.cookies
+      );
+    }
   }
 
   public update(deltaTime: number, playerX?: number, playerY?: number, cookiesCollected?: number) {
@@ -187,6 +202,13 @@ export class Level {
     if (this.alligator && cookiesCollected !== undefined) {
       this.alligator.updateCookieCount(cookiesCollected);
       this.alligator.update(deltaTime, playerX, playerY);
+    }
+
+    // Update necromancer mini-boss
+    if (this.necromancer && playerX !== undefined && playerY !== undefined && cookiesCollected !== undefined) {
+      this.necromancer.updateCookieCount(cookiesCollected);
+      this.necromancer.updatePlayerPosition(playerX, playerY);
+      this.necromancer.update(deltaTime);
     }
 
     // Check fireball collisions with enemies and cactus
@@ -228,6 +250,11 @@ export class Level {
     if (this.alligator) {
       this.alligator.render(ctx);
     }
+
+    // Render necromancer mini-boss (on top of everything)
+    if (this.necromancer) {
+      this.necromancer.render(ctx);
+    }
     
     // All level elements rendered
     
@@ -254,6 +281,7 @@ export class Level {
         this.renderSubwayBackground(ctx);
         break;
       case 4: // Graveyard
+      case 4.5: // Graveyard with Necromancer
         this.renderGraveyardBackground(ctx);
         break;
       case 5: // Government Lab
@@ -830,6 +858,46 @@ export class Level {
   public completeAlligatorIntro(): void {
     if (this.alligator) {
       this.alligator.completeIntro();
+    }
+  }
+
+  public checkNecromancerCollision(playerBounds: { x: number; y: number; width: number; height: number; }): boolean {
+    if (!this.necromancer) {
+      return false;
+    }
+    
+    // Check broom melee attack
+    const broomHit = this.necromancer.checkBroomCollision(
+      playerBounds.x,
+      playerBounds.y,
+      playerBounds.width,
+      playerBounds.height
+    );
+    
+    // Check ghost collisions
+    const ghostHit = this.necromancer.checkGhostCollisions(
+      playerBounds.x,
+      playerBounds.y,
+      playerBounds.width,
+      playerBounds.height
+    );
+    
+    return broomHit || (ghostHit !== null);
+  }
+
+  public getNecromancer(): Necromancer | null {
+    return this.necromancer;
+  }
+
+  public playNecromancerIntro(): void {
+    if (this.necromancer) {
+      this.necromancer.playIntroSequence();
+    }
+  }
+
+  public completeNecromancerIntro(): void {
+    if (this.necromancer) {
+      this.necromancer.completeIntro();
     }
   }
 

@@ -577,6 +577,21 @@ export class GameEngine {
       this.activeTimeouts.add(introTimeout);
     }
 
+    // Check if level has necromancer mini-boss and play intro sequence
+    const necromancer = this.currentLevel.getNecromancer();
+    if (necromancer) {
+      console.log('GameEngine: Level has necromancer mini-boss - playing intro sequence');
+      this.currentLevel.playNecromancerIntro();
+      
+      // Complete intro after dramatic pause (2-3 seconds)
+      const introTimeout = window.setTimeout(() => {
+        this.currentLevel.completeNecromancerIntro();
+        console.log('GameEngine: Necromancer intro complete - mini-boss now active');
+        this.activeTimeouts.delete(introTimeout);
+      }, 2500);
+      this.activeTimeouts.add(introTimeout);
+    }
+
     console.log(`GameEngine: Level ${this.gameState.level} initialized with ${this.gameState.totalCookies} cookies`);
   }
 
@@ -763,6 +778,17 @@ export class GameEngine {
       // Alligator is instant death
       this.audioManager.playHit();
       this.damageSystem.takeDamage('alligator', 999, {
+        x: playerBounds.x,
+        y: playerBounds.y
+      });
+      this.handleGameOver();
+    }
+
+    // Check necromancer mini-boss collision (ONE-HIT KILL - unless dashing!)
+    if (!this.player.isDashing() && this.currentLevel.checkNecromancerCollision(playerBounds)) {
+      // Necromancer attacks and ghosts are instant death
+      this.audioManager.playHit();
+      this.damageSystem.takeDamage('necromancer', 999, {
         x: playerBounds.x,
         y: playerBounds.y
       });

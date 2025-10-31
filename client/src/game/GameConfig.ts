@@ -114,7 +114,7 @@ export const GAME_CONFIG = {
   },
 
   // Level Progression Sequence
-  LEVEL_SEQUENCE: [1, 1.5, 1.75, 2, 2.5, 2.75, 3, 4, 5] as const,
+  LEVEL_SEQUENCE: [1, 1.5, 1.75, 2, 2.5, 2.75, 3, 4, 4.5, 5] as const,
 
   // Animation Configuration
   ANIMATION: {
@@ -303,6 +303,28 @@ export const LEVEL_CONFIGS = {
     description: 'Crooked tombstones, mist, dead trees',
     hazards: []
   },
+  4.5: {
+    background: '#2F2F2F',
+    fbiAgents: 6,
+    armyMen: 0,
+    radioactiveRats: 8,
+    zombies: 4,
+    cookies: 14,
+    title: 'Level 4-2: Necromancer\'s Curse',
+    description: 'An evil witch haunts the graveyard! She summons ghosts and swings her broom!',
+    hazards: [],
+    miniBoss: {
+      type: 'necromancer',
+      position: { x: 400, y: 100 },
+      tombstonePositions: [
+        { x: 80, y: 400 },
+        { x: 200, y: 380 },
+        { x: 350, y: 410 },
+        { x: 500, y: 390 },
+        { x: 650, y: 420 }
+      ]
+    }
+  },
   5: {
     background: '#1C1C1C',
     fbiAgents: 6,
@@ -357,6 +379,11 @@ export const CUTSCENE_DATA = {
     levelNumber: 4,
     title: "Level 4: Graveyard of the Fallen", 
     description: "Government experiments created unholy abominations.\nZombies shamble between crooked tombstones.\nMist swirls as the undead hunt for fresh victims."
+  },
+  4.5: {
+    levelNumber: 4.5,
+    title: "Level 4-2: NECROMANCER'S CURSE",
+    description: "A wicked witch haunts this graveyard!\n\nShe summons vengeful ghosts from graves!\nHer broom strike is deadly if you get too close!\n\nGhosts chase you for a few seconds - dash to escape!\nIf a ghost catches you - ONE HIT KILL!\n\nBeware her dark magic and stay alert!"
   },
   5: {
     levelNumber: 5,
