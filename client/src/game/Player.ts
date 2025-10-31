@@ -18,6 +18,7 @@ class PlayerSpriteColors {
 
 import { InputManager } from './InputManager';
 import { MovementSystem } from './MovementSystem';
+import { BubbleShield } from './BubbleShield';
 import { logger } from './Logger';
 
 export class Player {
@@ -50,11 +51,18 @@ export class Player {
   private teleportStartX: number = 0;
   private teleportStartY: number = 0;
   private teleportPhase: 'fadeOut' | 'fadeIn' = 'fadeOut';
+  
+  // Weapon X - Bubble Shield system
+  private weaponXUnlocked: boolean = false;
+  private bubbleShield: BubbleShield;
+  private weaponXMessageTimer: number = 0;
+  private weaponXMessageDuration: number = 3000; // Show message for 3 seconds
 
   constructor(x: number, y: number) {
     this.x = x;
     this.y = y;
     this.movementSystem = new MovementSystem();
+    this.bubbleShield = new BubbleShield();
     // Configure for faster, more responsive gameplay
     this.movementSystem.configure({
       baseSpeed: 6,
@@ -68,6 +76,14 @@ export class Player {
   }
 
   public update(inputManager: InputManager, deltaTime: number, canvasWidth: number, canvasHeight: number) {
+    // Update Weapon X message timer
+    if (this.weaponXMessageTimer > 0) {
+      this.weaponXMessageTimer -= deltaTime * 1000;
+    }
+    
+    // Update bubble shield
+    this.bubbleShield.update(deltaTime);
+    
     // Update teleport cooldown
     if (this.teleportCooldownTimer > 0) {
       this.teleportCooldownTimer -= deltaTime;
@@ -82,6 +98,12 @@ export class Player {
       }
       // Don't process other inputs during teleport animation
       return;
+    }
+    
+    // Check for Weapon X bubble shield activation (X key)
+    const isXPressed = inputManager.isKeyPressed('x') || inputManager.isKeyPressed('X');
+    if (isXPressed && this.weaponXUnlocked) {
+      this.bubbleShield.activate();
     }
     
     // Get input direction
@@ -178,6 +200,9 @@ export class Player {
       this.renderTeleportEffect(ctx);
     }
     
+    // Draw bubble shield first (so it appears behind player)
+    this.bubbleShield.render(ctx, this.x, this.y);
+    
     // Draw dash trail effect if dashing
     if (state.isDashing) {
       ctx.save();
@@ -229,6 +254,11 @@ export class Player {
     this.renderSpriteTransformed(ctx, spritePixels);
     
     ctx.restore();
+    
+    // Render Weapon X unlock message
+    if (this.weaponXMessageTimer > 0) {
+      this.renderWeaponXMessage(ctx);
+    }
   }
 
   private getCurrentSpriteFrame(): number[][] {
@@ -665,5 +695,47 @@ export class Player {
     this.animationState = 'idle';
     this.stateTimer = 0;
     this.previousSpeed = 0;
+  }
+  
+  public unlockWeaponX(): void {
+    if (!this.weaponXUnlocked) {
+      this.weaponXUnlocked = true;
+      this.weaponXMessageTimer = this.weaponXMessageDuration;
+      logger.info('🔴 WEAPON X UNLOCKED! Press X to activate Bubble Shield!');
+    }
+  }
+  
+  public isWeaponXUnlocked(): boolean {
+    return this.weaponXUnlocked;
+  }
+  
+  public getBubbleShield(): BubbleShield {
+    return this.bubbleShield;
+  }
+  
+  private renderWeaponXMessage(ctx: CanvasRenderingContext2D): void {
+    ctx.save();
+    
+    const alpha = Math.min(1, this.weaponXMessageTimer / 500);
+    ctx.globalAlpha = alpha;
+    
+    const centerX = this.x + this.width / 2;
+    const messageY = this.y - 40;
+    
+    ctx.font = 'bold 16px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 4;
+    ctx.strokeText("You've found 'Weapon X'", centerX, messageY);
+    ctx.strokeText("Press X to use", centerX, messageY + 20);
+    
+    ctx.fillStyle = '#00ff00';
+    ctx.fillText("You've found 'Weapon X'", centerX, messageY);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText("Press X to use", centerX, messageY + 20);
+    
+    ctx.restore();
   }
 }
