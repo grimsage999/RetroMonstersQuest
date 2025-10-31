@@ -367,27 +367,159 @@ export class Level {
   }
 
   private renderDesertBackground(ctx: CanvasRenderingContext2D) {
-    // PERFORMANCE FIX: Use solid colors instead of gradients
-    ctx.fillStyle = '#FF8C42'; // Warm orange sky
-    ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight * 0.7);
+    // Enhanced desert sunset with layered atmosphere
+    // Sky layers - sunset gradient using horizontal bands for performance
+    const skyLayers = [
+      { color: '#1A0F3D', height: 0.15 },      // Deep purple top
+      { color: '#2D1B4E', height: 0.08 },      // Purple
+      { color: '#FF6B35', height: 0.12 },      // Orange-red
+      { color: '#FF8C42', height: 0.15 },      // Bright orange
+      { color: '#FFAA64', height: 0.15 },      // Light orange
+      { color: '#FFD4A3', height: 0.05 }       // Horizon glow
+    ];
     
-    // Simple sun (NO SHADOW BLUR - extremely expensive!)
+    let currentY = 0;
+    skyLayers.forEach(layer => {
+      ctx.fillStyle = layer.color;
+      const bandHeight = this.canvasHeight * layer.height;
+      ctx.fillRect(0, currentY, this.canvasWidth, bandHeight);
+      currentY += bandHeight;
+    });
+    
+    // Stars in upper sky
+    ctx.fillStyle = '#FFFFFF';
+    for (let i = 0; i < 12; i++) {
+      const x = (i * this.canvasWidth / 12) + Math.sin(i) * 40;
+      const y = (i * this.canvasHeight * 0.04) + 15;
+      const size = (i % 3 === 0) ? 3 : 2;
+      ctx.fillRect(x, y, size, size);
+    }
+    
+    // Enhanced sun with rays
+    const sunX = this.canvasWidth * 0.82;
+    const sunY = this.canvasHeight * 0.25;
+    const sunRadius = 40;
+    
+    // Sun rays (simple lines, no blur)
+    ctx.strokeStyle = '#FFD700';
+    ctx.lineWidth = 2;
+    ctx.globalAlpha = 0.3;
+    for (let i = 0; i < 12; i++) {
+      const angle = (i * Math.PI * 2) / 12;
+      ctx.beginPath();
+      ctx.moveTo(sunX + Math.cos(angle) * sunRadius, sunY + Math.sin(angle) * sunRadius);
+      ctx.lineTo(sunX + Math.cos(angle) * (sunRadius + 25), sunY + Math.sin(angle) * (sunRadius + 25));
+      ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+    
+    // Sun glow layers (no blur, just concentric circles with alpha)
+    ctx.globalAlpha = 0.15;
+    ctx.fillStyle = '#FFE55C';
+    ctx.beginPath();
+    ctx.arc(sunX, sunY, sunRadius + 15, 0, 2 * Math.PI);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+    
+    // Main sun
     ctx.fillStyle = '#FFD700';
     ctx.beginPath();
-    ctx.arc(this.canvasWidth * 0.8, this.canvasHeight * 0.2, 32, 0, 2 * Math.PI);
+    ctx.arc(sunX, sunY, sunRadius, 0, 2 * Math.PI);
     ctx.fill();
     
-    // Desert sand - solid color
-    ctx.fillStyle = '#DEB887';
+    // Distant mountain range (darkest, furthest)
+    ctx.fillStyle = '#3D2E5C';
+    ctx.beginPath();
+    ctx.moveTo(0, this.canvasHeight * 0.55);
+    ctx.lineTo(this.canvasWidth * 0.15, this.canvasHeight * 0.48);
+    ctx.lineTo(this.canvasWidth * 0.25, this.canvasHeight * 0.52);
+    ctx.lineTo(this.canvasWidth * 0.40, this.canvasHeight * 0.45);
+    ctx.lineTo(this.canvasWidth * 0.55, this.canvasHeight * 0.50);
+    ctx.lineTo(this.canvasWidth * 0.70, this.canvasHeight * 0.47);
+    ctx.lineTo(this.canvasWidth * 0.85, this.canvasHeight * 0.53);
+    ctx.lineTo(this.canvasWidth, this.canvasHeight * 0.49);
+    ctx.lineTo(this.canvasWidth, this.canvasHeight * 0.7);
+    ctx.lineTo(0, this.canvasHeight * 0.7);
+    ctx.closePath();
+    ctx.fill();
+    
+    // Mid-distance mountain range (lighter)
+    ctx.fillStyle = '#6B4E71';
+    ctx.beginPath();
+    ctx.moveTo(0, this.canvasHeight * 0.60);
+    ctx.lineTo(this.canvasWidth * 0.20, this.canvasHeight * 0.53);
+    ctx.lineTo(this.canvasWidth * 0.35, this.canvasHeight * 0.58);
+    ctx.lineTo(this.canvasWidth * 0.50, this.canvasHeight * 0.52);
+    ctx.lineTo(this.canvasWidth * 0.65, this.canvasHeight * 0.56);
+    ctx.lineTo(this.canvasWidth * 0.80, this.canvasHeight * 0.54);
+    ctx.lineTo(this.canvasWidth, this.canvasHeight * 0.59);
+    ctx.lineTo(this.canvasWidth, this.canvasHeight * 0.7);
+    ctx.lineTo(0, this.canvasHeight * 0.7);
+    ctx.closePath();
+    ctx.fill();
+    
+    // Desert rock formations (mesas/buttes)
+    ctx.fillStyle = '#8B6914';
+    // Left mesa
+    ctx.fillRect(this.canvasWidth * 0.05, this.canvasHeight * 0.60, 60, this.canvasHeight * 0.1);
+    ctx.fillRect(this.canvasWidth * 0.05 + 10, this.canvasHeight * 0.56, 40, this.canvasHeight * 0.04);
+    
+    // Right rock formation
+    ctx.fillRect(this.canvasWidth * 0.75, this.canvasHeight * 0.62, 70, this.canvasHeight * 0.08);
+    ctx.fillRect(this.canvasWidth * 0.75 + 15, this.canvasHeight * 0.58, 40, this.canvasHeight * 0.04);
+    
+    // Desert sand/ground - textured layers
+    ctx.fillStyle = '#E6B87D'; // Light sand
     ctx.fillRect(0, this.canvasHeight * 0.7, this.canvasWidth, this.canvasHeight * 0.3);
     
-    // Simple stars - no animation
-    ctx.fillStyle = '#FFFF99';
+    // Sand texture (darker streaks)
+    ctx.fillStyle = '#D4A574';
+    ctx.globalAlpha = 0.3;
     for (let i = 0; i < 8; i++) {
-      const x = (i * this.canvasWidth / 8) + Math.sin(i) * 50;
-      const y = (i * this.canvasHeight * 0.05) + 20;
-      ctx.fillRect(x, y, 2, 2);
+      const x = i * (this.canvasWidth / 8);
+      const w = this.canvasWidth / 10;
+      ctx.fillRect(x, this.canvasHeight * 0.7, w, this.canvasHeight * 0.3);
     }
+    ctx.globalAlpha = 1;
+    
+    // Darker sand shadow at base
+    ctx.fillStyle = '#C9A068';
+    ctx.fillRect(0, this.canvasHeight * 0.88, this.canvasWidth, this.canvasHeight * 0.12);
+    
+    // Desert cacti silhouettes
+    this.renderCactusSSilhouette(ctx, this.canvasWidth * 0.12, this.canvasHeight * 0.65, 1.2);
+    this.renderCactusSSilhouette(ctx, this.canvasWidth * 0.28, this.canvasHeight * 0.68, 0.9);
+    this.renderCactusSSilhouette(ctx, this.canvasWidth * 0.88, this.canvasHeight * 0.66, 1.0);
+    
+    // Desert rocks/boulders on ground
+    ctx.fillStyle = '#9B7043';
+    ctx.beginPath();
+    ctx.ellipse(this.canvasWidth * 0.15, this.canvasHeight * 0.75, 20, 12, 0, 0, 2 * Math.PI);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(this.canvasWidth * 0.45, this.canvasHeight * 0.82, 15, 10, 0, 0, 2 * Math.PI);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(this.canvasWidth * 0.72, this.canvasHeight * 0.78, 18, 11, 0, 0, 2 * Math.PI);
+    ctx.fill();
+  }
+  
+  private renderCactusSSilhouette(ctx: CanvasRenderingContext2D, x: number, y: number, scale: number) {
+    // Saguaro cactus silhouette in dark brown/purple
+    ctx.fillStyle = '#4A3C52';
+    const baseWidth = 12 * scale;
+    const baseHeight = 60 * scale;
+    
+    // Main trunk
+    ctx.fillRect(x - baseWidth / 2, y, baseWidth, baseHeight);
+    
+    // Left arm
+    ctx.fillRect(x - baseWidth * 2, y + baseHeight * 0.4, baseWidth * 0.8, baseHeight * 0.35);
+    ctx.fillRect(x - baseWidth * 2, y + baseHeight * 0.4, baseWidth * 0.8, -baseHeight * 0.25);
+    
+    // Right arm
+    ctx.fillRect(x + baseWidth * 0.7, y + baseHeight * 0.5, baseWidth * 0.8, baseHeight * 0.3);
+    ctx.fillRect(x + baseWidth * 0.7, y + baseHeight * 0.5, baseWidth * 0.8, -baseHeight * 0.2);
   }
 
   private renderCityBackground(ctx: CanvasRenderingContext2D) {
