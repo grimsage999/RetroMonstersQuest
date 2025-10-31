@@ -200,6 +200,15 @@ Changelog:
   - Styled with hover effects and tooltips for clear identification as dev utilities
   - Enables rapid testing and debugging across all 8 levels
   - Dev tools respect level transition flow with proper initialization and cutscenes
+- October 31, 2025. NYC Subway Manhole Visual Update:
+  - Redesigned manhole covers with NYC subway aesthetic (circular design)
+  - Added "NYC" text in center and "SUBWAY" text at bottom
+  - Decorative symbols arranged around the edge (◯, ■, ◇, △, etc.)
+  - Metallic blue-gray color scheme (#5A7D9A) with rust spots for realism
+  - Changed animation from split-in-half to smooth slide-to-the-right motion
+  - Orange glow effect appears around hole when opening (matches reference art)
+  - Dark circular hole with depth shadows revealed underneath
+  - Maintains existing collision detection and timing mechanics
 ```
 
 ## User Preferences
