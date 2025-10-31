@@ -114,7 +114,7 @@ export const GAME_CONFIG = {
   },
 
   // Level Progression Sequence
-  LEVEL_SEQUENCE: [1, 1.5, 1.75, 2, 2.5, 2.75, 3, 3.5, 4, 4.5, 5] as const,
+  LEVEL_SEQUENCE: [1, 1.5, 1.75, 2, 2.5, 2.75, 3, 3.5, 4, 4.5, 5, 5.5, 5.75] as const,
 
   // Animation Configuration
   ANIMATION: {
@@ -350,6 +350,29 @@ export const LEVEL_CONFIGS = {
     title: 'Level 5: Government Lab + Boss Cathedral',
     description: 'Sterile laboratory with dark secrets, then gothic cathedral boss arena',
     hazards: []
+  },
+  5.5: {
+    background: '#1C1C1C',
+    fbiAgents: 0,
+    armyMen: 0,
+    radioactiveRats: 0,
+    zombies: 0,
+    cookies: 8,
+    title: 'Level 5-2: Secret Laboratory',
+    description: 'An abandoned lab with a mysterious power source...',
+    hazards: [],
+    hasWeaponX: true
+  },
+  5.75: {
+    background: '#1C1C1C',
+    fbiAgents: 6,
+    armyMen: 4,
+    radioactiveRats: 8,
+    zombies: 6,
+    cookies: 18,
+    title: 'Level 5-3: Lab Combat Test',
+    description: 'Test your new Weapon X ability in combat!',
+    hazards: []
   }
 } as const;
 
@@ -410,5 +433,15 @@ export const CUTSCENE_DATA = {
     title: "Level 5: Government Lab",
     description: "The sterile facility hides dark secrets.\nInteract with lab equipment to uncover fragments.\nSomewhere here lies The Adjudicator...",
     weaponUnlocked: "🌟 COSMIC MASTERY 🌟\nCosmo reaches peak performance!\nUltimate speed and agility unlocked!"
+  },
+  5.5: {
+    levelNumber: 5.5,
+    title: "Level 5-2: SECRET LABORATORY",
+    description: "You've discovered a hidden research facility!\n\nThe lab is eerily quiet... no enemies in sight.\nIn the center of the room, a strange device glows with alien energy.\n\n🔴 NEW WEAPON DISCOVERED! 🔴\nInvestigate the red sphere to unlock 'Weapon X'!"
+  },
+  5.75: {
+    levelNumber: 5.75,
+    title: "Level 5-3: LAB COMBAT TEST",
+    description: "Time to test your new Weapon X ability!\n\n🛡️ Press X to activate BUBBLE SHIELD! 🛡️\nThe green bubble repels enemies and paralyzes them!\n\nUse it strategically - it has a cooldown!\nProtect yourself and collect cookies!"
   }
 } as const;
