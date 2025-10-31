@@ -57,11 +57,13 @@ export class Enemy {
   private animationFrame: number = 0;
   private animationTimer: number = 0;
   private active: boolean = true;
+  private id: string;
 
   constructor(x: number, y: number, type: EnemyType) {
     this.x = x;
     this.y = y;
     this.type = type;
+    this.id = `enemy_${type}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     
     switch (type) {
       case 'cia':
@@ -333,6 +335,10 @@ export class Enemy {
 
   public isActive(): boolean {
     return this.active;
+  }
+
+  public getId(): string {
+    return this.id;
   }
 
   private getZombieWalkFrame1() {

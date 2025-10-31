@@ -28,6 +28,7 @@ export class AlligatorBoss {
   private eatenEnemies: EatenEnemy[] = [];
   private mouthOpen: number = 0;
   private facingDirection: number = 1; // 1 = right, -1 = left
+  private swallowedThisCycle: string[] = []; // Track enemies eaten during current attack
 
   private readonly WARNING_DURATION = 1000;
   private readonly ATTACK_DURATION = 800;
@@ -126,7 +127,7 @@ export class AlligatorBoss {
     deltaTime: number, 
     playerX?: number, 
     playerY?: number,
-    enemies?: Array<{ getBounds(): { x: number; y: number; width: number; height: number }; isActive(): boolean; destroy(): void }>
+    enemies?: Array<{ getBounds(): { x: number; y: number; width: number; height: number }; isActive(): boolean; destroy(): void; getId?(): string }>
   ): void {
     if (!this.isIntroComplete) {
       return;
@@ -166,6 +167,7 @@ export class AlligatorBoss {
           this.attackType = this.selectAttackType();
           this.attackState = 'warning';
           this.stateTimer = 0;
+          this.swallowedThisCycle = []; // Reset swallowed enemies for new attack
           this.playAttackSound();
         }
         break;
@@ -195,9 +197,9 @@ export class AlligatorBoss {
           
           this.mouthOpen = Math.sin(this.stateTimer * 0.01) * 12;
         } else if (this.attackType === 'eat_and_spit') {
-          // Eat nearby enemies
+          // Eat nearby enemies - track which ones we actually swallow
           if (this.stateTimer < this.ATTACK_DURATION * 0.4 && enemies) {
-            enemies.forEach(enemy => {
+            enemies.forEach((enemy, index) => {
               if (enemy.isActive()) {
                 const bounds = enemy.getBounds();
                 const dx = bounds.x - this.x;
@@ -205,17 +207,21 @@ export class AlligatorBoss {
                 const distance = Math.sqrt(dx * dx + dy * dy);
                 
                 if (distance < this.EAT_RANGE) {
-                  enemy.destroy();
-                  this.playEatSound();
+                  const enemyId = enemy.getId?.() || `enemy_${index}_${Date.now()}`;
+                  // Only eat if not already swallowed this cycle
+                  if (!this.swallowedThisCycle.includes(enemyId)) {
+                    enemy.destroy();
+                    this.swallowedThisCycle.push(enemyId);
+                    this.playEatSound();
+                  }
                 }
               }
             });
           }
           
-          // Spit enemies toward player at halfway point
-          if (this.stateTimer > this.ATTACK_DURATION * 0.5 && this.stateTimer < this.ATTACK_DURATION * 0.6) {
-            const inactiveEnemies = enemies?.filter(e => !e.isActive()) || [];
-            const enemiesToSpit = Math.min(3, inactiveEnemies.length);
+          // Spit ONLY the enemies we swallowed this cycle
+          if (this.stateTimer > this.ATTACK_DURATION * 0.5 && this.stateTimer < this.ATTACK_DURATION * 0.6 && this.swallowedThisCycle.length > 0) {
+            const enemiesToSpit = Math.min(3, this.swallowedThisCycle.length);
             
             for (let i = 0; i < enemiesToSpit; i++) {
               const dx = this.playerX - (this.x + this.width / 2);
@@ -233,6 +239,8 @@ export class AlligatorBoss {
                 });
               }
             }
+            // Clear the swallowed list after spitting so we don't reuse them
+            this.swallowedThisCycle = [];
           }
         }
         
