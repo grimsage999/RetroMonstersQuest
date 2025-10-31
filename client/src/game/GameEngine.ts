@@ -894,7 +894,7 @@ export class GameEngine {
     if (this.transitionManager.isInTransition()) {
       // Render current level if available
       if (this.currentLevel) {
-        this.currentLevel.render(this.ctx);
+        this.currentLevel.render(this.ctx, this.gameState.cookiesCollected);
       }
       // Overlay transition effect
       this.transitionManager.render();
@@ -904,7 +904,7 @@ export class GameEngine {
     // Normal game rendering
     if (this.currentLevel) {
       // Render level background and objects
-      this.currentLevel.render(this.ctx);
+      this.currentLevel.render(this.ctx, this.gameState.cookiesCollected);
 
       // Render player with invincibility effect
       if (!this.damageSystem.shouldRenderInvincibility()) {

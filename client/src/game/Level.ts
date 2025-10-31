@@ -278,7 +278,7 @@ export class Level {
     });
   }
 
-  public render(ctx: CanvasRenderingContext2D) {
+  public render(ctx: CanvasRenderingContext2D, cookiesCollected: number = 0) {
     // Render background
     this.renderBackground(ctx);
     
@@ -326,8 +326,9 @@ export class Level {
     
     // All level elements rendered
     
-    // Render finish line
-    this.renderFinishLine(ctx);
+    // Render finish line with cookie collection status
+    const totalCookies = this.cookies.length;
+    this.renderFinishLine(ctx, cookiesCollected, totalCookies);
   }
 
   private renderBackground(ctx: CanvasRenderingContext2D) {
@@ -2014,11 +2015,13 @@ export class Level {
     ctx.restore();
   }
 
-  private renderFinishLine(ctx: CanvasRenderingContext2D) {
+  private renderFinishLine(ctx: CanvasRenderingContext2D, cookiesCollected: number = 0, totalCookies: number = 0) {
     if (!this.finishLine) return; // Guard against null finishLine
     
     ctx.save();
     ctx.imageSmoothingEnabled = false;
+    
+    const allCookiesCollected = cookiesCollected >= totalCookies;
     
     // Checkered finish line pattern (based on reference image)
     const tileSize = 16; // Larger tiles to match character scale
@@ -2028,7 +2031,8 @@ export class Level {
       [1,0,1,0,1,0,1,0,1,0,1,0,1],
     ];
     
-    const colors = ['#000000', '#ffffff']; // Black and white
+    // If cookies not collected, show red/black (locked), otherwise normal black/white
+    const colors = allCookiesCollected ? ['#000000', '#ffffff'] : ['#000000', '#ff0000'];
     
     // Draw checkered pattern
     for (let row = 0; row < pattern.length; row++) {
@@ -2044,13 +2048,24 @@ export class Level {
       }
     }
     
-    // Add "FINISH" text in pixel font style
-    ctx.fillStyle = '#ffff00';
-    ctx.shadowColor = '#ffff00';
-    ctx.shadowBlur = 2;
-    ctx.font = 'bold 8px monospace';
-    ctx.textAlign = 'center';
-    ctx.fillText('FINISH', this.finishLine.x + this.finishLine.width/2, this.finishLine.y + 12);
+    // Add text based on cookie collection status
+    if (allCookiesCollected) {
+      ctx.fillStyle = '#ffff00';
+      ctx.shadowColor = '#ffff00';
+      ctx.shadowBlur = 2;
+      ctx.font = 'bold 8px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('FINISH', this.finishLine.x + this.finishLine.width/2, this.finishLine.y + 12);
+    } else {
+      // Show locked indicator
+      ctx.fillStyle = '#ff0000';
+      ctx.shadowColor = '#ff0000';
+      ctx.shadowBlur = 2;
+      ctx.font = 'bold 8px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('LOCKED', this.finishLine.x + this.finishLine.width/2, this.finishLine.y + 12);
+      ctx.fillText(`${cookiesCollected}/${totalCookies}`, this.finishLine.x + this.finishLine.width/2, this.finishLine.y + 22);
+    }
     
     ctx.restore();
   }
