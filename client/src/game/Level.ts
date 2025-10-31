@@ -56,7 +56,8 @@ export class Level {
     // Validate canvas dimensions to prevent edge cases
     this.canvasWidth = Math.max(canvasWidth, 800);
     this.canvasHeight = Math.max(canvasHeight, 600);
-    this.config = this.levelConfigs[levelNumber as keyof typeof LEVEL_CONFIGS] || this.levelConfigs[1];
+    // Access level config using dynamic property access for decimal level numbers
+    this.config = (this.levelConfigs as Record<number, LevelConfig>)[levelNumber] || this.levelConfigs[1];
     this.audioManager = audioManager;
     
     this.initializeLevel();
