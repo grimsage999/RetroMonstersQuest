@@ -54,6 +54,8 @@ export class GameEngine {
   private frameCount: number = 0;
   private fpsTimer: number = 0;
   private currentFPS: number = 0;
+  private collisionChecks: number = 0;
+  private spatialGridEntities: number = 0;
 
   // Optimization systems
   private spatialGrid: SpatialGrid;
@@ -278,7 +280,13 @@ export class GameEngine {
    * Run diagnostic check
    */
   public runDiagnostic() {
-    const report = this.diagnosticSystem.runDiagnostic(this.gameState, this.currentFPS);
+    // Include spatial grid optimization metrics
+    const enhancedGameState = {
+      ...this.gameState,
+      spatialGridEntities: this.spatialGridEntities,
+      collisionChecks: this.collisionChecks
+    };
+    const report = this.diagnosticSystem.runDiagnostic(enhancedGameState as any, this.currentFPS);
     this.diagnosticSystem.logDiagnostic(report);
 
     // Auto-fix critical issues
@@ -690,8 +698,17 @@ export class GameEngine {
     const playerBounds = this.player.getBounds();
     if (!playerBounds) return;
 
+    // SPATIAL GRID OPTIMIZATION: Populate grid with all entities for O(k) collision detection
+    this.spatialGrid.clear();
+    this.currentLevel.populateSpatialGrid(this.spatialGrid);
+    
+    // Track spatial grid performance metrics
+    const gridStats = this.spatialGrid.getStats();
+    this.spatialGridEntities = gridStats.totalEntities;
+    this.collisionChecks = 0;
+
     // Check cookie collisions - Core feedback loop: Visual pop + audio crunch + brief screen flash
-    const collectedCookies = this.currentLevel.checkCookieCollisions(playerBounds);
+    const collectedCookies = this.currentLevel.checkCookieCollisions(playerBounds, this.spatialGrid);
     if (collectedCookies > 0) {
       this.gameState.cookiesCollected += collectedCookies;
       this.gameState.score += collectedCookies * 10;
@@ -722,7 +739,7 @@ export class GameEngine {
     }
 
     // Check enemy collisions with damage system (unless dashing - invulnerable!)
-    if (!this.player.isDashing() && this.currentLevel.checkEnemyCollisions(playerBounds)) {
+    if (!this.player.isDashing() && this.currentLevel.checkEnemyCollisions(playerBounds, this.spatialGrid)) {
       // Use damage system to handle hits properly
       const damageApplied = this.damageSystem.takeDamage('enemy', 1, {
         x: playerBounds.x,
@@ -743,7 +760,7 @@ export class GameEngine {
     }
 
     // Check hazard collisions (dancing cacti, etc.) with damage system (unless dashing!)
-    if (!this.player.isDashing() && this.currentLevel.checkHazardCollisions(playerBounds)) {
+    if (!this.player.isDashing() && this.currentLevel.checkHazardCollisions(playerBounds, this.spatialGrid)) {
       // Use damage system to handle hits from environmental hazards
       const damageApplied = this.damageSystem.takeDamage('hazard', 1, {
         x: playerBounds.x,

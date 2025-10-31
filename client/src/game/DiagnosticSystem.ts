@@ -28,6 +28,8 @@ export interface DiagnosticReport {
     playerHealth: number;
     level: number;
     fps: number;
+    spatialGridEntities?: number;
+    collisionChecks?: number;
   };
   issues: string[];
   warnings: string[];

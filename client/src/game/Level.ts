@@ -8,6 +8,7 @@ import { Manhole } from './Manhole';
 import { Alligator, ManholeSpawnPoint } from './Alligator';
 import { AlligatorBoss } from './AlligatorBoss';
 import { Necromancer, TombstonePosition } from './Necromancer';
+import { SpatialGrid } from './SpatialGrid';
 
 interface Cookie {
   x: number;
@@ -234,6 +235,47 @@ export class Level {
 
     // Check fireball collisions with enemies and cactus
     this.checkFireballCollisions();
+  }
+
+  /**
+   * SPATIAL GRID OPTIMIZATION: Populate the grid with all collidable entities
+   * This enables O(k) collision detection instead of O(n)
+   */
+  public populateSpatialGrid(grid: SpatialGrid): void {
+    // Insert all cookies
+    this.cookies.forEach(cookie => {
+      if (!cookie.collected) {
+        grid.insert(cookie, cookie.x, cookie.y, cookie.width, cookie.height);
+      }
+    });
+
+    // Insert all enemies
+    this.enemies.forEach(enemy => {
+      if (enemy.isActive()) {
+        const bounds = enemy.getBounds();
+        grid.insert(enemy, bounds.x, bounds.y, bounds.width, bounds.height);
+      }
+    });
+
+    // Insert all hazards
+    this.hazards.forEach(hazard => {
+      const bounds = hazard.getBounds();
+      grid.insert(hazard, bounds.x, bounds.y, bounds.width, bounds.height);
+    });
+
+    // Insert spinning cacti
+    this.spinningCacti.forEach(cactus => {
+      const bounds = cactus.getBounds();
+      grid.insert(cactus, bounds.x, bounds.y, bounds.width, bounds.height);
+    });
+
+    // Insert manholes
+    this.manholes.forEach(manhole => {
+      if (manhole.isDangerous()) {
+        const bounds = manhole.getBounds();
+        grid.insert(manhole, bounds.x, bounds.y, bounds.width, bounds.height);
+      }
+    });
   }
 
   public render(ctx: CanvasRenderingContext2D) {
@@ -829,11 +871,22 @@ export class Level {
     ctx.restore();
   }
 
-  public checkCookieCollisions(playerBounds: { x: number; y: number; width: number; height: number; }): number {
+  public checkCookieCollisions(
+    playerBounds: { x: number; y: number; width: number; height: number; },
+    grid: SpatialGrid
+  ): number {
     let collected = 0;
     
-    this.cookies.forEach(cookie => {
-      if (!cookie.collected && this.checkCollision(playerBounds, cookie)) {
+    // SPATIAL GRID OPTIMIZATION: Only check cookies near the player (O(k) instead of O(n))
+    const potentialCookies = grid.getPotentialCollisions(
+      playerBounds.x,
+      playerBounds.y,
+      playerBounds.width,
+      playerBounds.height
+    );
+    
+    potentialCookies.forEach((cookie: any) => {
+      if (cookie.collected !== undefined && !cookie.collected && this.checkCollision(playerBounds, cookie)) {
         cookie.collected = true;
         collected++;
       }
@@ -842,29 +895,57 @@ export class Level {
     return collected;
   }
 
-  public checkEnemyCollisions(playerBounds: { x: number; y: number; width: number; height: number; }): boolean {
-    return this.enemies.some(enemy => 
-      enemy.isActive() && this.checkCollision(playerBounds, enemy.getBounds())
+  public checkEnemyCollisions(
+    playerBounds: { x: number; y: number; width: number; height: number; },
+    grid: SpatialGrid
+  ): boolean {
+    // SPATIAL GRID OPTIMIZATION: Only check enemies near the player (O(k) instead of O(n))
+    const potentialEnemies = grid.getPotentialCollisions(
+      playerBounds.x,
+      playerBounds.y,
+      playerBounds.width,
+      playerBounds.height
     );
+    
+    return potentialEnemies.some((entity: any) => {
+      // Filter for Enemy objects only
+      if (entity.isActive && typeof entity.isActive === 'function' && entity.getBounds) {
+        return entity.isActive() && this.checkCollision(playerBounds, entity.getBounds());
+      }
+      return false;
+    });
   }
 
-  public checkHazardCollisions(playerBounds: { x: number; y: number; width: number; height: number; }): boolean {
-    // Check dancing cacti
-    const dancingCactusHit = this.hazards.some(hazard => 
-      this.checkCollision(playerBounds, hazard.getBounds())
+  public checkHazardCollisions(
+    playerBounds: { x: number; y: number; width: number; height: number; },
+    grid: SpatialGrid
+  ): boolean {
+    // SPATIAL GRID OPTIMIZATION: Only check hazards near the player (O(k) instead of O(n))
+    const potentialHazards = grid.getPotentialCollisions(
+      playerBounds.x,
+      playerBounds.y,
+      playerBounds.width,
+      playerBounds.height
     );
 
-    // Check spinning cacti (including fireballs)
-    const spinningCactusHit = this.spinningCacti.some(cactus =>
-      cactus.checkCollision(playerBounds.x, playerBounds.y, playerBounds.width, playerBounds.height)
-    );
+    // Check entities from spatial grid
+    const spatialHit = potentialHazards.some((entity: any) => {
+      // DancingCactus check
+      if (entity.getBounds && !entity.checkCollision && !entity.isDangerous) {
+        return this.checkCollision(playerBounds, entity.getBounds());
+      }
+      // SpinningCactus check (has checkCollision method)
+      if (entity.checkCollision && typeof entity.checkCollision === 'function') {
+        return entity.checkCollision(playerBounds.x, playerBounds.y, playerBounds.width, playerBounds.height);
+      }
+      // Manhole check (already filtered for dangerous in populateSpatialGrid)
+      if (entity.isDangerous && typeof entity.isDangerous === 'function' && entity.getBounds) {
+        return this.checkCollision(playerBounds, entity.getBounds());
+      }
+      return false;
+    });
 
-    // Check manholes (only dangerous when open)
-    const manholeHit = this.manholes.some(manhole =>
-      manhole.isDangerous() && this.checkCollision(playerBounds, manhole.getBounds())
-    );
-
-    return dancingCactusHit || spinningCactusHit || manholeHit;
+    return spatialHit;
   }
 
   public checkAlligatorCollision(playerBounds: { x: number; y: number; width: number; height: number; }): boolean {
