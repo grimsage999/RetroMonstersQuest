@@ -54,10 +54,39 @@ Preferred communication style: Simple, everyday language.
 ## Recent Changes
 
 ```
+- October 31, 2025. Level 4.5 "Necromancer's Curse" with Necromancer Mini-Boss:
+  - Created Ghost.ts class - ethereal projectiles that chase the player
+  - Created Necromancer.ts class - evil witch mini-boss that haunts the graveyard
+  - Added Level 4.5 configuration between Level 4 and Level 5
+  - Updated LEVEL_SEQUENCE: 1 → 1.5 → 1.75 → 2 → 2.5 → 2.75 → 3 → 4 → 4.5 → 5
+  - Necromancer positioned at center-top of graveyard (400, 100)
+  - **Attack patterns**: 
+    - Broom melee attack: Close-range swinging broom attack with animated swing
+    - Ghost summoning: Raises 2-3 ghosts from random tombstones (5 spawn points)
+  - **Ghost mechanics**:
+    - 5-second lifetime with fade-out effect in final second
+    - Homing behavior with smooth velocity blending
+    - Cyan ethereal appearance with glowing eyes and wispy trails
+    - ONE-HIT KILL if they catch the player
+  - **Attack frequency** (scales with cookie count):
+    - High cookies (>70%): 3.5-4.5 seconds between attacks
+    - Medium cookies (30-70%): 2.5-3.5 seconds between attacks
+    - Low cookies (<30%): 1.5-2.5 seconds between attacks
+  - ONE-HIT KILL mechanic - both broom and ghosts are instant death (dash provides invulnerability)
+  - **Audio system**: 
+    - Evil laugh intro (0.3x playback rate)
+    - Ghost summoning sound (0.5x playback rate)
+    - Broom swing sound (0.8x playback rate)
+  - **Visual design**: Dark witch with pointed hat, flowing robes, purple accents, pale green skin
+  - Purple channeling aura during ghost summoning (1 second warning)
+  - Collision detection for both melee range (100 pixels) and all active ghosts
+  - Introduction sequence: 2.5 second dramatic pause with evil laugh before attacks begin
+  - Level uses same graveyard backdrop/environment as Level 4
+  - Tombstone positions: (80, 400), (200, 380), (350, 410), (500, 390), (650, 420)
+
 - October 31, 2025. Level 2.75 "Grease Gator" with Alligator Mini-Boss - Enhanced:
   - Created Alligator.ts class - menacing mini-boss that hunts from manholes
   - Added Level 2.75 configuration between Level 2.5 and Level 3
-  - Updated LEVEL_SEQUENCE: 1 → 1.5 → 1.75 → 2 → 2.5 → 2.75 → 3 → 4 → 5
   - Alligator emerges from any manhole (5 spawn points) with humanoid design
   - Attack patterns: Bite and grab attacks with extending neck animation
   - **Neck Extension**: Animated neck extends ~35 pixels upward during attacks using sine wave motion
