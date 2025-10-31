@@ -222,9 +222,14 @@ export class GameEngine {
     });
 
     this.commandInputSystem.registerCommandExecutor(GameCommand.FIRE_SECONDARY, (cmd: InputCommand) => {
-      if (!cmd.pressed) return; // Only on key press, not release
-
-      // No secondary weapon in simplified game
+      // During gameplay, pass X key to InputManager for Weapon X bubble shield activation
+      if (this.stateManager.getCurrentPhase() === GamePhase.PLAYING) {
+        if (cmd.pressed) {
+          this.inputManager.handleKeyDown('x');
+        } else {
+          this.inputManager.handleKeyUp('x');
+        }
+      }
     });
 
     this.commandInputSystem.registerCommandExecutor(GameCommand.SKIP_CUTSCENE, (cmd: InputCommand) => {
@@ -688,9 +693,12 @@ export class GameEngine {
     if (this.gameState.cookiesCollected >= this.gameState.totalCookies) {
       const finishLine = this.currentLevel.getFinishLine();
       if (this.checkCollision(this.player.getBounds(), finishLine)) {
-        if (this.gameState.level >= 5) {
-          // Level 5: Complete when cookies collected (boss is optional/visual only)
-          // Final victory: Cosmic resistance successful, joy reclaimed
+        // Check if this is the final level in the sequence
+        const currentIndex = GAME_CONFIG.LEVEL_SEQUENCE.indexOf(this.gameState.level as any);
+        const isFinalLevel = currentIndex === GAME_CONFIG.LEVEL_SEQUENCE.length - 1;
+        
+        if (isFinalLevel) {
+          // Final level complete: Cosmic resistance successful, joy reclaimed
           this.gameState.phase = 'victory';
           this.audioManager.playVictoryFanfare();
           this.showVictorySequence();
