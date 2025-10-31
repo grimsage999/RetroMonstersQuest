@@ -334,29 +334,31 @@ export class Level {
     }
     ctx.globalAlpha = 1;
     
-    // Sleek pavement with grid pattern
+    // Sleek pavement
     ctx.fillStyle = '#483D8B'; // Dark slate blue
     ctx.fillRect(0, this.canvasHeight * 0.7, this.canvasWidth, this.canvasHeight * 0.3);
     
-    // Add grid lines for futuristic feel
-    ctx.strokeStyle = '#00CED1'; // Dark turquoise
-    ctx.lineWidth = 1;
-    ctx.globalAlpha = 0.4;
-    // Vertical lines
-    for (let x = 0; x < this.canvasWidth; x += 32) {
-      ctx.beginPath();
-      ctx.moveTo(x, this.canvasHeight * 0.7);
-      ctx.lineTo(x, this.canvasHeight);
-      ctx.stroke();
+    // Add grid lines for futuristic feel (only for level 2)
+    if (this.levelNumber === 2) {
+      ctx.strokeStyle = '#00CED1'; // Dark turquoise
+      ctx.lineWidth = 1;
+      ctx.globalAlpha = 0.4;
+      // Vertical lines
+      for (let x = 0; x < this.canvasWidth; x += 32) {
+        ctx.beginPath();
+        ctx.moveTo(x, this.canvasHeight * 0.7);
+        ctx.lineTo(x, this.canvasHeight);
+        ctx.stroke();
+      }
+      // Horizontal lines
+      for (let y = this.canvasHeight * 0.7; y < this.canvasHeight; y += 16) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(this.canvasWidth, y);
+        ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
     }
-    // Horizontal lines
-    for (let y = this.canvasHeight * 0.7; y < this.canvasHeight; y += 16) {
-      ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.lineTo(this.canvasWidth, y);
-      ctx.stroke();
-    }
-    ctx.globalAlpha = 1;
   }
 
   private renderSubwayBackground(ctx: CanvasRenderingContext2D) {
