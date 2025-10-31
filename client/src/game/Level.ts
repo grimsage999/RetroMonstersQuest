@@ -9,6 +9,7 @@ import { Alligator, ManholeSpawnPoint } from './Alligator';
 import { AlligatorBoss } from './AlligatorBoss';
 import { Necromancer, TombstonePosition } from './Necromancer';
 import { SpatialGrid } from './SpatialGrid';
+import { WeaponX } from './WeaponX';
 
 interface Cookie {
   x: number;
@@ -28,6 +29,7 @@ interface LevelConfig {
   title: string;
   description: string;
   hazards: readonly HazardConfig[];
+  hasWeaponX?: boolean;
 }
 
 export class Level {
@@ -42,6 +44,7 @@ export class Level {
   private alligator: Alligator | null = null;
   private alligatorBoss: AlligatorBoss | null = null;
   private necromancer: Necromancer | null = null;
+  private weaponX: WeaponX | null = null;
   private finishLine: { x: number; y: number; width: number; height: number; } | null = null;
   private config: LevelConfig;
   private audioManager: any;
@@ -189,6 +192,15 @@ export class Level {
         this.config.cookies
       );
     }
+
+    // Initialize Weapon X collectible if present in config
+    this.weaponX = null;
+    if (this.config.hasWeaponX) {
+      const centerX = this.canvasWidth / 2 - 12;
+      const centerY = this.canvasHeight / 2 - 12;
+      this.weaponX = new WeaponX(centerX, centerY);
+      logger.info(`Weapon X spawned at center: (${centerX}, ${centerY})`);
+    }
   }
 
   public update(deltaTime: number, playerX?: number, playerY?: number, cookiesCollected?: number) {
@@ -231,6 +243,11 @@ export class Level {
       this.necromancer.updateCookieCount(cookiesCollected);
       this.necromancer.updatePlayerPosition(playerX, playerY);
       this.necromancer.update(deltaTime);
+    }
+
+    // Update Weapon X
+    if (this.weaponX) {
+      this.weaponX.update(deltaTime);
     }
 
     // Check fireball collisions with enemies and cactus
@@ -303,6 +320,11 @@ export class Level {
         this.renderCookie(ctx, cookie);
       }
     });
+
+    // Render Weapon X (if present)
+    if (this.weaponX && !this.weaponX.isCollected()) {
+      this.weaponX.render(ctx);
+    }
     
     // Render enemies
     this.enemies.forEach(enemy => {
@@ -355,6 +377,8 @@ export class Level {
         this.renderGraveyardBackground(ctx);
         break;
       case 5: // Government Lab
+      case 5.5: // Secret Laboratory
+      case 5.75: // Lab Combat Test
         this.renderLabBackground(ctx);
         break;
       default:
@@ -2092,6 +2116,19 @@ export class Level {
     });
     
     return collected;
+  }
+
+  public checkWeaponXCollision(playerBounds: { x: number; y: number; width: number; height: number; }): boolean {
+    if (!this.weaponX || this.weaponX.isCollected()) {
+      return false;
+    }
+
+    if (this.weaponX.checkCollision(playerBounds.x, playerBounds.y, playerBounds.width, playerBounds.height)) {
+      this.weaponX.collect();
+      return true;
+    }
+
+    return false;
   }
 
   public checkEnemyCollisions(
