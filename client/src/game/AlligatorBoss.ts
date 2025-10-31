@@ -29,12 +29,15 @@ export class AlligatorBoss {
   private mouthOpen: number = 0;
   private facingDirection: number = 1; // 1 = right, -1 = left
   private swallowedThisCycle: string[] = []; // Track enemies eaten during current attack
+  private neckExtension: number = 0;
+  private headX: number = 0;
+  private headY: number = 0;
 
   private readonly WARNING_DURATION = 1000;
-  private readonly ATTACK_DURATION = 800;
+  private readonly ATTACK_DURATION = 1200;
   private readonly COOLDOWN_DURATION = 500;
-  private readonly MOVE_SPEED = 2.5;
-  private readonly BITE_RANGE = 80;
+  private readonly MOVE_SPEED = 1.5;
+  private readonly BITE_RANGE = 120;
   private readonly EAT_RANGE = 100;
 
   constructor(audioManager: any, totalCookies: number, startX: number = 400, startY: number = 350) {
@@ -185,14 +188,32 @@ export class AlligatorBoss {
 
       case 'attacking':
         if (this.attackType === 'bite') {
-          // Lunge toward player
+          // Move slowly toward player during bite
           const dx = this.playerX - (this.x + this.width / 2);
           const dy = this.playerY - (this.y + this.height / 2);
           const distance = Math.sqrt(dx * dx + dy * dy);
           
           if (distance > 0) {
-            this.velocityX = (dx / distance) * this.MOVE_SPEED * 3;
-            this.velocityY = (dy / distance) * this.MOVE_SPEED * 3;
+            this.velocityX = (dx / distance) * this.MOVE_SPEED * 0.8;
+            this.velocityY = (dy / distance) * this.MOVE_SPEED * 0.8;
+          }
+          
+          // Extend neck toward player
+          const attackProgress = Math.min(1, this.stateTimer / (this.ATTACK_DURATION * 0.7));
+          this.neckExtension = Math.sin(attackProgress * Math.PI) * 80;
+          
+          // Calculate head position
+          const baseHeadX = this.x + this.width / 2;
+          const baseHeadY = this.y + this.height / 2 - 20;
+          
+          if (distance > 0 && this.neckExtension > 0) {
+            const dirX = dx / distance;
+            const dirY = dy / distance;
+            this.headX = baseHeadX + dirX * this.neckExtension;
+            this.headY = baseHeadY + dirY * this.neckExtension;
+          } else {
+            this.headX = baseHeadX;
+            this.headY = baseHeadY;
           }
           
           this.mouthOpen = Math.sin(this.stateTimer * 0.01) * 12;
@@ -248,18 +269,21 @@ export class AlligatorBoss {
           this.attackState = 'cooldown';
           this.stateTimer = 0;
           this.mouthOpen = 0;
+          this.neckExtension = 0;
         }
         break;
 
       case 'cooldown':
         this.velocityX *= 0.85;
         this.velocityY *= 0.85;
+        this.neckExtension *= 0.8; // Retract neck
         
         if (this.stateTimer >= this.COOLDOWN_DURATION) {
           this.attackState = 'idle';
           this.stateTimer = 0;
           this.attackType = null;
           this.attackCooldown = this.getAttackCooldown();
+          this.neckExtension = 0;
         }
         break;
     }
@@ -359,6 +383,41 @@ export class AlligatorBoss {
       ctx.fillRect((41 + i * 2) * scale, 42 * scale, 2 * scale, 2 * scale);
     }
 
+    // Draw neck extension during bite attack
+    if (this.attackType === 'bite' && this.attackState === 'attacking' && this.neckExtension > 5) {
+      ctx.restore(); // Exit local transform
+      ctx.save();
+      ctx.imageSmoothingEnabled = false;
+      
+      const baseX = this.x + this.width / 2;
+      const baseY = this.y + this.height / 2 - 20;
+      
+      // Draw neck segments
+      const neckSegments = 4;
+      ctx.fillStyle = '#5A7D4A';
+      for (let i = 0; i < neckSegments; i++) {
+        const t = i / neckSegments;
+        const segmentX = baseX + (this.headX - baseX) * t;
+        const segmentY = baseY + (this.headY - baseY) * t;
+        const segmentWidth = 16 - (i * 2);
+        ctx.fillRect(segmentX - segmentWidth / 2, segmentY, segmentWidth, this.neckExtension / neckSegments + 2);
+        
+        // Belly on neck
+        ctx.fillStyle = '#E8D4A0';
+        ctx.fillRect(segmentX - (segmentWidth / 2 - 2), segmentY + 2, segmentWidth - 4, this.neckExtension / neckSegments - 2);
+        ctx.fillStyle = '#5A7D4A';
+      }
+      
+      ctx.restore();
+      ctx.save();
+      if (this.facingDirection === -1) {
+        ctx.translate(this.x + this.width, this.y);
+        ctx.scale(-1, 1);
+      } else {
+        ctx.translate(this.x, this.y);
+      }
+    }
+
     // Head
     ctx.fillStyle = '#4A5F3A';
     ctx.fillRect(10 * scale, 4 * scale, 30 * scale, 18 * scale);
@@ -416,13 +475,20 @@ export class AlligatorBoss {
       return false;
     }
 
-    const centerX = this.x + this.width / 2;
-    const centerY = this.y + this.height / 2;
+    // Use head position for bite attacks with neck extension
+    let checkX = this.x + this.width / 2;
+    let checkY = this.y + this.height / 2;
+    
+    if (this.attackType === 'bite' && this.neckExtension > 5) {
+      checkX = this.headX;
+      checkY = this.headY;
+    }
+
     const playerCenterX = playerX + playerSize / 2;
     const playerCenterY = playerY + playerSize / 2;
 
-    const dx = playerCenterX - centerX;
-    const dy = playerCenterY - centerY;
+    const dx = playerCenterX - checkX;
+    const dy = playerCenterY - checkY;
     const distance = Math.sqrt(dx * dx + dy * dy);
 
     return distance < this.BITE_RANGE;
