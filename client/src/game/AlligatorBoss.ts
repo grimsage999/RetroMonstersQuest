@@ -287,11 +287,11 @@ export class AlligatorBoss {
       const pulse = Math.sin(this.stateTimer * 0.01) * 0.3 + 0.7;
       ctx.fillStyle = `rgba(255, 50, 0, ${pulse * 0.3})`;
       ctx.beginPath();
-      ctx.arc(this.x + this.width / 2, this.y + this.height / 2, 40, 0, Math.PI * 2);
+      ctx.arc(this.x + this.width / 2, this.y + this.height / 2, 60, 0, Math.PI * 2);
       ctx.fill();
     }
 
-    // Render alligator body
+    // Render detailed pixel art alligator
     ctx.save();
     if (this.facingDirection === -1) {
       ctx.translate(this.x + this.width, this.y);
@@ -300,53 +300,112 @@ export class AlligatorBoss {
       ctx.translate(this.x, this.y);
     }
 
-    // Tank top (greasy look)
-    ctx.fillStyle = '#FFFFFF';
-    ctx.fillRect(10, 20, 40, 30);
-    
-    // Grease stains on tank top
-    ctx.fillStyle = '#8B7355';
-    ctx.fillRect(15, 25, 8, 6);
-    ctx.fillRect(28, 32, 10, 5);
-    ctx.fillRect(20, 40, 7, 4);
+    const scale = 2;
 
-    // Body
+    // Legs (humanoid stance)
     ctx.fillStyle = '#5A7D4A';
-    ctx.fillRect(5, 15, 50, 40);
+    ctx.fillRect(12 * scale, 42 * scale, 8 * scale, 18 * scale);
+    ctx.fillRect(30 * scale, 42 * scale, 8 * scale, 18 * scale);
     
-    // Belly
+    // Feet/claws
+    ctx.fillStyle = '#4A5F3A';
+    ctx.fillRect(10 * scale, 58 * scale, 12 * scale, 4 * scale);
+    ctx.fillRect(28 * scale, 58 * scale, 12 * scale, 4 * scale);
+    
+    // Claws on feet
+    ctx.fillStyle = '#FFFACD';
+    for (let i = 0; i < 3; i++) {
+      ctx.fillRect((11 + i * 3) * scale, 60 * scale, 2 * scale, 2 * scale);
+      ctx.fillRect((29 + i * 3) * scale, 60 * scale, 2 * scale, 2 * scale);
+    }
+
+    // Main body (green)
+    ctx.fillStyle = '#5A7D4A';
+    ctx.fillRect(8 * scale, 18 * scale, 34 * scale, 28 * scale);
+    
+    // Belly (beige/tan)
     ctx.fillStyle = '#E8D4A0';
-    ctx.fillRect(15, 25, 30, 25);
+    ctx.fillRect(14 * scale, 22 * scale, 22 * scale, 22 * scale);
+
+    // White tank top
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(12 * scale, 20 * scale, 26 * scale, 24 * scale);
+    
+    // Grease stains on tank top (brown/yellow)
+    ctx.fillStyle = '#8B7355';
+    ctx.fillRect(16 * scale, 24 * scale, 6 * scale, 4 * scale);
+    ctx.fillRect(26 * scale, 30 * scale, 8 * scale, 5 * scale);
+    ctx.fillRect(18 * scale, 36 * scale, 5 * scale, 3 * scale);
+    
+    // More stains
+    ctx.fillStyle = '#A0826D';
+    ctx.fillRect(22 * scale, 26 * scale, 4 * scale, 3 * scale);
+    ctx.fillRect(30 * scale, 38 * scale, 4 * scale, 4 * scale);
+
+    // Arms (humanoid)
+    ctx.fillStyle = '#5A7D4A';
+    ctx.fillRect(2 * scale, 24 * scale, 8 * scale, 16 * scale);
+    ctx.fillRect(40 * scale, 24 * scale, 8 * scale, 16 * scale);
+    
+    // Hands/claws
+    ctx.fillStyle = '#4A5F3A';
+    ctx.fillRect(2 * scale, 38 * scale, 8 * scale, 6 * scale);
+    ctx.fillRect(40 * scale, 38 * scale, 8 * scale, 6 * scale);
+    
+    // Claw details
+    ctx.fillStyle = '#FFFACD';
+    for (let i = 0; i < 3; i++) {
+      ctx.fillRect((3 + i * 2) * scale, 42 * scale, 2 * scale, 2 * scale);
+      ctx.fillRect((41 + i * 2) * scale, 42 * scale, 2 * scale, 2 * scale);
+    }
 
     // Head
     ctx.fillStyle = '#4A5F3A';
-    ctx.fillRect(45, 10, 35, 30);
+    ctx.fillRect(10 * scale, 4 * scale, 30 * scale, 18 * scale);
     
-    // Eyes
-    ctx.fillStyle = '#FF0000';
-    ctx.fillRect(52, 15, 8, 8);
-    ctx.fillRect(65, 15, 8, 8);
-
     // Snout
-    ctx.fillStyle = '#3A4F2A';
-    ctx.fillRect(75, 20, 15, 15);
+    ctx.fillStyle = '#5A7D4A';
+    ctx.fillRect(34 * scale, 10 * scale, 16 * scale, 10 * scale);
+    
+    // Nostrils
+    ctx.fillStyle = '#2A3F1A';
+    ctx.fillRect(44 * scale, 12 * scale, 3 * scale, 3 * scale);
+    ctx.fillRect(44 * scale, 16 * scale, 3 * scale, 3 * scale);
 
-    // Mouth/Teeth (open during bite)
-    if (this.attackType === 'bite' && this.attackState === 'attacking') {
-      ctx.fillStyle = '#000000';
-      ctx.fillRect(75, 28 + this.mouthOpen / 2, 15, 3 + this.mouthOpen);
-      
-      ctx.fillStyle = '#FFFFFF';
-      for (let i = 0; i < 4; i++) {
-        ctx.fillRect(76 + i * 3, 28 + this.mouthOpen / 2, 2, 4);
-        ctx.fillRect(76 + i * 3, 31 + this.mouthOpen, 2, 4);
+    // Eyes (red glowing)
+    ctx.fillStyle = '#FF0000';
+    ctx.fillRect(18 * scale, 8 * scale, 6 * scale, 6 * scale);
+    ctx.fillRect(28 * scale, 8 * scale, 6 * scale, 6 * scale);
+    
+    // Eye glow effect
+    ctx.fillStyle = '#FF6666';
+    ctx.fillRect(20 * scale, 10 * scale, 2 * scale, 2 * scale);
+    ctx.fillRect(30 * scale, 10 * scale, 2 * scale, 2 * scale);
+
+    // Mouth/Teeth
+    const mouthOffset = (this.attackType === 'bite' && this.attackState === 'attacking') ? this.mouthOpen : 0;
+    
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(36 * scale, (18 + mouthOffset / 4) * scale, 12 * scale, (2 + mouthOffset / 2) * scale);
+    
+    // Teeth
+    ctx.fillStyle = '#FFFFFF';
+    for (let i = 0; i < 5; i++) {
+      ctx.fillRect((37 + i * 2) * scale, (18 + mouthOffset / 4) * scale, 2 * scale, 3 * scale);
+      if (mouthOffset > 2) {
+        ctx.fillRect((37 + i * 2) * scale, (20 + mouthOffset / 2) * scale, 2 * scale, 3 * scale);
       }
     }
 
-    // Legs
-    ctx.fillStyle = '#5A7D4A';
-    ctx.fillRect(10, 50, 10, 15);
-    ctx.fillRect(40, 50, 10, 15);
+    // Scales texture on body
+    ctx.fillStyle = '#4A5F3A';
+    for (let y = 0; y < 3; y++) {
+      for (let x = 0; x < 4; x++) {
+        if ((x + y) % 2 === 0) {
+          ctx.fillRect((10 + x * 6) * scale, (20 + y * 6) * scale, 4 * scale, 4 * scale);
+        }
+      }
+    }
 
     ctx.restore();
     ctx.restore();

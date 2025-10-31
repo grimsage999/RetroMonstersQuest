@@ -303,6 +303,7 @@ export class Level {
         this.renderCityBackground(ctx);
         break;
       case 3: // Subway
+      case 3.5: // Sewer Boss (same subway background)
         this.renderSubwayBackground(ctx);
         break;
       case 4: // Graveyard
