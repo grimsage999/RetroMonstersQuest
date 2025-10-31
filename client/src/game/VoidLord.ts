@@ -428,95 +428,149 @@ export class VoidLord {
     const centerX = this.x + this.width / 2;
     const centerY = this.y + this.height / 2;
 
-    // Tentacles with wave animation
-    for (let i = 0; i < 8; i++) {
-      const angle = (i / 8) * Math.PI * 2;
+    // Void tendrils/hair emanating from the head
+    for (let i = 0; i < 12; i++) {
+      const angle = (i / 12) * Math.PI * 2 - Math.PI / 2;
       const waveOffset = Math.sin(this.tentacleWave + i * 0.5) * 15;
-      const tentacleLength = 50 + waveOffset;
+      const tendrilLength = 40 + waveOffset;
+      const startOffset = 35;
       
       ctx.strokeStyle = '#4B0082';
-      ctx.lineWidth = 6;
-      ctx.globalAlpha = 0.8;
+      ctx.lineWidth = 4 + Math.sin(i) * 2;
+      ctx.globalAlpha = 0.7;
       
       ctx.beginPath();
-      ctx.moveTo(centerX, centerY);
+      const startX = centerX + Math.cos(angle) * startOffset;
+      const startY = centerY - 15 + Math.sin(angle) * startOffset;
+      ctx.moveTo(startX, startY);
       
-      const endX = centerX + Math.cos(angle) * tentacleLength;
-      const endY = centerY + Math.sin(angle) * tentacleLength;
-      const controlX = centerX + Math.cos(angle + 0.3) * (tentacleLength * 0.7);
-      const controlY = centerY + Math.sin(angle + 0.3) * (tentacleLength * 0.7);
+      const endX = startX + Math.cos(angle) * tendrilLength;
+      const endY = startY + Math.sin(angle) * tendrilLength;
+      const controlX = startX + Math.cos(angle + 0.2) * (tendrilLength * 0.6);
+      const controlY = startY + Math.sin(angle + 0.2) * (tendrilLength * 0.6);
       
       ctx.quadraticCurveTo(controlX, controlY, endX, endY);
       ctx.stroke();
       
-      // Tentacle tips
+      // Wispy void energy at tendril tips
       ctx.fillStyle = '#8A2BE2';
+      ctx.globalAlpha = 0.5;
       ctx.beginPath();
-      ctx.arc(endX, endY, 4, 0, Math.PI * 2);
+      ctx.arc(endX, endY, 3, 0, Math.PI * 2);
       ctx.fill();
     }
     ctx.globalAlpha = 1;
 
-    // Main head/body - cosmic purple
-    ctx.fillStyle = '#4B0082';
-    ctx.beginPath();
-    ctx.arc(centerX, centerY, 45, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Darker inner core
+    // Humanoid head shape - main skull
     ctx.fillStyle = '#2E0854';
     ctx.beginPath();
-    ctx.arc(centerX, centerY, 35, 0, Math.PI * 2);
+    ctx.ellipse(centerX, centerY, 50, 55, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    // Cosmic details/spots
-    for (let i = 0; i < 12; i++) {
-      const angle = (i / 12) * Math.PI * 2;
-      const distance = 25 + Math.random() * 10;
+    // Shadowy face overlay
+    const faceGradient = ctx.createRadialGradient(centerX, centerY - 10, 20, centerX, centerY, 50);
+    faceGradient.addColorStop(0, '#1a0533');
+    faceGradient.addColorStop(1, '#4B0082');
+    ctx.fillStyle = faceGradient;
+    ctx.beginPath();
+    ctx.ellipse(centerX, centerY, 48, 53, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Void energy swirls on face
+    for (let i = 0; i < 8; i++) {
+      const angle = (i / 8) * Math.PI * 2 + this.auraRotation * 0.5;
+      const distance = 20 + Math.sin(this.tentacleWave + i) * 5;
       const spotX = centerX + Math.cos(angle) * distance;
       const spotY = centerY + Math.sin(angle) * distance;
       
-      ctx.fillStyle = '#8A2BE2';
-      ctx.globalAlpha = 0.4 + Math.random() * 0.3;
+      ctx.fillStyle = '#6B21A8';
+      ctx.globalAlpha = 0.3 + Math.sin(this.tentacleWave + i) * 0.2;
       ctx.beginPath();
-      ctx.arc(spotX, spotY, 2 + Math.random() * 2, 0, Math.PI * 2);
+      ctx.arc(spotX, spotY, 2, 0, Math.PI * 2);
       ctx.fill();
     }
     ctx.globalAlpha = 1;
+
+    // Menacing mouth/void opening
+    ctx.fillStyle = '#0a0015';
+    ctx.globalAlpha = 0.9;
+    ctx.beginPath();
+    ctx.ellipse(centerX, centerY + 20, 12, 8, 0, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Inner void glow in mouth
+    const mouthGlow = ctx.createRadialGradient(centerX, centerY + 20, 0, centerX, centerY + 20, 10);
+    mouthGlow.addColorStop(0, 'rgba(138, 43, 226, 0.6)');
+    mouthGlow.addColorStop(1, 'rgba(138, 43, 226, 0)');
+    ctx.fillStyle = mouthGlow;
+    ctx.beginPath();
+    ctx.ellipse(centerX, centerY + 20, 10, 6, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+
+    // Nose/face structure shadowing
+    ctx.fillStyle = 'rgba(10, 0, 21, 0.4)';
+    ctx.beginPath();
+    ctx.ellipse(centerX, centerY + 5, 8, 12, 0, 0, Math.PI * 2);
+    ctx.fill();
   }
 
   private renderEyes(ctx: CanvasRenderingContext2D): void {
     const centerX = this.x + this.width / 2;
-    const centerY = this.y + this.height / 2 - 10;
+    const centerY = this.y + this.height / 2 - 15;
 
-    // Eye positions
+    // Eye positions - more humanoid spacing
     const eyePositions = [
-      { x: centerX - 20, y: centerY },
-      { x: centerX + 20, y: centerY }
+      { x: centerX - 18, y: centerY },
+      { x: centerX + 18, y: centerY }
     ];
 
     eyePositions.forEach(eye => {
-      // Glowing red eye socket
-      const gradient = ctx.createRadialGradient(eye.x, eye.y, 5, eye.x, eye.y, 15);
-      gradient.addColorStop(0, `rgba(255, 0, 0, ${this.eyeGlow})`);
-      gradient.addColorStop(1, 'rgba(255, 0, 0, 0)');
+      // Dark eye socket
+      ctx.fillStyle = '#0a0015';
+      ctx.beginPath();
+      ctx.ellipse(eye.x, eye.y, 12, 10, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Intense glowing red aura
+      const outerGlow = ctx.createRadialGradient(eye.x, eye.y, 0, eye.x, eye.y, 20);
+      outerGlow.addColorStop(0, `rgba(255, 0, 0, ${this.eyeGlow * 0.8})`);
+      outerGlow.addColorStop(0.5, `rgba(255, 0, 0, ${this.eyeGlow * 0.4})`);
+      outerGlow.addColorStop(1, 'rgba(255, 0, 0, 0)');
       
-      ctx.fillStyle = gradient;
+      ctx.fillStyle = outerGlow;
       ctx.beginPath();
-      ctx.arc(eye.x, eye.y, 15, 0, Math.PI * 2);
+      ctx.arc(eye.x, eye.y, 20, 0, Math.PI * 2);
       ctx.fill();
 
-      // Eye itself
+      // Bright red eye core
       ctx.fillStyle = '#FF0000';
+      ctx.globalAlpha = 0.9 + this.eyeGlow * 0.1;
       ctx.beginPath();
-      ctx.arc(eye.x, eye.y, 8, 0, Math.PI * 2);
+      ctx.ellipse(eye.x, eye.y, 9, 8, 0, 0, Math.PI * 2);
       ctx.fill();
 
-      // Eye highlight
+      // Brighter inner core
+      ctx.fillStyle = '#FF3333';
+      ctx.beginPath();
+      ctx.ellipse(eye.x, eye.y, 6, 5, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Menacing eye highlight
       ctx.fillStyle = '#FF6666';
       ctx.beginPath();
-      ctx.arc(eye.x - 2, eye.y - 2, 3, 0, Math.PI * 2);
+      ctx.arc(eye.x - 2, eye.y - 2, 2.5, 0, Math.PI * 2);
       ctx.fill();
+      
+      ctx.globalAlpha = 1;
+
+      // Eye glare effect during attack states
+      if (this.state === 'warning' || this.state === 'attacking') {
+        ctx.fillStyle = `rgba(255, 100, 100, ${this.eyeGlow * 0.5})`;
+        ctx.beginPath();
+        ctx.arc(eye.x, eye.y, 11, 0, Math.PI * 2);
+        ctx.fill();
+      }
     });
   }
 

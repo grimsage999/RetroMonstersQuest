@@ -81,14 +81,31 @@ export class Ghost {
     ctx.save();
     ctx.globalAlpha = this.fadeAlpha * 0.8;
 
-    // Ghostly cyan glow color
-    const glowColor = '#00FFFF';
-    const darkColor = '#008B8B';
+    // Void ghost - purple/dark void colors
+    const glowColor = '#8A2BE2';
+    const darkColor = '#4B0082';
 
     // Floating animation offset
     const floatOffset = Math.sin(this.animationFrame * Math.PI / 2) * 3;
 
-    // Ghost body (wispy ethereal shape)
+    // Void energy glow
+    const voidGlow = ctx.createRadialGradient(
+      this.x + this.width / 2,
+      this.y + this.height / 2 + floatOffset,
+      0,
+      this.x + this.width / 2,
+      this.y + this.height / 2 + floatOffset,
+      this.width / 2
+    );
+    voidGlow.addColorStop(0, `rgba(138, 43, 226, ${this.fadeAlpha * 0.6})`);
+    voidGlow.addColorStop(0.7, `rgba(75, 0, 130, ${this.fadeAlpha * 0.3})`);
+    voidGlow.addColorStop(1, 'rgba(75, 0, 130, 0)');
+    ctx.fillStyle = voidGlow;
+    ctx.beginPath();
+    ctx.arc(this.x + this.width / 2, this.y + this.height / 2 + floatOffset, this.width / 2, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Ghost body (wispy void shape)
     ctx.fillStyle = glowColor;
     ctx.beginPath();
     ctx.ellipse(
@@ -102,7 +119,7 @@ export class Ghost {
     );
     ctx.fill();
 
-    // Dark ethereal core
+    // Dark void core
     ctx.fillStyle = darkColor;
     ctx.beginPath();
     ctx.ellipse(
@@ -116,12 +133,20 @@ export class Ghost {
     );
     ctx.fill();
 
-    // Glowing eyes
-    ctx.fillStyle = '#FFFFFF';
-    ctx.fillRect(this.x + 12, this.y + 12 + floatOffset, 4, 6);
-    ctx.fillRect(this.x + 24, this.y + 12 + floatOffset, 4, 6);
+    // Menacing red glowing eyes
+    ctx.fillStyle = '#FF0000';
+    ctx.globalAlpha = this.fadeAlpha * 0.9;
+    const eyeY = this.y + 12 + floatOffset;
+    ctx.fillRect(this.x + 12, eyeY, 4, 6);
+    ctx.fillRect(this.x + 24, eyeY, 4, 6);
+    
+    // Eye glow
+    ctx.fillStyle = '#FF6666';
+    ctx.globalAlpha = this.fadeAlpha * 0.5;
+    ctx.fillRect(this.x + 11, eyeY - 1, 6, 8);
+    ctx.fillRect(this.x + 23, eyeY - 1, 6, 8);
 
-    // Wispy tail trails
+    // Wispy void trails
     ctx.globalAlpha = this.fadeAlpha * 0.4;
     ctx.fillStyle = glowColor;
     for (let i = 0; i < 3; i++) {
