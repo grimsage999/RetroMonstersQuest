@@ -21,6 +21,8 @@ export class Fireball {
   private alive: boolean = true;
   private trailPositions: Array<{ x: number; y: number; alpha: number }> = [];
   private hitPlayer: boolean = false; // Track if fireball hit player this frame
+  private isChasing: boolean = false; // Tracks if fireball is actively chasing Cosmo (turns purple)
+  private chasingStartTime: number = 0; // When the chase started
 
   constructor(config: FireballConfig) {
     this.x = config.x;
@@ -47,6 +49,13 @@ export class Fireball {
     const playerCenterX = playerX + 24;
     const playerCenterY = playerY + 24;
     if (this.homing) {
+      // Mark as chasing once homing activates (changes color to purple)
+      if (!this.isChasing) {
+        this.isChasing = true;
+        this.chasingStartTime = Date.now();
+        logger.debug('🔥 Fireball now chasing Cosmo! Changing to PURPLE.');
+      }
+      
       const dx = playerCenterX - this.x; // Target center of player
       const dy = playerCenterY - this.y;
       const magnitude = Math.sqrt(dx * dx + dy * dy);
@@ -93,17 +102,28 @@ export class Fireball {
   public render(ctx: CanvasRenderingContext2D): void {
     if (!this.alive) return;
 
+    // Color scheme changes: RED when not chasing, PURPLE when chasing Cosmo
+    const isChasing = this.isChasing;
+
     // Draw trail
     this.trailPositions.forEach((trail, index) => {
       ctx.save();
       ctx.globalAlpha = trail.alpha * 0.6;
       const trailSize = this.size * (1 - index / 10);
       
-      // Outer glow
+      // Trail color matches fireball state
       const gradient = ctx.createRadialGradient(trail.x, trail.y, 0, trail.x, trail.y, trailSize);
-      gradient.addColorStop(0, '#FF6600');
-      gradient.addColorStop(0.5, '#FF3300');
-      gradient.addColorStop(1, 'rgba(255, 51, 0, 0)');
+      if (isChasing) {
+        // Purple trail when chasing
+        gradient.addColorStop(0, '#CC00FF');
+        gradient.addColorStop(0.5, '#9900CC');
+        gradient.addColorStop(1, 'rgba(153, 0, 204, 0)');
+      } else {
+        // Red trail initially
+        gradient.addColorStop(0, '#FF0000');
+        gradient.addColorStop(0.5, '#CC0000');
+        gradient.addColorStop(1, 'rgba(204, 0, 0, 0)');
+      }
       
       ctx.fillStyle = gradient;
       ctx.fillRect(trail.x - trailSize, trail.y - trailSize, trailSize * 2, trailSize * 2);
@@ -113,26 +133,49 @@ export class Fireball {
     // Draw main fireball
     ctx.save();
     
-    // Orange/yellow fireball
-    // Outer glow
-    const outerGlow = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size * 1.5);
-    outerGlow.addColorStop(0, '#FFAA00');
-    outerGlow.addColorStop(0.5, '#FF6600');
-    outerGlow.addColorStop(1, 'rgba(255, 102, 0, 0)');
-    
-    ctx.fillStyle = outerGlow;
-    ctx.fillRect(this.x - this.size * 1.5, this.y - this.size * 1.5, this.size * 3, this.size * 3);
-    
-    // Core fireball
-    const coreGradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size);
-    coreGradient.addColorStop(0, '#FFFF00');
-    coreGradient.addColorStop(0.5, '#FF9900');
-    coreGradient.addColorStop(1, '#FF3300');
-    
-    ctx.fillStyle = coreGradient;
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-    ctx.fill();
+    if (isChasing) {
+      // PURPLE fireball when chasing Cosmo
+      // Outer glow
+      const outerGlow = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size * 1.5);
+      outerGlow.addColorStop(0, '#FF00FF');
+      outerGlow.addColorStop(0.5, '#CC00FF');
+      outerGlow.addColorStop(1, 'rgba(204, 0, 255, 0)');
+      
+      ctx.fillStyle = outerGlow;
+      ctx.fillRect(this.x - this.size * 1.5, this.y - this.size * 1.5, this.size * 3, this.size * 3);
+      
+      // Core fireball - bright purple
+      const coreGradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size);
+      coreGradient.addColorStop(0, '#FFFFFF'); // White hot center
+      coreGradient.addColorStop(0.4, '#FF00FF'); // Bright magenta
+      coreGradient.addColorStop(1, '#9900FF'); // Deep purple
+      
+      ctx.fillStyle = coreGradient;
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+      ctx.fill();
+    } else {
+      // RED fireball initially (before chasing)
+      // Outer glow
+      const outerGlow = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size * 1.5);
+      outerGlow.addColorStop(0, '#FF6600');
+      outerGlow.addColorStop(0.5, '#FF0000');
+      outerGlow.addColorStop(1, 'rgba(255, 0, 0, 0)');
+      
+      ctx.fillStyle = outerGlow;
+      ctx.fillRect(this.x - this.size * 1.5, this.y - this.size * 1.5, this.size * 3, this.size * 3);
+      
+      // Core fireball - red/orange
+      const coreGradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size);
+      coreGradient.addColorStop(0, '#FFFF00'); // Yellow hot center
+      coreGradient.addColorStop(0.5, '#FF6600'); // Orange
+      coreGradient.addColorStop(1, '#FF0000'); // Red
+      
+      ctx.fillStyle = coreGradient;
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+      ctx.fill();
+    }
     
     ctx.restore();
   }
