@@ -1,3 +1,4 @@
+import { logger } from './Logger';
 /**
  * Diagnostic System for Cosmic Playground
  * Comprehensive health check for all game systems
@@ -299,28 +300,28 @@ export class DiagnosticSystem {
     console.group('System Health');
     Object.entries(report.systemHealth).forEach(([system, healthy]) => {
       const icon = healthy ? '✅' : '❌';
-      console.log(`${icon} ${system}: ${healthy ? 'OK' : 'FAILED'}`);
+      logger.info(`${icon} ${system}: ${healthy ? 'OK' : 'FAILED'}`);
     });
     console.groupEnd();
     
     console.group('Current State');
-    console.log('Game Phase:', report.currentState.gamePhase);
-    console.log('UI State:', report.currentState.uiState);
-    console.log('Transitioning:', report.currentState.isTransitioning);
-    console.log('Player Health:', report.currentState.playerHealth);
-    console.log('Level:', report.currentState.level);
-    console.log('FPS:', report.currentState.fps);
+    logger.info('Game Phase:', report.currentState.gamePhase);
+    logger.info('UI State:', report.currentState.uiState);
+    logger.info('Transitioning:', report.currentState.isTransitioning);
+    logger.info('Player Health:', report.currentState.playerHealth);
+    logger.info('Level:', report.currentState.level);
+    logger.info('FPS:', report.currentState.fps);
     console.groupEnd();
     
     if (report.issues.length > 0) {
       console.group('❌ Issues');
-      report.issues.forEach(issue => console.error(issue));
+      report.issues.forEach(issue => logger.error(issue));
       console.groupEnd();
     }
     
     if (report.warnings.length > 0) {
       console.group('⚠️ Warnings');
-      report.warnings.forEach(warning => console.warn(warning));
+      report.warnings.forEach(warning => logger.warn(warning));
       console.groupEnd();
     }
     

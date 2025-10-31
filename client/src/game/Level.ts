@@ -1,3 +1,4 @@
+import { logger } from './Logger';
 import { Enemy, EnemyType } from './Enemy';
 import { LEVEL_CONFIGS } from './GameConfig';
 import { OptimizedRenderer } from './OptimizedRenderer';
@@ -989,7 +990,7 @@ export class Level {
           const hit = this.checkCollision(fbBounds, enemyBounds);
 
           if (hit) {
-            console.log('Fireball hit enemy! Enemy destroyed.');
+            logger.info('Fireball hit enemy! Enemy destroyed.');
             fireball.kill();
             return false; // Remove enemy
           }
@@ -1002,7 +1003,7 @@ export class Level {
           const hit = this.checkCollision(fbBounds, cactusBounds);
 
           if (hit) {
-            console.log('Fireball hit cactus! Damage dealt.');
+            logger.info('Fireball hit cactus! Damage dealt.');
             fireball.kill();
             cactus.takeDamage(1);
           }

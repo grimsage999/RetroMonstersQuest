@@ -1,3 +1,4 @@
+import { logger } from './Logger';
 interface MovementConfig {
   baseSpeed: number;
   maxSpeed: number;
@@ -65,7 +66,7 @@ export class MovementSystem {
 
     // Handle dash
     if (isDashPressed && !this.isDashing && this.dashCooldownTimer <= 0 && (inputX !== 0 || inputY !== 0)) {
-      console.log(`🚀 DASH ACTIVATED! Speed: ${this.dashSpeed} px/frame`);
+      logger.info(`🚀 DASH ACTIVATED! Speed: ${this.dashSpeed} px/frame`);
       this.startDash(inputX, inputY);
     }
 

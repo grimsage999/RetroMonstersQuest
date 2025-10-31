@@ -1,3 +1,4 @@
+import { logger } from './Logger';
 /**
  * Command Input System - Addresses Issue 2: Input Event Isolation
  * 
@@ -160,7 +161,7 @@ export class CommandInputSystem {
       document.addEventListener('keydown', this.keyDownHandler);
       document.addEventListener('keyup', this.keyUpHandler);
     } catch (error) {
-      console.error('CommandInputSystem: Failed to add event listeners:', error);
+      logger.error('CommandInputSystem: Failed to add event listeners:', error);
       throw error; // Re-throw as this is critical for input functionality
     }
   }
@@ -193,7 +194,7 @@ export class CommandInputSystem {
           }
         }
       } catch (error) {
-        console.error('CommandInputSystem: Error capturing input:', error);
+        logger.error('CommandInputSystem: Error capturing input:', error);
       }
     }
   }
@@ -203,7 +204,7 @@ export class CommandInputSystem {
    */
   public setGamePhase(phase: GamePhase): void {
     if (this.currentGamePhase !== phase) {
-      console.log(`CommandInputSystem: Phase transition ${this.currentGamePhase} -> ${phase}`);
+      logger.info(`CommandInputSystem: Phase transition ${this.currentGamePhase} -> ${phase}`);
       this.currentGamePhase = phase;
       
       // Clear any queued events from previous phase
@@ -211,7 +212,7 @@ export class CommandInputSystem {
       this.eventQueue = [];
       
       if (oldQueueSize > 0) {
-        console.log(`CommandInputSystem: Cleared ${oldQueueSize} queued events for phase transition`);
+        logger.info(`CommandInputSystem: Cleared ${oldQueueSize} queued events for phase transition`);
       }
     }
   }
@@ -243,7 +244,7 @@ export class CommandInputSystem {
       for (const filter of filters) {
         if (filter.accepts(command)) {
           commandAccepted = true;
-          console.log(`Command ${command.command} accepted by ${filter.name} filter`);
+          logger.info(`Command ${command.command} accepted by ${filter.name} filter`);
           
           // Execute the command
           const executor = this.commandExecutors.get(command.command);
@@ -251,7 +252,7 @@ export class CommandInputSystem {
             try {
               executor(command);
             } catch (error) {
-              console.error(`Error executing command ${command.command}:`, error);
+              logger.error(`Error executing command ${command.command}:`, error);
             }
           }
           break;
@@ -259,7 +260,7 @@ export class CommandInputSystem {
       }
       
       if (!commandAccepted) {
-        console.log(`Command ${command.command} rejected in phase ${this.currentGamePhase}`);
+        logger.info(`Command ${command.command} rejected in phase ${this.currentGamePhase}`);
       }
     }
   }
@@ -329,7 +330,7 @@ export class CommandInputSystem {
    * Emergency reset - clear all queued input
    */
   public emergencyReset(): void {
-    console.warn('CommandInputSystem: Emergency reset initiated');
+    logger.warn('CommandInputSystem: Emergency reset initiated');
     this.eventQueue = [];
     this.commandHistory = [];
   }
@@ -348,9 +349,9 @@ export class CommandInputSystem {
         this.keyUpHandler = undefined;
       }
       
-      console.log('CommandInputSystem: Event listeners cleaned up');
+      logger.info('CommandInputSystem: Event listeners cleaned up');
     } catch (error) {
-      console.error('CommandInputSystem: Failed to cleanup event listeners:', error);
+      logger.error('CommandInputSystem: Failed to cleanup event listeners:', error);
       // Continue cleanup despite errors - set handlers to undefined anyway
       this.keyDownHandler = undefined;
       this.keyUpHandler = undefined;

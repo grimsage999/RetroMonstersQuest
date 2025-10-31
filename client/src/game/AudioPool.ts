@@ -1,3 +1,4 @@
+import { logger } from './Logger';
 /**
  * Audio Pool Manager for efficient sound effect playback
  * Reuses audio instances instead of creating new ones
@@ -36,7 +37,7 @@ export class AudioPool {
   play(name: string): void {
     const pool = this.pools.get(name);
     if (!pool) {
-      console.warn(`Sound '${name}' not found in audio pool`);
+      logger.warn(`Sound '${name}' not found in audio pool`);
       return;
     }
 
@@ -47,9 +48,9 @@ export class AudioPool {
         // Improved error handling for better debugging
         audio.play().catch(e => {
           if (e.name === 'NotAllowedError') {
-            console.log(`Audio autoplay prevented for '${name}' - user interaction required`);
+            logger.info(`Audio autoplay prevented for '${name}' - user interaction required`);
           } else {
-            console.error(`Error playing sound '${name}':`, e);
+            logger.error(`Error playing sound '${name}':`, e);
           }
         });
         return;
@@ -62,9 +63,9 @@ export class AudioPool {
     audio.volume = this.volume;
     audio.play().catch(e => {
       if (e.name === 'NotAllowedError') {
-        console.log(`Audio autoplay prevented for cloned '${name}' - user interaction required`);
+        logger.info(`Audio autoplay prevented for cloned '${name}' - user interaction required`);
       } else {
-        console.error(`Error playing cloned sound '${name}':`, e);
+        logger.error(`Error playing cloned sound '${name}':`, e);
       }
     });
   }

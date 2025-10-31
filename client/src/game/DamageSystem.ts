@@ -1,3 +1,4 @@
+import { logger } from './Logger';
 import { GAME_CONFIG } from './GameConfig';
 
 /**
@@ -41,7 +42,7 @@ export class DamageSystem {
 
     // Validate damage amount
     if (amount <= 0) {
-      console.warn(`Invalid damage amount: ${amount}`);
+      logger.warn(`Invalid damage amount: ${amount}`);
       return false;
     }
 
@@ -66,12 +67,12 @@ export class DamageSystem {
         this.damageHistory.shift();
       }
     } catch (error) {
-      console.error('DamageSystem: Error updating damage history:', error);
+      logger.error('DamageSystem: Error updating damage history:', error);
       // Fallback: at least record the damage event even if history fails
       this.lastDamageEvent = damageEvent;
     }
 
-    console.log(`Player took ${amount} damage from ${source}. Health: ${this.health}/${this.maxHealth}`);
+    logger.info(`Player took ${amount} damage from ${source}. Health: ${this.health}/${this.maxHealth}`);
 
     // Activate invincibility
     this.activateInvincibility();
@@ -84,17 +85,17 @@ export class DamageSystem {
       try {
         this.onDamage(this.health, this.maxHealth);
       } catch (error) {
-        console.error('DamageSystem: Error in onDamage callback:', error);
+        logger.error('DamageSystem: Error in onDamage callback:', error);
       }
     }
 
     // Check for death with error handling
     if (this.health <= 0 && this.onDeath) {
-      console.log('Player defeated!');
+      logger.info('Player defeated!');
       try {
         this.onDeath();
       } catch (error) {
-        console.error('DamageSystem: Error in onDeath callback:', error);
+        logger.error('DamageSystem: Error in onDeath callback:', error);
       }
     }
 
@@ -107,7 +108,7 @@ export class DamageSystem {
   private activateInvincibility(): void {
     this.isInvincible = true;
     this.invincibilityTimer = this.invincibilityDuration;
-    console.log(`Invincibility activated for ${this.invincibilityDuration}ms`);
+    logger.info(`Invincibility activated for ${this.invincibilityDuration}ms`);
   }
 
   /**
@@ -120,7 +121,7 @@ export class DamageSystem {
       if (this.invincibilityTimer <= 0) {
         this.isInvincible = false;
         this.invincibilityTimer = 0;
-        console.log('Invincibility expired');
+        logger.info('Invincibility expired');
       }
     }
 
@@ -156,7 +157,7 @@ export class DamageSystem {
     this.health = Math.min(this.maxHealth, this.health + amount);
     
     if (this.health > previousHealth) {
-      console.log(`Player healed ${this.health - previousHealth} HP. Health: ${this.health}/${this.maxHealth}`);
+      logger.info(`Player healed ${this.health - previousHealth} HP. Health: ${this.health}/${this.maxHealth}`);
       
       if (this.onDamage) {
         this.onDamage(this.health, this.maxHealth);
@@ -174,7 +175,7 @@ export class DamageSystem {
     this.flashTimer = 0;
     this.lastDamageEvent = null;
     this.damageHistory = [];
-    console.log(`Health reset to ${this.health}/${this.maxHealth}`);
+    logger.info(`Health reset to ${this.health}/${this.maxHealth}`);
   }
 
   /**

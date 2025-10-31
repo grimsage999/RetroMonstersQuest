@@ -1,3 +1,4 @@
+import { logger } from './Logger';
 /**
  * Frame Buffer Manager - Addresses Issue 1: State Transition Reliability
  * 
@@ -101,7 +102,7 @@ export class FrameBufferManager {
     try {
       renderOperation(this.ctx);
     } catch (error) {
-      console.error('Rendering error caught by FrameBufferManager:', error);
+      logger.error('Rendering error caught by FrameBufferManager:', error);
       // Attempt recovery by clearing and showing error state
       this.clearFrameBuffer();
       this.renderErrorState();
@@ -203,7 +204,7 @@ export class FrameBufferManager {
    * Force reset to clean state (emergency recovery)
    */
   public forceReset(): void {
-    console.warn('FrameBufferManager: Force reset initiated');
+    logger.warn('FrameBufferManager: Force reset initiated');
     this.currentState = RenderState.IDLE;
     this.clearFrameBuffer();
     this.frameMetrics = [];

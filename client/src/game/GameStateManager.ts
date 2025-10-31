@@ -1,3 +1,4 @@
+import { logger } from './Logger';
 /**
  * Centralized Game State Manager
  * Prevents UI layering issues and ensures clean state transitions
@@ -71,13 +72,13 @@ export class GameStateManager {
   transitionTo(newPhase: GamePhase): boolean {
     // Prevent transitions during ongoing transition
     if (this.transitionInProgress) {
-      console.warn(`Cannot transition to ${newPhase}: transition already in progress`);
+      logger.warn(`Cannot transition to ${newPhase}: transition already in progress`);
       return false;
     }
 
     // Validate transition
     if (!this.canTransitionTo(newPhase)) {
-      console.error(`Invalid state transition: ${this.currentPhase} -> ${newPhase}`);
+      logger.error(`Invalid state transition: ${this.currentPhase} -> ${newPhase}`);
       return false;
     }
 
@@ -93,13 +94,13 @@ export class GameStateManager {
     this.previousPhase = oldPhase;
     this.currentPhase = newPhase;
 
-    console.log(`Game state transition: ${oldPhase} -> ${newPhase}`);
+    logger.info(`Game state transition: ${oldPhase} -> ${newPhase}`);
 
     // Notify listeners after state is fully set
     try {
       this.notifyListeners();
     } catch (error) {
-      console.error('GameStateManager: Error notifying listeners:', error);
+      logger.error('GameStateManager: Error notifying listeners:', error);
     }
 
     // Reset transition flag after a brief delay (track timeout)
@@ -115,7 +116,7 @@ export class GameStateManager {
    * Force transition (use sparingly, only for error recovery)
    */
   forceTransitionTo(newPhase: GamePhase): void {
-    console.warn(`FORCE transitioning from ${this.currentPhase} to ${newPhase}`);
+    logger.warn(`FORCE transitioning from ${this.currentPhase} to ${newPhase}`);
     this.previousPhase = this.currentPhase;
     this.currentPhase = newPhase;
     this.transitionInProgress = false;

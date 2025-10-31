@@ -1,3 +1,4 @@
+import { logger } from './Logger';
 export class SoundGenerator {
   private audioContext: AudioContext | null = null;
 
@@ -5,7 +6,7 @@ export class SoundGenerator {
     try {
       this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
     } catch (error) {
-      console.log('Web Audio API not supported');
+      logger.debug('Web Audio API not supported');
     }
   }
 

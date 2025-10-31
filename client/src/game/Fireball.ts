@@ -1,3 +1,4 @@
+import { logger } from './Logger';
 export interface FireballConfig {
   x: number;
   y: number;
@@ -52,7 +53,7 @@ export class Fireball {
     // If fireball gets within 70 pixels of player, it's been "redirected"
     if (!this.redirected && distanceToPlayer < 70) {
       this.redirected = true;
-      console.log('Fireball redirected! Can now damage enemies/cactus.');
+      logger.debug('Fireball redirected! Can now damage enemies/cactus.');
     }
 
     // Homing behavior - slightly adjust direction toward player

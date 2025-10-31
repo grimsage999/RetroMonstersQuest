@@ -1,3 +1,4 @@
+import { logger } from './Logger';
 /**
  * UI State Controller
  * Manages all UI transitions with proper timing to prevent overlaps
@@ -40,7 +41,7 @@ export class UIStateController {
   ): void {
     // Atomic check and set to prevent race conditions
     if (this.isProcessing) {
-      console.log(`UIStateController: Queuing ${type} transition`);
+      logger.info(`UIStateController: Queuing ${type} transition`);
       // Use atomic operation to prevent race conditions
       const queuedTransition = () => this.executeTransition(type, callback, customDelay);
       this.transitionQueue.push(queuedTransition);
@@ -66,7 +67,7 @@ export class UIStateController {
     // Block input during transitions
     this.blockInputUntil = Date.now() + this.getTransitionDuration(type, customDelay);
     
-    console.log(`UIStateController: Starting ${type} transition`);
+    logger.info(`UIStateController: Starting ${type} transition`);
     
     // Add buffer before starting transition (track timeouts)
     try {
@@ -82,7 +83,7 @@ export class UIStateController {
           
           this.activeTimeouts.add(cleanupTimeout);
         } catch (error) {
-          console.error('UIStateController: Failed to create cleanup timeout:', error);
+          logger.error('UIStateController: Failed to create cleanup timeout:', error);
           // Fallback: complete transition immediately
           this.completeTransition();
         }
@@ -91,7 +92,7 @@ export class UIStateController {
       
       this.activeTimeouts.add(bufferTimeout);
     } catch (error) {
-      console.error('UIStateController: Failed to create buffer timeout:', error);
+      logger.error('UIStateController: Failed to create buffer timeout:', error);
       // Fallback: execute callback immediately
       callback();
       this.completeTransition();
@@ -122,7 +123,7 @@ export class UIStateController {
    * Complete current transition and process queue
    */
   private completeTransition(): void {
-    console.log(`UIStateController: Completed ${this.activeUI} transition`);
+    logger.info(`UIStateController: Completed ${this.activeUI} transition`);
     this.activeUI = 'none';
     this.isProcessing = false;
     
@@ -159,7 +160,7 @@ export class UIStateController {
    * Force clear all transitions (emergency reset)
    */
   public forceReset(): void {
-    console.warn('UIStateController: Force resetting all transitions');
+    logger.warn('UIStateController: Force resetting all transitions');
     
     // Clear all active timeouts to prevent memory leaks
     Array.from(this.activeTimeouts).forEach(timeout => {

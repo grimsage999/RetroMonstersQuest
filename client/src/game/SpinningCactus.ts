@@ -1,3 +1,4 @@
+import { logger } from './Logger';
 import { Fireball, FireballConfig } from './Fireball';
 
 export interface SpinningCactusConfig {
@@ -76,7 +77,7 @@ export class SpinningCactus {
     
     // Guard against division by zero (player exactly at cactus center)
     if (distance < 1) {
-      console.log('Player too close to cactus center, skipping fireball');
+      logger.debug('Player too close to cactus center, skipping fireball');
       return;
     }
     
@@ -195,11 +196,11 @@ export class SpinningCactus {
     if (!this.alive) return false;
     
     this.health -= damage;
-    console.log(`Spinning Cactus hit! Health: ${this.health}/5`);
+    logger.debug(`Spinning Cactus hit! Health: ${this.health}/5`);
     
     if (this.health <= 0) {
       this.alive = false;
-      console.log('Spinning Cactus destroyed!');
+      logger.debug('Spinning Cactus destroyed!');
       return true; // Return true if destroyed
     }
     return false;

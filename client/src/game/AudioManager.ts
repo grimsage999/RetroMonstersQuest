@@ -1,3 +1,4 @@
+import { logger } from './Logger';
 import { GAME_CONFIG } from './GameConfig';
 
 export class AudioManager {
@@ -68,7 +69,7 @@ export class AudioManager {
       Promise.all(loadPromises).then(() => {
         // All sounds loaded successfully
       }).catch(error => {
-        console.warn('AudioManager: Some sounds failed to load:', error);
+        logger.warn('AudioManager: Some sounds failed to load:', error);
       });
       
     } catch (error) {
@@ -85,7 +86,7 @@ export class AudioManager {
   public playBackgroundMusic() {
     if (this.backgroundMusic && !this.isMuted && this.isInitialized) {
       this.backgroundMusic.play().catch(error => {
-        console.log('Background music play prevented:', error);
+        logger.info('Background music play prevented:', error);
         // Disable background music to prevent repeated errors
         this.backgroundMusic = null;
       });
@@ -107,12 +108,12 @@ export class AudioManager {
         if (soundClone instanceof HTMLAudioElement) {
           soundClone.volume = 0.3;
           soundClone.play().catch(error => {
-            console.log('Hit sound play prevented:', error);
+            logger.info('Hit sound play prevented:', error);
             // Continue despite audio errors - don't break game flow
           });
         }
       } catch (error) {
-        console.error('Audio clone failed:', error);
+        logger.error('Audio clone failed:', error);
       }
     }
   }
@@ -121,7 +122,7 @@ export class AudioManager {
     if (this.successSound && !this.isMuted && this.isInitialized) {
       this.successSound.currentTime = 0;
       this.successSound.play().catch(error => {
-        console.log('Success sound play prevented:', error);
+        logger.info('Success sound play prevented:', error);
       });
     }
   }
@@ -135,11 +136,11 @@ export class AudioManager {
           soundClone.volume = 0.4;
           soundClone.playbackRate = 1.5; // Higher pitch for crunch
           soundClone.play().catch(error => {
-            console.log('Crunch sound play prevented:', error);
+            logger.info('Crunch sound play prevented:', error);
           });
         }
       } catch (error) {
-        console.error('Audio clone failed for crunch:', error);
+        logger.error('Audio clone failed for crunch:', error);
       }
     }
   }
@@ -153,11 +154,11 @@ export class AudioManager {
           soundClone.volume = 0.3;
           soundClone.playbackRate = 2.0; // Fast, zippy sound for dash
           soundClone.play().catch(error => {
-            console.log('Dash sound play prevented:', error);
+            logger.info('Dash sound play prevented:', error);
           });
         }
       } catch (error) {
-        console.error('Audio clone failed for dash:', error);
+        logger.error('Audio clone failed for dash:', error);
       }
     }
   }
@@ -171,11 +172,11 @@ export class AudioManager {
           soundClone.volume = 0.3;
           soundClone.playbackRate = 0.8; // Lower pitch for energy weapon
           soundClone.play().catch(error => {
-            console.log('Ray gun sound play prevented:', error);
+            logger.info('Ray gun sound play prevented:', error);
           });
         }
       } catch (error) {
-        console.error('Audio clone failed for ray gun:', error);
+        logger.error('Audio clone failed for ray gun:', error);
       }
     }
   }
@@ -189,11 +190,11 @@ export class AudioManager {
           soundClone.volume = 0.6;
           soundClone.playbackRate = 0.7; // Deep, powerful sound
           soundClone.play().catch(error => {
-            console.log('Adjudicator sound play prevented:', error);
+            logger.info('Adjudicator sound play prevented:', error);
           });
         }
       } catch (error) {
-        console.error('Audio clone failed for adjudicator:', error);
+        logger.error('Audio clone failed for adjudicator:', error);
       }
     }
   }
@@ -207,11 +208,11 @@ export class AudioManager {
           soundClone.volume = 0.8;
           soundClone.playbackRate = 1.2; // Triumphant tone
           soundClone.play().catch(error => {
-            console.log('Victory fanfare play prevented:', error);
+            logger.info('Victory fanfare play prevented:', error);
           });
         }
       } catch (error) {
-        console.error('Audio clone failed for victory fanfare:', error);
+        logger.error('Audio clone failed for victory fanfare:', error);
       }
     }
   }
@@ -225,11 +226,11 @@ export class AudioManager {
           soundClone.volume = 0.5;
           soundClone.playbackRate = 1.5; // Cheerful startup
           soundClone.play().catch(error => {
-            console.log('Game start sound play prevented:', error);
+            logger.info('Game start sound play prevented:', error);
           });
         }
       } catch (error) {
-        console.error('Audio clone failed for game start:', error);
+        logger.error('Audio clone failed for game start:', error);
       }
     }
   }
@@ -243,6 +244,6 @@ export class AudioManager {
       this.playBackgroundMusic();
     }
     
-    console.log(`Sound ${this.isMuted ? 'muted' : 'unmuted'}`);
+    logger.info(`Sound ${this.isMuted ? 'muted' : 'unmuted'}`);
   }
 }

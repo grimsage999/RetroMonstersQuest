@@ -1,3 +1,4 @@
+import { logger } from './Logger';
 export class InputManager {
   private keys: Set<string> = new Set();
 
@@ -17,7 +18,7 @@ export class InputManager {
     // Prevent race conditions by creating new set instead of clearing
     const oldSize = this.keys.size;
     if (oldSize > 0) {
-      console.log('InputManager: Clearing', oldSize, 'keys');
+      logger.debug('InputManager: Clearing', oldSize, 'keys');
     }
     
     // Atomic operation to prevent race conditions

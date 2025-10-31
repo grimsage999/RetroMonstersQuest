@@ -1,3 +1,4 @@
+import { logger } from './Logger';
 /**
  * Level Transition Manager
  * Handles smooth level transitions without lag or resets
@@ -46,7 +47,7 @@ export class LevelTransitionManager {
     onComplete: () => void
   ): Promise<void> {
     if (this.isTransitioning) {
-      console.warn('Transition already in progress');
+      logger.warn('Transition already in progress');
       return;
     }
 
@@ -61,7 +62,7 @@ export class LevelTransitionManager {
     try {
       await this.preloadLevelAssets(toLevel);
     } catch (error) {
-      console.warn('Failed to preload some level assets:', error);
+      logger.warn('Failed to preload some level assets:', error);
       // Continue anyway - game can still function without preloaded assets
     }
   }
@@ -84,7 +85,7 @@ export class LevelTransitionManager {
     // Simulate asset loading (with error handling)
     const promises = this.assetsToPreload.map(asset => 
       this.loadAsset(asset).catch(error => {
-        console.warn(`Failed to load asset ${asset}:`, error);
+        logger.warn(`Failed to load asset ${asset}:`, error);
         return Promise.resolve(); // Continue despite individual failures
       })
     );
@@ -98,7 +99,7 @@ export class LevelTransitionManager {
     return new Promise((resolve) => {
       // Simulate loading delay
       setTimeout(() => {
-        console.log(`Loaded asset: ${assetPath}`);
+        logger.info(`Loaded asset: ${assetPath}`);
         resolve();
       }, 100);
     });
@@ -131,7 +132,7 @@ export class LevelTransitionManager {
             try {
               this.onComplete();
             } catch (error) {
-              console.error('LevelTransitionManager: Error in onComplete callback:', error);
+              logger.error('LevelTransitionManager: Error in onComplete callback:', error);
               // Reset transition state to prevent being stuck
               this.isTransitioning = false;
               this.transitionPhase = 'complete';
@@ -244,7 +245,7 @@ export class LevelTransitionManager {
    */
   private cleanupPreviousLevel(): void {
     // Force garbage collection by nullifying references
-    console.log(`Cleaning up level ${this.currentLevel} resources`);
+    logger.info(`Cleaning up level ${this.currentLevel} resources`);
     
     // This would be called by the game engine to clean up:
     // - Enemy arrays
