@@ -186,7 +186,7 @@ export class Level {
     // Update alligator mini-boss
     if (this.alligator && cookiesCollected !== undefined) {
       this.alligator.updateCookieCount(cookiesCollected);
-      this.alligator.update(deltaTime);
+      this.alligator.update(deltaTime, playerX, playerY);
     }
 
     // Check fireball collisions with enemies and cactus

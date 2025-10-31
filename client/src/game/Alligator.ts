@@ -92,8 +92,22 @@ export class Alligator {
     }
   }
 
-  private selectRandomManhole(): number {
-    return Math.floor(Math.random() * this.manholePositions.length);
+  private selectNearestManhole(playerX: number, playerY: number): number {
+    let nearestIndex = 0;
+    let minDistance = Infinity;
+    
+    this.manholePositions.forEach((manhole, index) => {
+      const dx = (manhole.x + 24) - playerX;
+      const dy = (manhole.y + 24) - playerY;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      
+      if (distance < minDistance) {
+        minDistance = distance;
+        nearestIndex = index;
+      }
+    });
+    
+    return nearestIndex;
   }
 
   private selectRandomAttackType(): AttackType {
@@ -104,7 +118,7 @@ export class Alligator {
     return Math.random() < 0.5 ? 'bite' : 'grab';
   }
 
-  public update(deltaTime: number): void {
+  public update(deltaTime: number, playerX?: number, playerY?: number): void {
     if (!this.isIntroComplete) {
       return;
     }
@@ -124,7 +138,11 @@ export class Alligator {
       case 'idle':
         this.attackCooldown -= deltaTime;
         if (this.attackCooldown <= 0) {
-          this.currentManholeIndex = this.selectRandomManhole();
+          if (playerX !== undefined && playerY !== undefined) {
+            this.currentManholeIndex = this.selectNearestManhole(playerX, playerY);
+          } else {
+            this.currentManholeIndex = Math.floor(Math.random() * this.manholePositions.length);
+          }
           this.attackType = this.selectRandomAttackType();
           this.attackState = 'warning';
           this.stateTimer = 0;
