@@ -471,6 +471,26 @@ export class GameEngine {
     });
   }
 
+  // Dev tool: Jump to a specific level instantly
+  public jumpToLevel(targetLevel: number) {
+    console.log(`GameEngine: [DEV] Jumping to level ${targetLevel}`);
+    const currentLevel = this.gameState.level;
+    
+    this.stateManager.transitionTo(GamePhase.LEVEL_TRANSITION);
+
+    // Start transition with loading screen
+    this.transitionManager.startTransition(currentLevel, targetLevel, () => {
+      this.gameState.level = targetLevel;
+      this.gameState.cookiesCollected = 0;
+
+      // Initialize new level immediately
+      this.initializeLevel();
+
+      // Show cutscene for new level
+      this.showLevelCutscene();
+    });
+  }
+
   private showLevelCutscene() {
     console.log(`GameEngine: Showing cutscene for level ${this.gameState.level}`);
     const cutsceneData: CutsceneData = this.getCutsceneData(this.gameState.level);

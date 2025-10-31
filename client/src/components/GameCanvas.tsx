@@ -70,6 +70,20 @@ const GameCanvas: React.FC = () => {
     }
   };
 
+  // Dev tools: Skip to next level
+  const handleDevSkipLevel = () => {
+    if (gameEngineRef.current && isStarted) {
+      gameEngineRef.current.nextLevel();
+    }
+  };
+
+  // Dev tools: Reset to Level 1
+  const handleDevResetToLevel1 = () => {
+    if (gameEngineRef.current && isStarted) {
+      gameEngineRef.current.jumpToLevel(1);
+    }
+  };
+
   const handleMobileControl = (key: string, pressed: boolean) => {
     if (gameEngineRef.current) {
       gameEngineRef.current.handleMobileInput(key, pressed);
@@ -91,6 +105,73 @@ const GameCanvas: React.FC = () => {
         {isStarted && (
           <div className="stats-overlay">
             <GameUI gameState={gameState} />
+          </div>
+        )}
+
+        {/* Dev Tools - Level Navigation */}
+        {isStarted && (
+          <div style={{
+            position: 'absolute',
+            top: '10px',
+            right: '10px',
+            display: 'flex',
+            gap: '10px',
+            zIndex: 1000
+          }}>
+            <button
+              onClick={handleDevSkipLevel}
+              style={{
+                padding: '8px 12px',
+                fontSize: '12px',
+                fontFamily: 'monospace',
+                backgroundColor: '#FF9800',
+                color: '#000',
+                border: '2px solid #FFB74D',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                fontWeight: 'bold',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.3)',
+                transition: 'all 0.2s'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#FFB74D';
+                e.currentTarget.style.transform = 'scale(1.05)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = '#FF9800';
+                e.currentTarget.style.transform = 'scale(1)';
+              }}
+              title="Dev Tool: Skip to next level"
+            >
+              ⏭️ Next Level
+            </button>
+            <button
+              onClick={handleDevResetToLevel1}
+              style={{
+                padding: '8px 12px',
+                fontSize: '12px',
+                fontFamily: 'monospace',
+                backgroundColor: '#2196F3',
+                color: '#FFF',
+                border: '2px solid #64B5F6',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                fontWeight: 'bold',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.3)',
+                transition: 'all 0.2s'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#64B5F6';
+                e.currentTarget.style.transform = 'scale(1.05)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = '#2196F3';
+                e.currentTarget.style.transform = 'scale(1)';
+              }}
+              title="Dev Tool: Reset to Level 1"
+            >
+              🔄 Reset to L1
+            </button>
           </div>
         )}
         
